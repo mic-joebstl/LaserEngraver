@@ -1,4 +1,6 @@
-﻿using System;
+﻿using LaserPathEngraver.Core.Configurations;
+using Microsoft.Extensions.Options;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -20,14 +22,14 @@ namespace LaserPathEngraver.UI.Win
 	/// </summary>
 	public partial class MainWindow : Window, INotifyPropertyChanged
 	{
-		private MainWindowViewModel _ViewModel;
+		private MainWindowViewModel _viewModel;
 
-		public MainWindow()
+		public MainWindow(IOptions<UserConfiguration> userConfiguration, Space space)
 		{
-			System.Threading.Thread.CurrentThread.CurrentUICulture = new System.Globalization.CultureInfo("de");
+			System.Threading.Thread.CurrentThread.CurrentUICulture = userConfiguration.Value.Culture;
 			InitializeComponent();
-			_ViewModel = new MainWindowViewModel();
-			DataContext = _ViewModel;
+			_viewModel = new MainWindowViewModel(userConfiguration, space);
+			DataContext = _viewModel;
 			SizeChanged += (o, e) => { RaisePropertyChanged(nameof(TutorialViewBox)); };
 			_TutorialBox.SizeChanged += (o, e) => { RaisePropertyChanged(nameof(TutorialViewBox)); };
 		}
@@ -44,12 +46,12 @@ namespace LaserPathEngraver.UI.Win
 
 		private void ContentControl_KeyDown(object sender, KeyEventArgs e)
 		{
-			_ViewModel.OnSpaceKeyDown(sender, e);
+			_viewModel.OnSpaceKeyDown(sender, e);
 		}
 
 		private void ContentControl_KeyUp(object sender, KeyEventArgs e)
 		{
-			_ViewModel.OnSpaceKeyUp(sender, e);
+			_viewModel.OnSpaceKeyUp(sender, e);
 		}
 
 		public event PropertyChangedEventHandler? PropertyChanged;

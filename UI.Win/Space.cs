@@ -1,4 +1,7 @@
-﻿using System;
+﻿using LaserPathEngraver.Core.Configurations;
+using LaserPathEngraver.UI.Win.Visuals;
+using Microsoft.Extensions.Options;
+using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel;
@@ -18,6 +21,7 @@ namespace LaserPathEngraver.UI.Win
 
 		private Canvas _canvas;
 		private DateTime _renderDateTime;
+		private BurnArea _burnableArea;
 		private DateTime _renderCalculationsPerSecondDateTime;
 		private List<double> _renderIntervalHistory;
 		private double _scale;
@@ -35,11 +39,11 @@ namespace LaserPathEngraver.UI.Win
 
 		#region Initialization
 
-		public Space()
+		public Space(IOptions<DeviceConfiguration> deviceConfiguration)
 		{
-			_canvasHeightDot = 800;
-			_canvasWidthDot = 800;
-			_resolutionDpi = 25.4M;
+			_canvasHeightDot = deviceConfiguration.Value.HeightDots;
+			_canvasWidthDot = deviceConfiguration.Value.WidthDots;
+			_resolutionDpi = deviceConfiguration.Value.DPI;
 			_canvas = new Canvas();
 			_canvas.Width = 0;
 			_canvas.Height = 0;
@@ -60,6 +64,8 @@ namespace LaserPathEngraver.UI.Win
 			_dispatcherTimer.Interval = _realRenderInterval;
 			_dispatcherTimer.Tick += OnRender;
 			_dispatcherTimer.Start();
+
+			AddVisualToCanvas(_burnableArea = new BurnArea());
 		}
 
 		#endregion
@@ -290,18 +296,22 @@ namespace LaserPathEngraver.UI.Win
 				throw new NotImplementedException();
 
 		}
+		*/
 
-		private void AddBodyToCanvas(IBody body)
+		private void AddVisualToCanvas(IVisual visual)
 		{
-			if (!Canvas.Children.Contains(body.Visual))
+			var shape = visual?.Shape;
+			if (shape is null)
+				throw new ArgumentNullException(nameof(visual), "Required property " + nameof(visual.Shape) + " not set");
+
+			if (!Canvas.Children.Contains(shape))
 			{
-				Canvas.Children.Add(body.Visual);
-				System.Windows.Controls.Canvas.SetTop(body.Visual, SpacePositionToScreenPosition(body.Position).Y);
-				System.Windows.Controls.Canvas.SetLeft(body.Visual, SpacePositionToScreenPosition(body.Position).X);
-				body.PositionChanged += OnBodyPositionChanged;
+				Canvas.Children.Add(shape);
+				var position = visual.Position;
+				System.Windows.Controls.Canvas.SetTop(shape, SpacePositionToScreenPosition(position).Y);
+				System.Windows.Controls.Canvas.SetLeft(shape, SpacePositionToScreenPosition(position).X);
 			}
 		}
-		*/
 
 		private void OnRender(object? sender, EventArgs e)
 		{

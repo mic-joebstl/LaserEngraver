@@ -272,7 +272,7 @@
 
 			<StackPanel Orientation="Vertical"
 			            Name="_TutorialBox">
-				<ScrollViewer Height="300">
+				<ScrollViewer>
 					<ScrollViewer.Style>
 						<Style TargetType="{x:Type ScrollViewer}">
 							<Style.Triggers>
@@ -319,6 +319,14 @@
 											</Storyboard>
 										</BeginStoryboard>
 									</DataTrigger.ExitActions>
+								</DataTrigger>
+								<DataTrigger Binding="{Binding ShowTutorial, Mode=OneTime}" Value="True">
+									<Setter Property="Height" Value="300" />
+									<Setter Property="Opacity" Value="1" />
+								</DataTrigger>
+								<DataTrigger Binding="{Binding ShowTutorial, Mode=OneTime}" Value="False">
+									<Setter Property="Height" Value="0" />
+									<Setter Property="Opacity" Value="0" />
 								</DataTrigger>
 							</Style.Triggers>
 						</Style>
