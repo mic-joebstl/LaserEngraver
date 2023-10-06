@@ -32,7 +32,7 @@ namespace LaserPathEngraver.UI.Win
 		{
 			System.Threading.Thread.CurrentThread.CurrentUICulture = userConfiguration.Value.Culture;
 			System.Threading.Thread.CurrentThread.CurrentCulture = userConfiguration.Value.Culture;
-			DataContext = _viewModel = new MainWindowViewModel(userConfiguration, burnConfiguration, space, deviceDispatcher);
+			DataContext = _viewModel = new MainWindowViewModel(userConfiguration, burnConfiguration, space, deviceDispatcher, Dispatcher);
 			InitializeComponent();
 			SizeChanged += (o, e) =>
 			{

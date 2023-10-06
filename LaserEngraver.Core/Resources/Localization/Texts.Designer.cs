@@ -88,6 +88,16 @@ namespace LaserPathEngraver.Core.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to More than one device found. Please configure &quot;PortName&quot; from the list:
+        ///{0}.
+        /// </summary>
+        internal static string MoreThanOneDeviceFoundExceptionFormat {
+            get {
+                return ResourceManager.GetString("MoreThanOneDeviceFoundExceptionFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Positioning.
         /// </summary>
         internal static string MoveAbsoluteJobTitle {
@@ -97,11 +107,29 @@ namespace LaserPathEngraver.Core.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Kein Gerät gefunden.
+        /// </summary>
+        internal static string NoDeviceFoundException {
+            get {
+                return ResourceManager.GetString("NoDeviceFoundException", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Device disconnected unexpectedly.
         /// </summary>
         internal static string UnexpectedDeviceDisconnectedExceptionMessage {
             get {
                 return ResourceManager.GetString("UnexpectedDeviceDisconnectedExceptionMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unexpected response &quot;{0}&quot;.
+        /// </summary>
+        internal static string UnexpectedResponseExceptionFormat {
+            get {
+                return ResourceManager.GetString("UnexpectedResponseExceptionFormat", resourceCulture);
             }
         }
     }

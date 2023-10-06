@@ -126,10 +126,20 @@
   <data name="HomingJobTitle" xml:space="preserve">
     <value>Homing</value>
   </data>
+  <data name="MoreThanOneDeviceFoundExceptionFormat" xml:space="preserve">
+    <value>More than one device found. Please configure "PortName" from the list:
+{0}</value>
+  </data>
   <data name="MoveAbsoluteJobTitle" xml:space="preserve">
     <value>Positioning</value>
   </data>
+  <data name="NoDeviceFoundException" xml:space="preserve">
+    <value>Kein Gerät gefunden</value>
+  </data>
   <data name="UnexpectedDeviceDisconnectedExceptionMessage" xml:space="preserve">
     <value>Device disconnected unexpectedly</value>
+  </data>
+  <data name="UnexpectedResponseExceptionFormat" xml:space="preserve">
+    <value>Unexpected response "{0}"</value>
   </data>
 </root>

@@ -426,7 +426,7 @@ namespace LaserPathEngraver.UI.Win.Visuals
 					if (_isVisited != value)
 					{
 						_isVisited = value;
-						_owner._requiresRenderUpdate = true;
+						//_owner._requiresRenderUpdate = true;
 					}
 				}
 			}

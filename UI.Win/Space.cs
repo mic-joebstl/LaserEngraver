@@ -49,6 +49,7 @@ namespace LaserPathEngraver.UI.Win
 		private double _canvasHeightDot;
 		private double _deviceResolutionDpi;
 		private double _screenResolutionDpi;
+		private Dispatcher _windowDispatcher;
 
 		#endregion
 
@@ -65,6 +66,7 @@ namespace LaserPathEngraver.UI.Win
 			_deviceResolutionDpi = deviceConfiguration.Value.DPI;
 			_autoCenterView = userConfiguration.Value.AutoCenterView;
 			_preserveAspectRatio = userConfiguration.Value.PreserveAspectRatio;
+			_windowDispatcher = Dispatcher.CurrentDispatcher;
 
 			_canvas = new Canvas();
 			_canvas.Width = 0;
@@ -79,7 +81,7 @@ namespace LaserPathEngraver.UI.Win
 			_offsetY = 0;
 			_renderStopwatch = new Stopwatch();
 			_renderCanvasInterval = TimeSpan.FromMilliseconds(8);
-			_renderBitmapInterval = TimeSpan.FromMilliseconds(125);
+			_renderBitmapInterval = TimeSpan.FromMilliseconds(500);
 
 			_renderCanvasTimer = new DispatcherTimer(DispatcherPriority.Render);
 			_renderCanvasTimer.Interval = _renderCanvasInterval;
@@ -118,16 +120,19 @@ namespace LaserPathEngraver.UI.Win
 			_burnTarget.Element.Opacity = 0;
 			deviceDispatcher.DevicePositionChanged += (Device sender, DevicePositionChangedEventArgs args) =>
 			{
-				if (args.Position != null)
+				_windowDispatcher.BeginInvoke(() =>
 				{
-					_burnTarget.Position = new Point(args.Position.Value.X, args.Position.Value.Y);
-					_burnTarget.Element.Opacity = 0.7;
-				}
-				else
-				{
-					_burnTarget.Position = new Point(0, 0);
-					_burnTarget.Element.Opacity = 0;
-				}
+					if (args.Position != null)
+					{
+						_burnTarget.Position = new Point(args.Position.Value.X, args.Position.Value.Y);
+						_burnTarget.Element.Opacity = 0.7;
+					}
+					else
+					{
+						_burnTarget.Position = new Point(0, 0);
+						_burnTarget.Element.Opacity = 0;
+					}
+				});
 			};
 			AddVisualToCanvas(_burnTarget);
 

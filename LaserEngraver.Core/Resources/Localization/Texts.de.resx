@@ -126,10 +126,20 @@
   <data name="HomingJobTitle" xml:space="preserve">
     <value>Initialisierung</value>
   </data>
+  <data name="MoreThanOneDeviceFoundExceptionFormat" xml:space="preserve">
+    <value>Mehr als ein Gerät gefunden. Bitte "PortName" aus der Liste konfigurieren:
+{0}</value>
+  </data>
   <data name="MoveAbsoluteJobTitle" xml:space="preserve">
     <value>Positionierung</value>
   </data>
+  <data name="NoDeviceFoundException" xml:space="preserve">
+    <value>Kein Gerät gefunden</value>
+  </data>
   <data name="UnexpectedDeviceDisconnectedExceptionMessage" xml:space="preserve">
     <value>Gerät unerwartet getrennt</value>
+  </data>
+  <data name="UnexpectedResponseExceptionFormat" xml:space="preserve">
+    <value>Unerwartete Antwort "{0}"</value>
   </data>
 </root>

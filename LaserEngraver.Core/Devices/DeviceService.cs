@@ -91,6 +91,12 @@ namespace LaserPathEngraver.Core.Devices
 							_device.StatusChanged += OnDeviceStatusChanged;
 							_device.PositionChanged += OnDevicePositionChanged;
 						}
+						else if (_deviceConfiguration.Type == DeviceType.Serial)
+						{
+							_device = new Serial.SerialDevice(_deviceConfiguration);
+							_device.StatusChanged += OnDeviceStatusChanged;
+							_device.PositionChanged += OnDevicePositionChanged;
+						}
 						else
 						{
 							throw new NotSupportedException("Devicetype " + _deviceConfiguration.Type + " not supported.");
@@ -102,7 +108,12 @@ namespace LaserPathEngraver.Core.Devices
 			DeviceStatusChanged?.Invoke(_device, new DeviceStatusChangedEventArgs(DeviceStatus));
 			DevicePositionChanged?.Invoke(_device, new DevicePositionChangedEventArgs(DevicePosition));
 			PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(DeviceStatus)));
-			await _device.ConnectAsync(cancellationToken);
+
+			using (var ctsTimeout = new CancellationTokenSource(_deviceConfiguration.ConnectionTimeout))
+			using (var ctsCombined = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, ctsTimeout.Token))
+			{
+				await _device.ConnectAsync(ctsCombined.Token);
+			}
 		}
 
 		public async Task Disconnect(CancellationToken cancellationToken)

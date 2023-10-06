@@ -518,7 +518,7 @@
 								         UpdateSourceTrigger="PropertyChanged"
 								         StringFormat="N2">
 									<Binding.ValidationRules>
-										<rules:DoubleValidationRule Minimum="1" Maximum="1440" />
+										<rules:DoubleValidationRule Minimum="1" Maximum="1920" />
 									</Binding.ValidationRules>
 								</Binding>
 							</TextBox.Text>
@@ -552,7 +552,7 @@
 								         UpdateSourceTrigger="PropertyChanged"
 								         StringFormat="N2">
 									<Binding.ValidationRules>
-										<rules:DoubleValidationRule Minimum="1" Maximum="1440" />
+										<rules:DoubleValidationRule Minimum="0.01" Maximum="30" />
 									</Binding.ValidationRules>
 								</Binding>
 							</TextBox.Text>
@@ -586,7 +586,7 @@
 								         UpdateSourceTrigger="PropertyChanged"
 								         StringFormat="N2">
 									<Binding.ValidationRules>
-										<rules:DoubleValidationRule Minimum="1" Maximum="12" />
+										<rules:DoubleValidationRule Minimum="0.01" Maximum="12" />
 									</Binding.ValidationRules>
 								</Binding>
 							</TextBox.Text>
@@ -620,7 +620,7 @@
 								         UpdateSourceTrigger="PropertyChanged"
 								         StringFormat="N2">
 									<Binding.ValidationRules>
-										<rules:DoubleValidationRule Minimum="1" Maximum="30" />
+										<rules:DoubleValidationRule Minimum="1" Maximum="1920" />
 									</Binding.ValidationRules>
 								</Binding>
 							</TextBox.Text>
@@ -654,7 +654,7 @@
 								         UpdateSourceTrigger="PropertyChanged"
 								         StringFormat="N2">
 									<Binding.ValidationRules>
-										<rules:DoubleValidationRule Minimum="1" Maximum="30" />
+										<rules:DoubleValidationRule Minimum="0.01" Maximum="30" />
 									</Binding.ValidationRules>
 								</Binding>
 							</TextBox.Text>
@@ -688,7 +688,7 @@
 								         UpdateSourceTrigger="PropertyChanged"
 								         StringFormat="N2">
 									<Binding.ValidationRules>
-										<rules:DoubleValidationRule Minimum="1" Maximum="12" />
+										<rules:DoubleValidationRule Minimum="0.01" Maximum="12" />
 									</Binding.ValidationRules>
 								</Binding>
 							</TextBox.Text>

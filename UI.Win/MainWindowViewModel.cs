@@ -24,6 +24,7 @@ namespace LaserPathEngraver.UI.Win
 		private IWritableOptions<UserConfiguration> _userConfiguration;
 		private IWritableOptions<BurnConfiguration> _burnConfiguration;
 		private Space _space;
+		private Dispatcher _windowDispatcher;
 		private DeviceDispatcherService _deviceDispatcher;
 		private bool _enableVisualEffects;
 		private DropShadowEffect? _dropShadowEffect;
@@ -34,11 +35,12 @@ namespace LaserPathEngraver.UI.Win
 		private Theme? _customTheme;
 		private DeviceStatus? _debouncedStatus;
 
-		public MainWindowViewModel(IWritableOptions<UserConfiguration> userConfiguration, IWritableOptions<BurnConfiguration> burnConfiguration, Space space, DeviceDispatcherService deviceDispatcher)
+		public MainWindowViewModel(IWritableOptions<UserConfiguration> userConfiguration, IWritableOptions<BurnConfiguration> burnConfiguration, Space space, DeviceDispatcherService deviceDispatcher, Dispatcher windowDispatcher)
 		{
 			_userConfiguration = userConfiguration;
 			_burnConfiguration = burnConfiguration;
 			_deviceDispatcher = deviceDispatcher;
+			_windowDispatcher = windowDispatcher;
 			_space = space;
 			_space.Canvas.PreviewMouseDown += OnSpaceMouseDown;
 			_space.Canvas.PreviewMouseUp += OnSpaceMouseUp;
@@ -364,7 +366,7 @@ namespace LaserPathEngraver.UI.Win
 					Y = spacePosition.Y < boundingRect.Top ? boundingRect.Top : spacePosition.Y > boundingRect.Bottom ? boundingRect.Bottom : spacePosition.Y,
 				};
 
-				Dispatcher.CurrentDispatcher.BeginInvoke(async () =>
+				_windowDispatcher.BeginInvoke(async () =>
 				{
 					if (DeviceDispatcher.DeviceStatus == DeviceStatus.Ready)
 					{
@@ -508,11 +510,11 @@ namespace LaserPathEngraver.UI.Win
 						}
 						else if (_deviceDispatcher.JobStatus == JobStatus.Paused)
 						{
-							Dispatcher.CurrentDispatcher.BeginInvoke(async () => await _deviceDispatcher.ContinueJob(CancellationToken.None));
+							_windowDispatcher.BeginInvoke(async () => await _deviceDispatcher.ContinueJob(CancellationToken.None));
 						}
 						else if (_deviceDispatcher.DeviceStatus == DeviceStatus.Ready && DeviceDispatcher.JobStatus != JobStatus.Running && DeviceDispatcher.JobStatus != JobStatus.Paused)
 						{
-							Dispatcher.CurrentDispatcher.BeginInvoke(async () =>
+							System.Threading.Tasks.Task.Run(async () =>
 							{
 								try
 								{
@@ -611,49 +613,64 @@ namespace LaserPathEngraver.UI.Win
 				.Throttle(TimeSpan.FromMilliseconds(80))
 				.Subscribe((args) =>
 				{
-					_debouncedStatus = _deviceDispatcher.DeviceStatus;
-					RaisePropertyChanged(nameof(DeviceStatusText));
+					_windowDispatcher.Invoke(() =>
+					{
+						_debouncedStatus = _deviceDispatcher.DeviceStatus;
+						RaisePropertyChanged(nameof(DeviceStatusText));
+					});
 				});
 
 			_deviceDispatcher.DeviceStatusChanged += (Device sender, DeviceStatusChangedEventArgs args) =>
 			{
-				RaisePropertyChanged(nameof(ConnectCommandText));
-				RaisePropertyChanged(nameof(StartCommandText));
-				RaisePropertyChanged(nameof(IsEditable));
-				if (_debouncedStatus < _deviceDispatcher.DeviceStatus)
+				_windowDispatcher.Invoke(() =>
 				{
-					_debouncedStatus = _deviceDispatcher.DeviceStatus;
-					RaisePropertyChanged(nameof(DeviceStatusText));
-				}
-				connectCommand.NotifyCanExecuteChanged();
-				startCommand.NotifyCanExecuteChanged();
-				framingCommand.NotifyCanExecuteChanged();
+					RaisePropertyChanged(nameof(ConnectCommandText));
+					RaisePropertyChanged(nameof(StartCommandText));
+					RaisePropertyChanged(nameof(IsEditable));
+					if (_debouncedStatus < _deviceDispatcher.DeviceStatus)
+					{
+						_debouncedStatus = _deviceDispatcher.DeviceStatus;
+						RaisePropertyChanged(nameof(DeviceStatusText));
+					}
+					connectCommand.NotifyCanExecuteChanged();
+					startCommand.NotifyCanExecuteChanged();
+					framingCommand.NotifyCanExecuteChanged();
+				});
 			};
 
 			_deviceDispatcher.JobStatusChanged += (object sender, JobStatusChangedEventArgs args) =>
 			{
-				RaisePropertyChanged(nameof(JobStatusText));
-				RaisePropertyChanged(nameof(StartCommandText));
-				RaisePropertyChanged(nameof(IsEditable));
-				connectCommand.NotifyCanExecuteChanged();
-				startCommand.NotifyCanExecuteChanged();
-				cancelCommand.NotifyCanExecuteChanged();
-				framingCommand.NotifyCanExecuteChanged();
+				_windowDispatcher.Invoke(() =>
+				{
+					RaisePropertyChanged(nameof(JobStatusText));
+					RaisePropertyChanged(nameof(StartCommandText));
+					RaisePropertyChanged(nameof(IsEditable));
+					connectCommand.NotifyCanExecuteChanged();
+					startCommand.NotifyCanExecuteChanged();
+					cancelCommand.NotifyCanExecuteChanged();
+					framingCommand.NotifyCanExecuteChanged();
+				});
 			};
 
 			Space.PropertyChanged += (object? sender, PropertyChangedEventArgs e) =>
 			{
-				if (e.PropertyName == nameof(Space.ImageBoundingRect))
+				_windowDispatcher.Invoke(() =>
 				{
-					framingCommand.NotifyCanExecuteChanged();
-				}
+					if (e.PropertyName == nameof(Space.ImageBoundingRect))
+					{
+						framingCommand.NotifyCanExecuteChanged();
+					}
+				});
 			};
 			Space.BurnArea.PropertyChanged += (object? sender, PropertyChangedEventArgs e) =>
 			{
-				if (e.PropertyName == nameof(Space.BurnArea.Points))
+				_windowDispatcher.Invoke(() =>
 				{
-					startCommand.NotifyCanExecuteChanged();
-				}
+					if (e.PropertyName == nameof(Space.BurnArea.Points))
+					{
+						startCommand.NotifyCanExecuteChanged();
+					}
+				});
 			};
 		}
 
