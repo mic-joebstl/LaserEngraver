@@ -36,14 +36,14 @@ namespace LaserPathEngraver.Core.Devices
 
 		public Point? DevicePosition => _device?.Position;
 
-		private Job? CurrentJob 
+		private Job? CurrentJob
 		{
 			get => _currentJob;
 			set
 			{
 				lock (_syncRoot)
 				{
-					if (_currentJob != null)
+					if (_currentJob != null && _currentJob != value)
 					{
 						if (_currentJob.Status == JobStatus.Running)
 						{
@@ -70,6 +70,8 @@ namespace LaserPathEngraver.Core.Devices
 		public string? JobTitle => CurrentJob?.Title;
 
 		public TimeSpan JobElapsedDuration => CurrentJob?.ElapsedDuration ?? TimeSpan.Zero;
+
+		public bool IsJobPausable => JobStatus == JobStatus.Running && CurrentJob is IPausableJob;
 
 		public async Task Connect(CancellationToken cancellationToken)
 		{
@@ -101,21 +103,6 @@ namespace LaserPathEngraver.Core.Devices
 			DevicePositionChanged?.Invoke(_device, new DevicePositionChangedEventArgs(DevicePosition));
 			PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(DeviceStatus)));
 			await _device.ConnectAsync(cancellationToken);
-		}
-
-		private void OnDevicePositionChanged(Device sender, DevicePositionChangedEventArgs args)
-		{
-			DevicePositionChanged?.Invoke(sender, args);
-		}
-
-		private void OnDeviceStatusChanged(Device sender, DeviceStatusChangedEventArgs args)
-		{
-			DeviceStatusChanged?.Invoke(sender, args);
-		}
-
-		private void OnJobStatusChanged(object sender, JobStatusChangedEventArgs jobStatusChangedEventArgs)
-		{
-			JobStatusChanged?.Invoke(sender, jobStatusChangedEventArgs);
 		}
 
 		public async Task Disconnect(CancellationToken cancellationToken)
@@ -162,9 +149,41 @@ namespace LaserPathEngraver.Core.Devices
 			await job.ExecuteAsync(device, cancellationToken);
 		}
 
-		public void CancelJob() 
+		public async Task ContinueJob(CancellationToken cancellationToken)
+		{
+			var job = CurrentJob;
+			if (job != null && job.Status == JobStatus.Paused)
+			{
+				await ExecuteJob(job, cancellationToken);
+			}
+		}
+
+		public void CancelJob()
 		{
 			CurrentJob?.Cancel();
+		}
+
+		public void PauseJob()
+		{
+			if (CurrentJob is IPausableJob pausableJob)
+			{
+				pausableJob.Pause();
+			}
+		}
+
+		private void OnDevicePositionChanged(Device sender, DevicePositionChangedEventArgs args)
+		{
+			DevicePositionChanged?.Invoke(sender, args);
+		}
+
+		private void OnDeviceStatusChanged(Device sender, DeviceStatusChangedEventArgs args)
+		{
+			DeviceStatusChanged?.Invoke(sender, args);
+		}
+
+		private void OnJobStatusChanged(object sender, JobStatusChangedEventArgs jobStatusChangedEventArgs)
+		{
+			JobStatusChanged?.Invoke(sender, jobStatusChangedEventArgs);
 		}
 	}
 }

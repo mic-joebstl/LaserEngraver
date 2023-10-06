@@ -97,6 +97,15 @@ namespace LaserPathEngraver.UI.Win.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Continue.
+        /// </summary>
+        public static string ContinueButtonText {
+            get {
+                return ResourceManager.GetString("ContinueButtonText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Connecting.
         /// </summary>
         public static string DeviceStatusConnectingText {
@@ -350,6 +359,15 @@ namespace LaserPathEngraver.UI.Win.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Pause.
+        /// </summary>
+        public static string PauseButtonText {
+            get {
+                return ResourceManager.GetString("PauseButtonText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Path.
         /// </summary>
         public static string PlottingModePathText {
@@ -409,6 +427,15 @@ namespace LaserPathEngraver.UI.Win.Resources.Localization {
         public static string ShowHelpText {
             get {
                 return ResourceManager.GetString("ShowHelpText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Start.
+        /// </summary>
+        public static string StartButtonText {
+            get {
+                return ResourceManager.GetString("StartButtonText", resourceCulture);
             }
         }
         

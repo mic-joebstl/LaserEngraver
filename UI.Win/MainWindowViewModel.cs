@@ -76,6 +76,43 @@ namespace LaserPathEngraver.UI.Win
 			);
 			ConnectCommand = connectCommand;
 
+			var startCommand = new RelayCommand(
+				execute: () =>
+				{
+					try
+					{
+						ErrorMessage = null;
+
+						if (_deviceDispatcher.IsJobPausable)
+						{
+							_deviceDispatcher.PauseJob();
+						}
+						else if (_deviceDispatcher.JobStatus == JobStatus.Paused)
+						{
+							Dispatcher.CurrentDispatcher.BeginInvoke(async () => await _deviceDispatcher.ContinueJob(CancellationToken.None));
+						}
+						else if (_deviceDispatcher.DeviceStatus == DeviceStatus.Ready && DeviceDispatcher.JobStatus != JobStatus.Running && DeviceDispatcher.JobStatus != JobStatus.Paused)
+						{
+							//TODO
+							//Dispatcher.CurrentDispatcher.BeginInvoke(async () => await _deviceDispatcher.ExecuteJob(new EngravingJob(), CancellationToken.None));
+						}
+					}
+					catch (Exception ex)
+					{
+						ErrorMessage = ex.Message;
+					}
+				},
+				canExecute: () =>
+					_deviceDispatcher.JobStatus == JobStatus.Paused ||
+					_deviceDispatcher.IsJobPausable ||
+					_deviceDispatcher.DeviceStatus == DeviceStatus.Ready &&
+					DeviceDispatcher.JobStatus != JobStatus.Running &&
+					DeviceDispatcher.JobStatus != JobStatus.Paused &&
+					false /* Space.BurnPoints.Any() */
+
+			);
+			StartCommand = startCommand;
+
 			var cancelCommand = new RelayCommand(
 				execute: () =>
 				{
@@ -89,7 +126,7 @@ namespace LaserPathEngraver.UI.Win
 						ErrorMessage = ex.Message;
 					}
 				},
-				canExecute: () => _deviceDispatcher.JobStatus == JobStatus.Running
+				canExecute: () => _deviceDispatcher.JobStatus == JobStatus.Running || _deviceDispatcher.JobStatus == JobStatus.Paused
 			);
 			CancelCommand = cancelCommand;
 
@@ -127,17 +164,21 @@ namespace LaserPathEngraver.UI.Win
 			_deviceDispatcher.DeviceStatusChanged += (Device sender, DeviceStatusChangedEventArgs args) =>
 			{
 				RaisePropertyChanged(nameof(ConnectCommandText));
+				RaisePropertyChanged(nameof(StartCommandText));
 				RaisePropertyChanged(nameof(DeviceStatusText));
 				RaisePropertyChanged(nameof(IsEditable));
 				connectCommand.NotifyCanExecuteChanged();
+				startCommand.NotifyCanExecuteChanged();
 				framingCommand.NotifyCanExecuteChanged();
 			};
 
 			_deviceDispatcher.JobStatusChanged += (object sender, JobStatusChangedEventArgs args) =>
 			{
 				RaisePropertyChanged(nameof(JobStatusText));
+				RaisePropertyChanged(nameof(StartCommandText));
 				RaisePropertyChanged(nameof(IsEditable));
 				connectCommand.NotifyCanExecuteChanged();
+				startCommand.NotifyCanExecuteChanged();
 				cancelCommand.NotifyCanExecuteChanged();
 				framingCommand.NotifyCanExecuteChanged();
 			};
@@ -244,9 +285,14 @@ namespace LaserPathEngraver.UI.Win
 		}
 
 		public string ConnectCommandText =>
-			DeviceDispatcher.DeviceStatus == DeviceStatus.Disconnected ? Resources.Localization.Texts.ConnectButtonText :
-			DeviceDispatcher.DeviceStatus == DeviceStatus.Connecting ? Resources.Localization.Texts.ConnectButtonText :
+			DeviceDispatcher.DeviceStatus == DeviceStatus.Disconnected || DeviceDispatcher.DeviceStatus == DeviceStatus.Connecting ?
+			Resources.Localization.Texts.ConnectButtonText :
 			Resources.Localization.Texts.DisconnectButtonText;
+
+		public string StartCommandText =>
+			DeviceDispatcher.IsJobPausable ? Resources.Localization.Texts.PauseButtonText :
+			DeviceDispatcher.JobStatus == JobStatus.Paused ? Resources.Localization.Texts.ContinueButtonText :
+			Resources.Localization.Texts.StartButtonText;
 
 		public string? DeviceStatusText =>
 			DeviceDispatcher.DeviceStatus == DeviceStatus.Disconnected ? Resources.Localization.Texts.DeviceStatusDisconnectedText :
@@ -265,6 +311,8 @@ namespace LaserPathEngraver.UI.Win
 			null;
 
 		public ICommand ConnectCommand { get; private set; }
+
+		public ICommand StartCommand { get; private set; }
 
 		public ICommand CancelCommand { get; private set; }
 
@@ -368,8 +416,6 @@ namespace LaserPathEngraver.UI.Win
 					{
 						try
 						{
-
-
 							await _deviceDispatcher.ExecuteJob(
 								new MoveAbsoluteJob(new System.Drawing.Point { X = (int)spacePosition.X, Y = (int)spacePosition.Y }),
 								CancellationToken.None

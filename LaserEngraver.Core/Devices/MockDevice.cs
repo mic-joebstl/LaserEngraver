@@ -41,7 +41,7 @@ namespace LaserPathEngraver.Core.Devices
 			{
 				tx.Open();
 
-				await Task.Delay(TimeSpan.FromSeconds(5), cancellationToken);
+				await Task.Delay(TimeSpan.FromSeconds(2), cancellationToken);
 				Position = new System.Drawing.Point(0, 0);
 			}
 		}

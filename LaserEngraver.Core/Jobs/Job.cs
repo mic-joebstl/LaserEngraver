@@ -33,6 +33,11 @@ namespace LaserPathEngraver.Core.Jobs
 
 	public delegate void JobStatusChangedEventHandler(object sender, JobStatusChangedEventArgs jobStatusChangedEventArgs);
 
+	public interface IPausableJob
+	{
+		public void Pause();
+	}
+
 	public abstract class Job : INotifyPropertyChanged, IDisposable
 	{
 		private JobStatus _status;
@@ -53,7 +58,7 @@ namespace LaserPathEngraver.Core.Jobs
 		public JobStatus Status
 		{
 			get => _status;
-			private set
+			protected set
 			{
 				if (_status != value)
 				{
@@ -73,6 +78,11 @@ namespace LaserPathEngraver.Core.Jobs
 		public void Cancel()
 		{
 			_cts.Cancel();
+			if (Status == JobStatus.Paused)
+			{
+				Status = JobStatus.Cancelled;
+				Dispose();
+			}
 		}
 
 		internal async Task ExecuteAsync(Device device, CancellationToken cancellationToken)
@@ -152,33 +162,46 @@ namespace LaserPathEngraver.Core.Jobs
 		}
 	}
 
-	public sealed class FramingJob : Job
+	public sealed class FramingJob : Job, IPausableJob
 	{
-		private Rectangle _frame;
+		private Queue<Point> _frame;
 		private TimeSpan _stepDelay;
+		private bool _signalPause;
 
 		public FramingJob(Rectangle frame, TimeSpan stepDelay)
 		{
-			_frame = frame;
 			_stepDelay = stepDelay;
+
+			_frame = new Queue<Point>(4);
+			_frame.Enqueue(new Point(frame.Left, frame.Top));
+			_frame.Enqueue(new Point(frame.Right, frame.Top));
+			_frame.Enqueue(new Point(frame.Right, frame.Bottom));
+			_frame.Enqueue(new Point(frame.Left, frame.Bottom));
 		}
 
 		public override string Title => Resources.Localization.Texts.FramingJobTitle;
 
+		public void Pause()
+		{
+			_signalPause = true;
+		}
+
 		protected override async Task ExecuteCoreAsync(Device device, CancellationToken cancellationToken)
 		{
-			var queue = new Queue<Point>(4);
-			queue.Enqueue(new Point(_frame.Left, _frame.Top));
-			queue.Enqueue(new Point(_frame.Right, _frame.Top));
-			queue.Enqueue(new Point(_frame.Right, _frame.Bottom));
-			queue.Enqueue(new Point(_frame.Left, _frame.Bottom));
-			while (true)
+			_signalPause = false;
+
+			while (_frame.TryDequeue(out var point))
 			{
 				cancellationToken.ThrowIfCancellationRequested();
-				var point = queue.Dequeue();
 				await device.MoveAbsoluteAsync(point, cancellationToken);
 				await Task.Delay(_stepDelay);
-				queue.Enqueue(point);
+				_frame.Enqueue(point);
+
+				if (_signalPause)
+				{
+					Status = JobStatus.Paused;
+					return;
+				}
 			}
 		}
 	}

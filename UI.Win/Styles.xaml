@@ -98,10 +98,10 @@
 			</Setter.Value>
 		</Setter>
 		<Style.Triggers>
-			<DataTrigger Binding="{Binding IsEnabled, Mode=OneTime}" Value="True">
+			<DataTrigger Binding="{Binding RelativeSource={RelativeSource Self}, Path=IsEnabled, Mode=OneTime}" Value="True">
 				<Setter Property="Opacity" Value="1" />
 			</DataTrigger>
-			<DataTrigger Binding="{Binding IsEnabled, Mode=OneTime}" Value="False">
+			<DataTrigger Binding="{Binding RelativeSource={RelativeSource Self}, Path=IsEnabled, Mode=OneTime}" Value="False">
 				<Setter Property="Opacity" Value="0.4" />
 			</DataTrigger>
 			<Trigger Property="IsEnabled" Value="True">
@@ -157,10 +157,10 @@
 
 	<Style x:Key="{x:Type Label}" TargetType="{x:Type Label}">
 		<Style.Triggers>
-			<DataTrigger Binding="{Binding IsEnabled, Mode=OneTime}" Value="True">
+			<DataTrigger Binding="{Binding RelativeSource={RelativeSource Self}, Path=IsEnabled, Mode=OneTime}" Value="True">
 				<Setter Property="Opacity" Value="1" />
 			</DataTrigger>
-			<DataTrigger Binding="{Binding IsEnabled, Mode=OneTime}" Value="False">
+			<DataTrigger Binding="{Binding RelativeSource={RelativeSource Self}, Path=IsEnabled, Mode=OneTime}" Value="False">
 				<Setter Property="Opacity" Value="0.4" />
 			</DataTrigger>
 			<Trigger Property="IsEnabled" Value="True">
@@ -315,10 +315,10 @@
 			</Setter.Value>
 		</Setter>
 		<Style.Triggers>
-			<DataTrigger Binding="{Binding IsEnabled, Mode=OneTime}" Value="True">
+			<DataTrigger Binding="{Binding RelativeSource={RelativeSource Self}, Path=IsEnabled, Mode=OneTime}" Value="True">
 				<Setter Property="Opacity" Value="1" />
 			</DataTrigger>
-			<DataTrigger Binding="{Binding IsEnabled, Mode=OneTime}" Value="False">
+			<DataTrigger Binding="{Binding RelativeSource={RelativeSource Self}, Path=IsEnabled, Mode=OneTime}" Value="False">
 				<Setter Property="Opacity" Value="0.4" />
 			</DataTrigger>
 			<Trigger Property="IsEnabled" Value="True">
@@ -436,10 +436,10 @@
 			</Setter.Value>
 		</Setter>
 		<Style.Triggers>
-			<DataTrigger Binding="{Binding IsEnabled, Mode=OneTime}" Value="True">
+			<DataTrigger Binding="{Binding RelativeSource={RelativeSource Self}, Path=IsEnabled, Mode=OneTime}" Value="True">
 				<Setter Property="Opacity" Value="1" />
 			</DataTrigger>
-			<DataTrigger Binding="{Binding IsEnabled, Mode=OneTime}" Value="False">
+			<DataTrigger Binding="{Binding RelativeSource={RelativeSource Self}, Path=IsEnabled, Mode=OneTime}" Value="False">
 				<Setter Property="Opacity" Value="0.4" />
 			</DataTrigger>
 			<Trigger Property="IsEnabled" Value="True">
@@ -518,10 +518,10 @@
 			</Setter.Value>
 		</Setter>
 		<Style.Triggers>
-			<DataTrigger Binding="{Binding IsEnabled, Mode=OneTime}" Value="True">
+			<DataTrigger Binding="{Binding RelativeSource={RelativeSource Self}, Path=IsEnabled, Mode=OneTime}" Value="True">
 				<Setter Property="Opacity" Value="1" />
 			</DataTrigger>
-			<DataTrigger Binding="{Binding IsEnabled, Mode=OneTime}" Value="False">
+			<DataTrigger Binding="{Binding RelativeSource={RelativeSource Self}, Path=IsEnabled, Mode=OneTime}" Value="False">
 				<Setter Property="Opacity" Value="0.4" />
 			</DataTrigger>
 			<Trigger Property="IsEnabled" Value="True">
@@ -620,28 +620,6 @@
 					</BeginStoryboard>
 				</Trigger.ExitActions>
 			</Trigger>
-			<!--<EventTrigger RoutedEvent="Button.PreviewMouseLeftButtonDown">
-				<BeginStoryboard>
-					<Storyboard>
-						<ColorAnimation Storyboard.TargetProperty="Background.Color"
-						                To="#40ffffff"
-						                Duration="0:0:0.2"
-						                AccelerationRatio="0.1"
-						                DecelerationRatio="0.9" />
-					</Storyboard>
-				</BeginStoryboard>
-			</EventTrigger>
-			<EventTrigger RoutedEvent="Button.PreviewMouseLeftButtonUp">
-				<BeginStoryboard>
-					<Storyboard>
-						<ColorAnimation Storyboard.TargetProperty="Background.Color"
-						                To="transparent"
-						                Duration="0:0:0.2"
-						                AccelerationRatio="0.1"
-						                DecelerationRatio="0.9" />
-					</Storyboard>
-				</BeginStoryboard>
-			</EventTrigger>-->
 		</Style.Triggers>
 	</Style>
 

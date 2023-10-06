@@ -29,9 +29,8 @@ namespace LaserPathEngraver.UI.Win
 		public MainWindow(IWritableOptions<UserConfiguration> userConfiguration, Space space, DeviceDispatcherService deviceDispatcher)
 		{
 			System.Threading.Thread.CurrentThread.CurrentUICulture = userConfiguration.Value.Culture;
+			DataContext = _viewModel = new MainWindowViewModel(userConfiguration, space, deviceDispatcher);
 			InitializeComponent();
-			_viewModel = new MainWindowViewModel(userConfiguration, space, deviceDispatcher);
-			DataContext = _viewModel;
 			SizeChanged += (o, e) =>
 			{
 				RaisePropertyChanged(nameof(TutorialViewBox));

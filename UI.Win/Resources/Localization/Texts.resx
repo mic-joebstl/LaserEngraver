@@ -129,6 +129,9 @@
   <data name="ConnectButtonText" xml:space="preserve">
     <value>Connect</value>
   </data>
+  <data name="ContinueButtonText" xml:space="preserve">
+    <value>Continue</value>
+  </data>
   <data name="DeviceStatusConnectingText" xml:space="preserve">
     <value>Connecting</value>
   </data>
@@ -239,6 +242,9 @@ Exact duration depends on the device, so it is specified here in percent.
   <data name="MaximumEngravingPowerText" xml:space="preserve">
     <value>Max. Power [%]</value>
   </data>
+  <data name="PauseButtonText" xml:space="preserve">
+    <value>Pause</value>
+  </data>
   <data name="PlottingModePathText" xml:space="preserve">
     <value>Path</value>
   </data>
@@ -259,6 +265,9 @@ Exact duration depends on the device, so it is specified here in percent.
   </data>
   <data name="ShowHelpText" xml:space="preserve">
     <value>Show help</value>
+  </data>
+  <data name="StartButtonText" xml:space="preserve">
+    <value>Start</value>
   </data>
   <data name="StatusTitle" xml:space="preserve">
     <value>Status</value>

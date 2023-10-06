@@ -75,7 +75,7 @@
 
 					<StackPanel Orientation="Horizontal"
 					            Margin="0,7.5,0,7.5">
-						<TextBox Width="70" Height="30" IsEnabled="{Binding IsEditable}">
+						<TextBox Width="70" Height="30" IsEnabled="{Binding IsEditable, Mode=OneWay}">
 							<TextBox.Text>
 								<Binding Path="Space.EngravingDuration"
 								         UpdateSourceTrigger="LostFocus"
@@ -90,7 +90,7 @@
 						<Label Foreground="White"
 						       FontSize="16"
 						       Content="{x:Static localization:Texts.EngravingDurationText}"
-						       IsEnabled="{Binding IsEditable}" />
+						       IsEnabled="{Binding IsEditable, Mode=OneWay}" />
 					</StackPanel>
 
 					<Slider Minimum="0"
@@ -99,11 +99,11 @@
 					        TickFrequency="1"
 					        Value="{Binding Path=Space.EngravingDuration, Converter={StaticResource ByteScaleConverter}}"
 					        HorizontalAlignment="Left"
-					        IsEnabled="{Binding IsEditable}" />
+					        IsEnabled="{Binding IsEditable, Mode=OneWay}" />
 
 					<StackPanel Orientation="Horizontal"
 					            Margin="0,7.5,0,7.5">
-						<TextBox Width="70" Height="30" IsEnabled="{Binding IsEditable}">
+						<TextBox Width="70" Height="30" IsEnabled="{Binding IsEditable, Mode=OneWay}">
 							<TextBox.Text>
 								<Binding Path="Space.EngravingPower"
 								         UpdateSourceTrigger="LostFocus"
@@ -118,7 +118,7 @@
 						<Label Foreground="White"
 						       FontSize="16"
 						       Content="{x:Static localization:Texts.MaximumEngravingPowerText}"
-						       IsEnabled="{Binding IsEditable}">
+						       IsEnabled="{Binding IsEditable, Mode=OneWay}">
 							<Label.Style>
 								<Style TargetType="{x:Type Label}">
 									<Style.Triggers>
@@ -132,10 +132,10 @@
 												<Setter Property="Visibility" Value="Collapsed" />
 											</DataTrigger.Setters>
 										</DataTrigger>
-										<DataTrigger Binding="{Binding IsEnabled, Mode=OneTime}" Value="True">
+										<DataTrigger Binding="{Binding RelativeSource={RelativeSource Self}, Path=IsEnabled, Mode=OneTime}" Value="True">
 											<Setter Property="Opacity" Value="1" />
 										</DataTrigger>
-										<DataTrigger Binding="{Binding IsEnabled, Mode=OneTime}" Value="False">
+										<DataTrigger Binding="{Binding RelativeSource={RelativeSource Self}, Path=IsEnabled, Mode=OneTime}" Value="False">
 											<Setter Property="Opacity" Value="0.4" />
 										</DataTrigger>
 										<Trigger Property="IsEnabled" Value="True">
@@ -193,7 +193,7 @@
 						<Label Foreground="White"
 						       FontSize="16"
 						       Content="{x:Static localization:Texts.EngravingPowerText}"
-						       IsEnabled="{Binding IsEditable}">
+						       IsEnabled="{Binding IsEditable, Mode=OneWay}">
 							<Label.Style>
 								<Style TargetType="{x:Type Label}">
 									<Style.Triggers>
@@ -207,10 +207,10 @@
 												<Setter Property="Visibility" Value="Visible" />
 											</DataTrigger.Setters>
 										</DataTrigger>
-										<DataTrigger Binding="{Binding IsEnabled, Mode=OneTime}" Value="True">
+										<DataTrigger Binding="{Binding RelativeSource={RelativeSource Self}, Path=IsEnabled, Mode=OneTime}" Value="True">
 											<Setter Property="Opacity" Value="1" />
 										</DataTrigger>
-										<DataTrigger Binding="{Binding IsEnabled, Mode=OneTime}" Value="False">
+										<DataTrigger Binding="{Binding RelativeSource={RelativeSource Self}, Path=IsEnabled, Mode=OneTime}" Value="False">
 											<Setter Property="Opacity" Value="0.4" />
 										</DataTrigger>
 										<Trigger Property="IsEnabled" Value="True">
@@ -273,7 +273,7 @@
 					        TickFrequency="1"
 					        Value="{Binding Path=Space.EngravingPower, Converter={StaticResource ByteScaleConverter}}"
 					        HorizontalAlignment="Left"
-					        IsEnabled="{Binding IsEditable}" />
+					        IsEnabled="{Binding IsEditable, Mode=OneWay}" />
 
 					<StackPanel Orientation="Vertical">
 						<StackPanel.Style>
@@ -336,7 +336,7 @@
 						</StackPanel.Style>
 						<StackPanel Orientation="Horizontal"
 						            Margin="0,7.5,0,7.5">
-							<TextBox Width="70" Height="30" IsEnabled="{Binding IsEditable}">
+							<TextBox Width="70" Height="30" IsEnabled="{Binding IsEditable, Mode=OneWay}">
 								<TextBox.Text>
 									<Binding Path="Space.FixedPowerThreshold"
 									         UpdateSourceTrigger="LostFocus"
@@ -351,7 +351,7 @@
 							<Label Foreground="White"
 							       FontSize="16"
 							       Content="{x:Static localization:Texts.FixedEngravingPowerThresholdText}"
-							       IsEnabled="{Binding IsEditable}" />
+							       IsEnabled="{Binding IsEditable, Mode=OneWay}" />
 						</StackPanel>
 
 						<Slider Minimum="0"
@@ -360,28 +360,28 @@
 						        TickFrequency="1"
 						        Value="{Binding Path=Space.FixedPowerThreshold, Converter={StaticResource ByteScaleConverter}}"
 						        HorizontalAlignment="Left"
-						        IsEnabled="{Binding IsEditable}" />
+						        IsEnabled="{Binding IsEditable, Mode=OneWay}" />
 					</StackPanel>
 
 					<CheckBox Margin="0,12.5,0,0"
 					          IsChecked="{Binding Space.IsPowerVarible}"
 					          Content="{x:Static localization:Texts.IsPowerVariableText}"
-					          IsEnabled="{Binding IsEditable}" />
+					          IsEnabled="{Binding IsEditable, Mode=OneWay}" />
 
 					<StackPanel Orientation="Vertical">
 						<Label FontSize="16"
 						       Foreground="White"
 						       Margin="0,12.5,0,0"
 						       Content="{x:Static localization:Texts.PlottingModeTitle}"
-						       IsEnabled="{Binding IsEditable}" />
+						       IsEnabled="{Binding IsEditable, Mode=OneWay}" />
 						<CheckBox Margin="12.5,5,0,0"
 						          IsChecked="{Binding Space.IsPlottingModeRasterizedEnabled}"
 						          Content="{x:Static localization:Texts.PlottingModeRasterizedText}"
-						          IsEnabled="{Binding IsEditable}" />
+						          IsEnabled="{Binding IsEditable, Mode=OneWay}" />
 						<CheckBox Margin="12.5,12.5,0,0"
 						          IsChecked="{Binding Space.IsPlottingModePathEnabled}"
 						          Content="{x:Static localization:Texts.PlottingModePathText}"
-						          IsEnabled="{Binding IsEditable}" />
+						          IsEnabled="{Binding IsEditable, Mode=OneWay}" />
 					</StackPanel>
 					
 
@@ -460,7 +460,7 @@
 								</Style.Triggers>
 							</Style>
 						</StackPanel.Style>
-						<TextBox Width="70" Height="30" IsEnabled="{Binding IsEditable}">
+						<TextBox Width="70" Height="30" IsEnabled="{Binding IsEditable, Mode=OneWay}">
 							<TextBox.Text>
 								<Binding Path="Space.ImageWidthDot"
 								         UpdateSourceTrigger="PropertyChanged"
@@ -474,7 +474,7 @@
 						<Label Foreground="White"
 						       FontSize="16"
 						       Content="{x:Static localization:Texts.WidthPxText}"
-						       IsEnabled="{Binding IsEditable}" />
+						       IsEnabled="{Binding IsEditable, Mode=OneWay}" />
 					</StackPanel>
 
 					<StackPanel Orientation="Horizontal"
@@ -495,7 +495,7 @@
 								</Style.Triggers>
 							</Style>
 						</StackPanel.Style>
-						<TextBox Width="70" Height="30" IsEnabled="{Binding IsEditable}">
+						<TextBox Width="70" Height="30" IsEnabled="{Binding IsEditable, Mode=OneWay}">
 							<TextBox.Text>
 								<Binding Path="Space.ImageWidthCm"
 								         UpdateSourceTrigger="PropertyChanged"
@@ -509,7 +509,7 @@
 						<Label Foreground="White"
 						       FontSize="16"
 						       Content="{x:Static localization:Texts.WidthCmText}"
-						       IsEnabled="{Binding IsEditable}" />
+						       IsEnabled="{Binding IsEditable, Mode=OneWay}" />
 					</StackPanel>
 
 					<StackPanel Orientation="Horizontal"
@@ -530,7 +530,7 @@
 								</Style.Triggers>
 							</Style>
 						</StackPanel.Style>
-						<TextBox Width="70" Height="30" IsEnabled="{Binding IsEditable}">
+						<TextBox Width="70" Height="30" IsEnabled="{Binding IsEditable, Mode=OneWay}">
 							<TextBox.Text>
 								<Binding Path="Space.ImageHeightDot"
 								         UpdateSourceTrigger="PropertyChanged"
@@ -544,7 +544,7 @@
 						<Label Foreground="White"
 						       FontSize="16"
 						       Content="{x:Static localization:Texts.HeightPxText}"
-						       IsEnabled="{Binding IsEditable}" />
+						       IsEnabled="{Binding IsEditable, Mode=OneWay}" />
 					</StackPanel>
 
 					<StackPanel Orientation="Horizontal"
@@ -565,7 +565,7 @@
 								</Style.Triggers>
 							</Style>
 						</StackPanel.Style>
-						<TextBox Width="70" Height="30" IsEnabled="{Binding IsEditable}">
+						<TextBox Width="70" Height="30" IsEnabled="{Binding IsEditable, Mode=OneWay}">
 							<TextBox.Text>
 								<Binding Path="Space.ImageHeightCm"
 								         UpdateSourceTrigger="PropertyChanged"
@@ -579,13 +579,13 @@
 						<Label Foreground="White"
 						       FontSize="16"
 						       Content="{x:Static localization:Texts.HeightCmText}"
-						       IsEnabled="{Binding IsEditable}" />
+						       IsEnabled="{Binding IsEditable, Mode=OneWay}" />
 					</StackPanel>
 
 					<CheckBox Margin="0,12.5,0,0"
 					          IsChecked="{Binding Space.PreserveAspectRatio}"
 					          Content="{x:Static localization:Texts.PreserveAspectRatioText}"
-					          IsEnabled="{Binding IsEditable}" />
+					          IsEnabled="{Binding IsEditable, Mode=OneWay}" />
 
 				</StackPanel>
 			</ScrollViewer>
@@ -689,6 +689,10 @@
 					<Button Margin="0,12.5,0,0"
 					        Command="{Binding FramingCommand}"
 					        Content="{x:Static localization:Texts.FramingCommandText}" />
+
+					<Button Margin="0,12.5,0,0"
+					        Command="{Binding StartCommand}"
+					        Content="{Binding StartCommandText}" />
 
 					<Button Margin="0,12.5,0,0"
 					        Command="{Binding CancelCommand}"
