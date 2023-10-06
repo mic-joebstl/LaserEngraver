@@ -25,6 +25,7 @@ namespace LaserPathEngraver.Core.Jobs
 		private Point _pointTranslation;
 		private BurnConfiguration _configuration;
 		private IEnumerable<IEngravePoint> _source;
+		private IEngravePoint? _currentPoint;
 
 		public EngraveJob(BurnConfiguration configuration, Point pointTranslation, IEnumerable<IEngravePoint> source)
 		{
@@ -42,12 +43,64 @@ namespace LaserPathEngraver.Core.Jobs
 
 		private IEnumerable<IEngravePoint> GetSortedPoints()
 		{
-			return _source
-				.Where(x => !x.IsVisited && x.Intensity > 0)
-				.OrderBy(x => x.Y)
-				.ThenBy(x => x.Y % 2 == 0 ? x.X : x.X * -1);
+			var relevantPoints = _source.Where(x => !x.IsVisited && x.Intensity > 0);
+			if (_configuration.PlottingMode == BurnPlottingMode.Rasterized)
+			{
+				var points = relevantPoints
+					.OrderBy(x => x.Y)
+					.ThenBy(x => x.Y % 2 == 0 ? x.X : x.X * -1);
+				foreach(var point in points)
+				{
+					yield return point;
+				}
+			}
+			else
+			{
+				var unhandledPoints = new HashSet<IEngravePoint>(relevantPoints);
 
-			//TODO PlottingMode/Sort
+				IEnumerable<IEngravePoint> HandleCluster(IEngravePoint point)
+				{
+					if (unhandledPoints.Remove(point))
+					{
+						yield return point;
+
+						var neighbor = unhandledPoints.FirstOrDefault(other =>
+						{
+							var x = other.X - point.X;
+							var y = other.Y - point.Y;
+							return x * x + y * y <= 2;
+						});
+
+						if (neighbor is not null)
+						{
+							foreach (var p in HandleCluster(neighbor))
+							{
+								yield return p;
+							}
+						}
+					}
+				}
+
+				while (unhandledPoints.Count > 0)
+				{
+					_currentPoint = _currentPoint is null ? unhandledPoints.First() :
+						unhandledPoints
+							//the exact vector length is not necessary to find the nearest point, just a comparable absolute weighting value
+							.OrderBy(p =>
+							{
+								var x = p.X - _currentPoint.X;
+								var y = p.Y - _currentPoint.Y;
+								return x * x + y * y;
+							})
+							.First();
+
+					foreach (var p in HandleCluster(_currentPoint))
+					{
+						yield return p;
+						_currentPoint = p;
+					}
+				}
+			}
 		}
 
 		protected override async Task ExecuteCoreAsync(Device device, CancellationToken cancellationToken)
@@ -56,7 +109,7 @@ namespace LaserPathEngraver.Core.Jobs
 			var duration = _configuration.Duration;
 
 #if DEBUG
-			var delayMilliseconds = 0.5d;
+			var delayMilliseconds = 5d;
 			var sw = new Stopwatch();
 			sw.Start();
 			long i = 0;

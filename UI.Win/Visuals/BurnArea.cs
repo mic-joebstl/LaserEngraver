@@ -48,6 +48,7 @@ namespace LaserPathEngraver.UI.Win.Visuals
 		{
 			_rectangle = new Rectangle();
 			_rectangle.DataContext = this;
+			_rectangle.StrokeThickness = 0;
 			_targets = new List<BurnTarget>();
 			_renderSync = new SemaphoreSlim(1, 1);
 			_requiresRenderUpdate = true;
