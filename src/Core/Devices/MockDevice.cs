@@ -118,17 +118,12 @@ namespace LaserEngraver.Core.Devices
 			return Task.CompletedTask;
 		}
 
-		public override async Task Engrave(ushort powerMilliwatt, byte duration, Point startingPoint, int length, CancellationToken cancellationToken)
+		public override async Task Engrave(ushort powerMilliwatt, byte duration, int length, CancellationToken cancellationToken)
 		{
 			using (var tx = StatusIntermediateTransition(DeviceStatus.Ready, DeviceStatus.Executing))
 			{
 				tx.Open();
 				await Task.Delay(TimeSpan.FromMilliseconds(length));
-				var position = Position;
-				if (position.HasValue)
-				{
-					Position = startingPoint;
-				}
 			}
 		}
 	}

@@ -201,7 +201,7 @@ namespace LaserEngraver.Core.Jobs
 				imageStartingPoint.Offset(_pointTranslation);
 
 				await device.MoveAbsoluteAsync(imageStartingPoint, cancellationToken);
-				await device.Engrave(powerMilliwatt, duration, imageStartingPoint, pointGroup.Length, cancellationToken);
+				await device.Engrave(powerMilliwatt, duration, pointGroup.Length, cancellationToken);
 
 				foreach (var point in pointGroup)
 				{

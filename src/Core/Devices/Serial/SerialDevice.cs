@@ -176,7 +176,7 @@ namespace LaserEngraver.Core.Devices.Serial
 				_requiresReset = true;
 			}
 		}
-		public override async Task Engrave(ushort powerMilliwatt, byte duration, Point startingPoint, int length, CancellationToken cancellationToken)
+		public override async Task Engrave(ushort powerMilliwatt, byte duration, int length, CancellationToken cancellationToken)
 		{
 			if (length < 1)
 			{
