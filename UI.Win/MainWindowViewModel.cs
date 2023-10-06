@@ -392,7 +392,7 @@ namespace LaserPathEngraver.UI.Win
 		{
 			if (System.Windows.Input.Keyboard.IsKeyDown(System.Windows.Input.Key.LeftCtrl))
 			{
-				_space.Scale = Math.Round(_space.Scale + (double)e.Delta / 1000, 4);
+				_space.ImageScale = Math.Round(_space.ImageScale + (double)e.Delta / 1000, 4);
 			}
 		}
 
@@ -400,20 +400,27 @@ namespace LaserPathEngraver.UI.Win
 		{
 			if (System.Windows.Input.Keyboard.IsKeyDown(System.Windows.Input.Key.LeftCtrl))
 			{
+				double? scale = null;
 				if (System.Windows.Input.Keyboard.IsKeyDown(System.Windows.Input.Key.OemPlus) ||
 					System.Windows.Input.Keyboard.IsKeyDown(System.Windows.Input.Key.Add))
 				{
-					_space.Scale += _space.Scale / 10;
+					scale = _space.ImageScalePercent + _space.ImageScalePercent / 10;
 				}
 				else if (System.Windows.Input.Keyboard.IsKeyDown(System.Windows.Input.Key.OemMinus) ||
 					System.Windows.Input.Keyboard.IsKeyDown(System.Windows.Input.Key.Subtract))
 				{
-					_space.Scale -= _space.Scale / 10;
+					scale = _space.ImageScalePercent - _space.ImageScalePercent / 10;
 				}
 				else if (System.Windows.Input.Keyboard.IsKeyDown(System.Windows.Input.Key.D0) ||
 					System.Windows.Input.Keyboard.IsKeyDown(System.Windows.Input.Key.NumPad0))
 				{
-					_space.Scale = 1;
+					scale = 100;
+				}
+
+				if (scale.HasValue)
+				{
+					scale = scale - scale % 5;
+					_space.ImageScalePercent = scale.Value;
 				}
 			}
 			RaisePropertyChanged(nameof(CanvasCursor));

@@ -398,7 +398,7 @@
 					            Margin="0,7.5,0,7.5">
 						<TextBox Width="70" Height="30">
 							<TextBox.Text>
-								<Binding Path="Space.ScalePercent"
+								<Binding Path="Space.ImageScalePercent"
 								         UpdateSourceTrigger="PropertyChanged"
 								         StringFormat="N2">
 									<Binding.ValidationRules>
@@ -414,7 +414,7 @@
 					<Slider Minimum="1"
 					        Maximum="3"
 					        Width="200"
-					        Value="{Binding Path=Space.ScalePercent, Converter={StaticResource LogScaleConverter}}"
+					        Value="{Binding Path=Space.ImageScalePercent, Converter={StaticResource LogScaleConverter}}"
 					        HorizontalAlignment="Left" />
 
 					<CheckBox Margin="0,12.5,0,0"

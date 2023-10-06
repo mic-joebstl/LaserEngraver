@@ -111,7 +111,7 @@ namespace LaserPathEngraver.UI.Win
 							//snap to 5%
 							scale = scale - scale % 0.05;
 
-							_viewModel.Space.Scale = scale;
+							_viewModel.Space.ImageScale = scale;
 						}
 					}
 				}

@@ -155,7 +155,10 @@ namespace LaserPathEngraver.UI.Win
 				{
 					_screenResolutionDpi = value;
 					RaisePropertyChanged(nameof(ScreenResolutionDpi));
+					RaisePropertyChanged(nameof(ImageScale));
+					RaisePropertyChanged(nameof(ImageScalePercent));
 					RaisePropertyChanged(nameof(Scale));
+					
 				}
 			}
 		} 
@@ -377,29 +380,39 @@ namespace LaserPathEngraver.UI.Win
 
 		public double Scale
 		{
+			get => _scale;
+			set 
+			{
+				if(_scale != value)
+				{
+					_scale = value;
+					UpdateVisuals();
+					RaisePropertyChanged(nameof(Scale));
+					RaisePropertyChanged(nameof(ImageScale));
+					RaisePropertyChanged(nameof(ImageScalePercent));
+				}
+			}
+		}
+
+		public double ImageScale
+		{
 			get
 			{
-				PresentationSource.FromVisual(Canvas);
-
-				return _scale / _screenResolutionDpi * _deviceResolutionDpi;
+				return Scale / _screenResolutionDpi * _deviceResolutionDpi;
 			}
 			set
 			{
 				if (value > 0)
 				{
-					_scale = value / _deviceResolutionDpi * _screenResolutionDpi;
-
-					UpdateVisuals();
-					RaisePropertyChanged(nameof(Scale));
-					RaisePropertyChanged(nameof(ScalePercent));
+					Scale = value / _deviceResolutionDpi * _screenResolutionDpi;
 				}
 			}
 		}
 
-		public double ScalePercent
+		public double ImageScalePercent
 		{
-			get => Scale * 100;
-			set => Scale = value / 100;
+			get => ImageScale * 100;
+			set => ImageScale = value / 100;
 		}
 
 		public double OffsetX
