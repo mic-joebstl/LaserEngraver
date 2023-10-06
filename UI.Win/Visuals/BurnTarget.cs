@@ -45,15 +45,15 @@ namespace LaserPathEngraver.UI.Win.Visuals
 			}
 		}
 
-		public Shape Shape => _circle;
+		public FrameworkElement Element => _circle;
 
 		#region IVisual Methods
 
 		public void ApplyTheme(Theme theme)
 		{
-			Shape.Stroke = theme.BurnTargetBackground;
-			Shape.Fill = theme.Foreground;
-			Shape.Effect = new DropShadowEffect()
+			_circle.Stroke = theme.BurnTargetBackground;
+			_circle.Fill = theme.Foreground;
+			_circle.Effect = new DropShadowEffect()
 			{
 				Color = theme.BurnTargetBackground.Color,
 				ShadowDepth = 0,

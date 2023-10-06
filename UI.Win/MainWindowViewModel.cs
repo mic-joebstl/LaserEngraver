@@ -319,7 +319,7 @@ namespace LaserPathEngraver.UI.Win
 						var pos = _mouseLastPos;
 						if (pos.X >= topLeft.X && pos.X <= bottomRight.X && pos.Y >= topLeft.Y && pos.Y <= bottomRight.Y)
 						{
-							e.MouseDevice.Capture(Space.BurnArea.Shape);
+							e.MouseDevice.Capture(Space.BurnArea.Element);
 						}
 					}
 				}

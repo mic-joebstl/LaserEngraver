@@ -13,7 +13,7 @@ namespace LaserPathEngraver.UI.Win.Visuals
 	{
 		Point Position { get; set; }
 		Size Size { get; set; }
-		Shape Shape { get; }
+		FrameworkElement Element { get; }
 
 		void ApplyTheme(Theme theme);
 	}

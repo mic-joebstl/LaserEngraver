@@ -124,19 +124,20 @@ namespace LaserPathEngraver.Core.Jobs
 
 #if DEBUG
 				var moveImmediate =
-					mockDevice is not null && (
-						i == 0 || previousPoint == null || (
-							Math.Abs(imagePoint.X - previousPoint.Value.X) > 1 ||
-							Math.Abs(imagePoint.Y - previousPoint.Value.Y) > 1
-						)
-					);
+					mockDevice is not null &&
+					previousPoint != null &&
+					Math.Abs(imagePoint.X - previousPoint.Value.X) <= 1 &&
+					Math.Abs(imagePoint.Y - previousPoint.Value.Y) <= 1;
+
 				if (moveImmediate)
 				{
 					mockDevice.MoveAbsoluteImmediate(imagePoint);
 				}
 				else
 				{
+					sw.Stop();
 					await device.MoveAbsoluteAsync(imagePoint, cancellationToken);
+					sw.Start();
 				}
 #else
 				await device.MoveAbsoluteAsync(imagePoint, cancellationToken);

@@ -91,7 +91,7 @@ namespace LaserPathEngraver.Core.Devices
 					var targetTime = i++ * delayMilliseconds;
 					var elapsedTime = sw.ElapsedMilliseconds;
 					var currentDelay = targetTime - elapsedTime;
-					if (currentDelay > 0)
+					if (i == 0 || currentDelay > 0)
 					{
 						await Task.Delay(TimeSpan.FromMilliseconds(currentDelay), cancellationToken);
 					}

@@ -93,13 +93,13 @@ namespace LaserPathEngraver.UI.Win
 
 			_burnBoundsRectangle = new BurnRectangle();
 			_burnBoundsRectangle.Size = new Size((double)_canvasWidthDot, (double)_canvasHeightDot);
-			_burnBoundsRectangle.Shape.StrokeThickness = 2;
-			_burnBoundsRectangle.Shape.StrokeDashArray = new DoubleCollection() { 5 };
+			_burnBoundsRectangle.StrokeThickness = 2;
+			_burnBoundsRectangle.StrokeDashArray = new DoubleCollection() { 5 };
 			AddVisualToCanvas(_burnBoundsRectangle);
 
 			_burnBitmapRectangle = new BurnRectangle();
-			_burnBitmapRectangle.Shape.StrokeThickness = 1;
-			_burnBitmapRectangle.Shape.StrokeDashArray = new DoubleCollection() { 2.5 };
+			_burnBitmapRectangle.StrokeThickness = 1;
+			_burnBitmapRectangle.StrokeDashArray = new DoubleCollection() { 2.5 };
 
 			AddVisualToCanvas(_burnBitmapRectangle);
 
@@ -115,18 +115,18 @@ namespace LaserPathEngraver.UI.Win
 
 			_burnTarget = new BurnTarget();
 			_burnTarget.Size = new Size(8, 8);
-			_burnTarget.Shape.Opacity = 0;
+			_burnTarget.Element.Opacity = 0;
 			deviceDispatcher.DevicePositionChanged += (Device sender, DevicePositionChangedEventArgs args) =>
 			{
 				if (args.Position != null)
 				{
 					_burnTarget.Position = new Point(args.Position.Value.X, args.Position.Value.Y);
-					_burnTarget.Shape.Opacity = 0.7;
+					_burnTarget.Element.Opacity = 0.7;
 				}
 				else
 				{
 					_burnTarget.Position = new Point(0, 0);
-					_burnTarget.Shape.Opacity = 0;
+					_burnTarget.Element.Opacity = 0;
 				}
 			};
 			AddVisualToCanvas(_burnTarget);
@@ -586,7 +586,7 @@ namespace LaserPathEngraver.UI.Win
 		{
 			if (updatePositions)
 			{
-				var shape = visual.Shape;
+				var shape = visual.Element;
 				if (visual is BurnTarget)
 				{
 					//BurnTarget has a fixed size
@@ -600,12 +600,12 @@ namespace LaserPathEngraver.UI.Win
 				}
 				else
 				{
-					shape.Width = visual.Size.Width * _scale + shape.StrokeThickness * 2;
-					shape.Height = visual.Size.Height * _scale + shape.StrokeThickness * 2;
+					shape.Width = visual.Size.Width * _scale;
+					shape.Height = visual.Size.Height * _scale;
 
 					var position = SpacePositionToScreenPosition(new Point((int)visual.Position.X, (int)visual.Position.Y));
-					Canvas.SetTop(shape, position.Y - shape.StrokeThickness);
-					Canvas.SetLeft(shape, position.X - shape.StrokeThickness);
+					Canvas.SetTop(shape, position.Y);
+					Canvas.SetLeft(shape, position.X);
 				}
 			}
 
@@ -620,7 +620,7 @@ namespace LaserPathEngraver.UI.Win
 
 		private void AddVisualToCanvas(IVisual visual)
 		{
-			var shape = visual.Shape;
+			var shape = visual.Element;
 			if (!Canvas.Children.Contains(shape))
 			{
 				Canvas.Children.Add(shape);

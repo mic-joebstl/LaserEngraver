@@ -26,10 +26,10 @@ namespace LaserPathEngraver.UI.Win.Visuals
 	{
 		private SemaphoreSlim _renderSync;
 		private Theme? _theme;
-		private Rectangle _rectangle;
+		private Image _image;
 		private System.Drawing.Bitmap? _originalBitmap;
 		private System.Drawing.Bitmap? _scaledBitmap;
-		private BitmapImage? _image;
+		private BitmapImage? _bitmapImage;
 		private MemoryStream? _imageStream;
 		private List<BurnTarget> _targets;
 		private Point _position;
@@ -46,9 +46,8 @@ namespace LaserPathEngraver.UI.Win.Visuals
 
 		public BurnArea()
 		{
-			_rectangle = new Rectangle();
-			_rectangle.DataContext = this;
-			_rectangle.StrokeThickness = 0;
+			_image = new Image();
+			_image.DataContext = this;
 			_targets = new List<BurnTarget>();
 			_renderSync = new SemaphoreSlim(1, 1);
 			_requiresRenderUpdate = true;
@@ -143,7 +142,7 @@ namespace LaserPathEngraver.UI.Win.Visuals
 
 		}
 
-		public Shape Shape => _rectangle;
+		public FrameworkElement Element => _image;
 
 		public IEnumerable<IEngravePoint> Points
 		{
@@ -175,9 +174,9 @@ namespace LaserPathEngraver.UI.Win.Visuals
 
 				if (_originalBitmap != null)
 				{
-					_image = new BitmapImage();
+					_bitmapImage = new BitmapImage();
 					_imageStream?.Dispose();
-					_image.BeginInit();
+					_bitmapImage.BeginInit();
 					var ms = _imageStream = new MemoryStream();
 
 					var width = (int)(Size.Width < 1 ? 1 : Size.Width);
@@ -222,15 +221,15 @@ namespace LaserPathEngraver.UI.Win.Visuals
 							var bitmap = new System.Drawing.Bitmap(width, height, stride, format, pointer);
 							bitmap.Save(ms, ImageFormat.Png);
 							ms.Position = 0;
-							_image.StreamSource = ms;
-							_image.EndInit();
-
+							_bitmapImage.StreamSource = ms;
+							_bitmapImage.EndInit();
 						}
 						finally
 						{
 							pinnedArray.Free();
 						}
-						_rectangle.Fill = new ImageBrush(_image);
+						_image.SnapsToDevicePixels = true;
+						_image.Source = _bitmapImage;
 					}
 				}
 
@@ -277,7 +276,7 @@ namespace LaserPathEngraver.UI.Win.Visuals
 
 			var width = Size.Width < 1 ? 1 : (float)Size.Width;
 			var height = Size.Height < 1 ? 1 : (float)Size.Height;
-			var brush = new System.Drawing.SolidBrush(System.Drawing.Color.Black);
+			var brush = new System.Drawing.SolidBrush(System.Drawing.Color.Transparent);
 			var scaledBitmap = new System.Drawing.Bitmap((int)width, (int)height);
 			var graph = System.Drawing.Graphics.FromImage(scaledBitmap);
 

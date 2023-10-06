@@ -44,14 +44,25 @@ namespace LaserPathEngraver.UI.Win.Visuals
 			}
 		}
 
-		public Shape Shape => _rectangle;
+		public FrameworkElement Element => _rectangle;
 
+		public double StrokeThickness
+		{
+			get => _rectangle.StrokeThickness;
+			set => _rectangle.StrokeThickness = value;
+		}
+
+		public System.Windows.Media.DoubleCollection StrokeDashArray
+		{
+			get => _rectangle.StrokeDashArray;
+			set => _rectangle.StrokeDashArray = value;
+		}
 
 		#region IVisual Methods
 
 		public void ApplyTheme(Theme theme)
 		{
-			Shape.Stroke = theme.Foreground;
+			_rectangle.Stroke = theme.Foreground;
 		}
 
 		#endregion
