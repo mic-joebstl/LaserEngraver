@@ -9,6 +9,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using LaserPathEngraver.Core.Configurations;
+using LaserPathEngraver.Core.Devices;
 
 namespace LaserPathEngraver.UI.Win
 {
@@ -27,7 +28,7 @@ namespace LaserPathEngraver.UI.Win
 				.SetBasePath(Directory.GetCurrentDirectory())
 				.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
 				.Build();
-			
+
 			ServiceProvider = ConfigureServices(new ServiceCollection())
 				.BuildServiceProvider();
 		}
@@ -42,7 +43,8 @@ namespace LaserPathEngraver.UI.Win
 				.ConfigureWritableJson<UserConfiguration>(Configuration.GetSection(nameof(UserConfiguration)), basePath)
 				.ConfigureWritableJson<BurnConfiguration>(Configuration.GetSection(nameof(BurnConfiguration)), basePath)
 				.AddSingleton<MainWindow>()
-				.AddSingleton<Space>();
+				.AddSingleton<Space>()
+				.AddSingleton<DeviceDispatcherService>();
 		}
 
 		private void OnStartup(object sender, StartupEventArgs e)

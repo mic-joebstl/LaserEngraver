@@ -13,26 +13,26 @@ using LaserPathEngraver.Core.Configurations;
 using Microsoft.Extensions.Options;
 using System.Linq;
 using LaserPathEngraver.UI.Win.Visuals;
+using LaserPathEngraver.Core.Devices;
+using CommunityToolkit.Mvvm.Input;
+using System.Threading;
 
 namespace LaserPathEngraver.UI.Win
 {
 	public class MainWindowViewModel : INotifyPropertyChanged
 	{
-		#region Fields
-
+		private string? _errorMessage;
 		private IWritableOptions<UserConfiguration> _userConfiguration;
 		private Space _space;
+		private DeviceDispatcherService _deviceDispatcher;
 		private bool _enableVisualEffects;
 		private Effect? _dropShadowEffect;
 		private System.Windows.Point _mouseLastPos;
 
-		#endregion
-
-		#region Initialization
-
-		public MainWindowViewModel(IWritableOptions<UserConfiguration> userConfiguration, Space space)
+		public MainWindowViewModel(IWritableOptions<UserConfiguration> userConfiguration, Space space, DeviceDispatcherService deviceDispatcher)
 		{
 			_userConfiguration = userConfiguration;
+			_deviceDispatcher = deviceDispatcher;
 			_space = space;
 			_space.Canvas.PreviewMouseDown += OnSpaceMouseDown;
 			_space.Canvas.PreviewMouseUp += OnSpaceMouseUp;
@@ -46,19 +46,37 @@ namespace LaserPathEngraver.UI.Win
 				BlurRadius = 20,
 				RenderingBias = RenderingBias.Performance
 			};
+
+			ConnectCommand = new AsyncRelayCommand(
+				cancelableExecute: async (CancellationToken cancellationToken) =>
+				{
+					try
+					{
+						ErrorMessage = null;
+						await _deviceDispatcher.Connect(cancellationToken);
+					}
+					catch (Exception ex)
+					{
+						ErrorMessage = ex.Message;
+					}
+				},
+				canExecute: () => _deviceDispatcher.DeviceStatus == DeviceStatus.Disconnected
+			);
 		}
 
-		#endregion
-
-		#region Properties
-
-		public Space Space
+		public string? ErrorMessage
 		{
-			get
+			get => _errorMessage;
+			set
 			{
-				return _space;
+				_errorMessage = value;
+				RaisePropertyChanged(nameof(ErrorMessage));
 			}
 		}
+
+		public DeviceDispatcherService DeviceDispatcher => _deviceDispatcher;
+
+		public Space Space => _space;
 
 		public bool EnableVisualEffects
 		{
@@ -131,9 +149,7 @@ namespace LaserPathEngraver.UI.Win
 			}
 		}
 
-		#endregion
-
-		#region Methods
+		public IAsyncRelayCommand ConnectCommand { get; private set; }
 
 		private void OnSpaceMouseDown(object? sender, System.Windows.Input.MouseButtonEventArgs e)
 		{
@@ -143,7 +159,7 @@ namespace LaserPathEngraver.UI.Win
 				{
 					e.MouseDevice.Capture(_space.Canvas);
 				}
-				else if(e.Source is FrameworkElement element && element.DataContext is BurnArea burnArea)
+				else if (e.Source is FrameworkElement element && element.DataContext is BurnArea burnArea)
 				{
 					e.MouseDevice.Capture(element);
 				}
@@ -156,7 +172,7 @@ namespace LaserPathEngraver.UI.Win
 			if (e.LeftButton == System.Windows.Input.MouseButtonState.Pressed)
 			{
 				var captured = e.MouseDevice.Captured;
-				if(captured != null) 
+				if (captured != null)
 				{
 					Vector delta = e.GetPosition(_space.Canvas) - _mouseLastPos;
 
@@ -166,7 +182,7 @@ namespace LaserPathEngraver.UI.Win
 						_space.OffsetX += delta.X / _space.Scale;
 						_space.OffsetY += delta.Y / _space.Scale;
 					}
-					else if(captured is FrameworkElement element && element.DataContext is BurnArea burnArea)
+					else if (captured is FrameworkElement element && element.DataContext is BurnArea burnArea)
 					{
 						burnArea.Position = new System.Windows.Point
 						{
@@ -273,8 +289,6 @@ namespace LaserPathEngraver.UI.Win
 				}
 			}
 		}
-
-		#endregion
 
 		#region INotifyPropertyChanged
 

@@ -35,7 +35,7 @@ namespace LaserPathEngraver.UI.Win.Visuals
 		private bool _requiresRenderUpdate;
 		private bool _requiresTargetUpdate;
 		private DateTime _targetUpdateRequestUtcDate = DateTime.MinValue;
-		private TimeSpan _targetUpdateDebounceTime = TimeSpan.FromMilliseconds(160);
+		private TimeSpan _targetUpdateDebounceTime = TimeSpan.FromMilliseconds(640);
 		private bool _resizing = false;
 		private byte _engraverPower = 0xff;
 		private byte _fixedPowerThreshold = 0xff;

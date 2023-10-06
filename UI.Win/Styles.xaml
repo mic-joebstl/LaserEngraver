@@ -276,7 +276,7 @@
 		<Setter Property="BorderBrush" Value="White" />
 		<Setter Property="Foreground" Value="White" />
 		<Setter Property="MinWidth" Value="60" />
-		<Setter Property="MinHeight" Value="30" />
+		<Setter Property="Height" Value="30" />
 		<Setter Property="AllowDrop" Value="False" />
 		<Setter Property="Template">
 			<Setter.Value>
@@ -293,9 +293,43 @@
 		<Style.Triggers>
 			<Trigger Property="IsEnabled" Value="True">
 				<Setter Property="Cursor" Value="Hand" />
+				<Trigger.EnterActions>
+					<BeginStoryboard>
+						<Storyboard>
+							<DoubleAnimation Storyboard.TargetProperty="Height"
+							                 To="30"
+							                 Duration="0:0:0.4"
+							                 AccelerationRatio="0.1"
+							                 DecelerationRatio="0.9" />
+							<DoubleAnimation Storyboard.TargetProperty="Opacity"
+							                 To="1"
+							                 Duration="0:0:0.4"
+							                 BeginTime="0:0:0.15"
+							                 AccelerationRatio="0.1"
+							                 DecelerationRatio="0.9" />
+						</Storyboard>
+					</BeginStoryboard>
+				</Trigger.EnterActions>
 			</Trigger>
 			<Trigger Property="IsEnabled" Value="False">
 				<Setter Property="Cursor" Value="Arrow" />
+				<Trigger.EnterActions>
+					<BeginStoryboard>
+						<Storyboard>
+							<DoubleAnimation Storyboard.TargetProperty="Height"
+							                 To="0"
+							                 Duration="0:0:0.4"
+							                 BeginTime="0:0:0.15"
+							                 AccelerationRatio="0.1"
+							                 DecelerationRatio="0.9" />
+							<DoubleAnimation Storyboard.TargetProperty="Opacity"
+							                 To="0"
+							                 Duration="0:0:0.4"
+							                 AccelerationRatio="0.1"
+							                 DecelerationRatio="0.9" />
+						</Storyboard>
+					</BeginStoryboard>
+				</Trigger.EnterActions>
 			</Trigger>
 			<Trigger Property="IsMouseOver" Value="True">
 				<Trigger.EnterActions>
