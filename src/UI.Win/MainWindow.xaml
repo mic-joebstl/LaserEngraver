@@ -739,7 +739,8 @@
 					       Padding="0,5,5,5"
 					       Content="{x:Static localization:Texts.StatusTitle}" />
 
-					<StackPanel Orientation="Vertical" Margin="0,5,5,5">
+					<StackPanel Orientation="Vertical" Margin="0,5,5,5"
+					            Visibility="{Binding IsDebugModeEnabled, Converter={StaticResource BoolToVisibilityConverter}}">
 						<Label Content="{x:Static localization:Texts.UpdateRateTitle}"
 						       FontSize="14"
 						       Padding="0" />

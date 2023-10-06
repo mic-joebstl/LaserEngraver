@@ -71,6 +71,13 @@ namespace LaserEngraver.UI.Win
 			InitializeCommands();
 		}
 
+#if DEBUG
+		public bool IsDebugModeEnabled => true;
+#else
+		public bool IsDebugModeEnabled => false;
+#endif
+
+
 		public Theme Theme => _theme;
 
 		public string? ErrorMessage
