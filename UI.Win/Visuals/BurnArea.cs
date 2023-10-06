@@ -70,18 +70,20 @@ namespace LaserPathEngraver.UI.Win.Visuals
 			int stride = 4 * ((width * bytesPerPixel + 3) / 4);
 			var imageBuffer = new byte[width * height * bytesPerPixel];
 			var randy = new Random();
-			int i = 0;
-			for (int r = 0; r < height; r++)
+
+			Parallel.For(0, height, r =>
 			{
 				for (int c = 0; c < width; c++)
 				{
-					imageBuffer[i++] = 0xff;
-					imageBuffer[i++] = 0xff;
-					imageBuffer[i++] = 0xff;
-					//imageBuffer[i++] = (byte)(1d / 800 * r * 0xff);
-					imageBuffer[i++] = (byte)randy.Next(0, 0xff);
+					var byteIndex = r * width * bytesPerPixel + c * bytesPerPixel;
+					imageBuffer[byteIndex] =     0xff;
+					imageBuffer[byteIndex + 1] = 0xff;
+					imageBuffer[byteIndex + 2] = 0xff;
+					//imageBuffer[byteIndex+3] = (byte)(1d / 800 * r * 0xff);
+					imageBuffer[byteIndex + 3] = (byte)randy.Next(0, 0xff);
 				}
-			}
+			});
+
 			GCHandle pinnedArray = GCHandle.Alloc(imageBuffer, GCHandleType.Pinned);
 			try
 			{
