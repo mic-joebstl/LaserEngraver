@@ -21,6 +21,7 @@
 			</ResourceDictionary.MergedDictionaries>
 			<converters:LogScaleConverter x:Key="LogScaleConverter" />
 			<converters:ByteScaleConverter x:Key="ByteScaleConverter" MinValue="0" MaxValue="100" />
+			<converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
 		</ResourceDictionary>
 	</Window.Resources>
 	<Grid>
@@ -431,6 +432,7 @@
 						<Grid.ColumnDefinitions>
 							<ColumnDefinition Width="1*" />
 							<ColumnDefinition Width="1*" />
+							<ColumnDefinition Width="1*" />
 						</Grid.ColumnDefinitions>
 
 						<CheckBox Grid.Column="0"
@@ -441,6 +443,11 @@
 						          Margin="0"
 						          IsChecked="{Binding ShowLightTheme}"
 						          Content="{x:Static localization:Texts.LightThemeText}" />
+						<CheckBox Grid.Column="2"
+						          Margin="0"
+						          Visibility="{Binding HasCustomTheme, Converter={StaticResource BoolToVisibilityConverter}}"
+						          IsChecked="{Binding ShowCustomTheme}"
+						          Content="{x:Static localization:Texts.CustomThemeText}" />
 					</Grid>
 
 					<Label FontSize="16"
@@ -449,6 +456,7 @@
 					       Content="{x:Static localization:Texts.UnitText}" />
 					<Grid HorizontalAlignment="Stretch">
 						<Grid.ColumnDefinitions>
+							<ColumnDefinition Width="1*" />
 							<ColumnDefinition Width="1*" />
 							<ColumnDefinition Width="1*" />
 						</Grid.ColumnDefinitions>
@@ -462,6 +470,7 @@
 						          IsChecked="{Binding ShowUnitPx}"
 						          Content="{x:Static localization:Texts.UnitPxText}" />
 					</Grid>
+
 
 					<Label FontSize="20"
 					       Margin="0,30,0,0"

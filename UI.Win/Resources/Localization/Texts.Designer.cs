@@ -106,6 +106,15 @@ namespace LaserPathEngraver.UI.Win.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Custom.
+        /// </summary>
+        public static string CustomThemeText {
+            get {
+                return ResourceManager.GetString("CustomThemeText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Dark.
         /// </summary>
         public static string DarkThemeText {

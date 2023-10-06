@@ -20,6 +20,7 @@ namespace LaserPathEngraver.UI.Win.Configuration
 		public bool PreserveAspectRatio { get; set; } = true;
 		public Unit Unit { get; set; } = Unit.cm;
 		public Theme Theme { get; set; } = Theme.Dark;
+		public Theme? CustomTheme { get; set; }
 
 	}
 
@@ -156,12 +157,18 @@ namespace LaserPathEngraver.UI.Win.Configuration
 		public override bool Equals(object? obj) => obj is Theme theme
 			&& theme.Foreground.Color.Equals(Foreground.Color)
 			&& theme.CanvasBackground.Color.Equals(CanvasBackground.Color)
-			&& theme.SectionBackground.Color.Equals(SectionBackground.Color);
+			&& theme.SectionBackground.Color.Equals(SectionBackground.Color)
+			&& theme.BurnTargetBackground.Color.Equals(BurnTargetBackground.Color)
+			&& theme.BurnStartColor.Equals(BurnStartColor)
+			&& theme.BurnEndColor.Equals(BurnEndColor);
 
 		public override int GetHashCode() =>
 			Foreground.Color.GetHashCode()
 			^ CanvasBackground.Color.GetHashCode()
-			^ SectionBackground.Color.GetHashCode();
+			^ SectionBackground.Color.GetHashCode()
+			^ BurnTargetBackground.Color.GetHashCode()
+			^ BurnStartColor.GetHashCode()
+			^ BurnEndColor.GetHashCode();
 
 		public Color GetBurnGradientColor(byte value)
 			=> _burnGradientMap.GetOrAdd(value, CalculateBurnGradientColor);

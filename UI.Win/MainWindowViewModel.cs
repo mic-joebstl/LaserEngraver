@@ -35,6 +35,7 @@ namespace LaserPathEngraver.UI.Win
 		private System.Windows.Point _mouseLastDownPos;
 		private DispatcherTimer _jobElapsedTimer;
 		private Theme _theme;
+		private Theme? _customTheme;
 
 		public MainWindowViewModel(IWritableOptions<UserConfiguration> userConfiguration, Space space, DeviceDispatcherService deviceDispatcher)
 		{
@@ -53,6 +54,11 @@ namespace LaserPathEngraver.UI.Win
 				RenderingBias = RenderingBias.Performance
 			};
 			_theme = userConfiguration.Value.Theme;
+			_customTheme = userConfiguration.Value.CustomTheme;
+			_customTheme =
+				_customTheme is not null && !_customTheme.Equals(Theme.Dark) && !_customTheme.Equals(Theme.Light) ? _customTheme : 
+				!_theme.Equals(Theme.Dark) && !_theme.Equals(Theme.Light) ? _theme :
+				null;
 
 			_jobElapsedTimer = new DispatcherTimer(DispatcherPriority.Render);
 			_jobElapsedTimer.Interval = TimeSpan.FromSeconds(0.1);
@@ -61,7 +67,6 @@ namespace LaserPathEngraver.UI.Win
 
 			InitializeThemeBindings();
 			InitializeCommands();
-
 		}
 
 		public Theme Theme => _theme;
@@ -137,6 +142,25 @@ namespace LaserPathEngraver.UI.Win
 			}
 		}
 
+		public bool HasCustomTheme => _customTheme != null;
+
+		public bool ShowCustomTheme
+		{
+			get
+			{
+				return _userConfiguration.Value?.Theme.Equals(_customTheme) ?? false;
+			}
+			set
+			{
+				_theme = _customTheme ?? Theme.Default;
+				_userConfiguration.Update(UpdateUserConfigTheme);
+				RaisePropertyChanged(nameof(Theme));
+				RaisePropertyChanged(nameof(ShowCustomTheme));
+				RaisePropertyChanged(nameof(ShowDarkTheme));
+				RaisePropertyChanged(nameof(ShowLightTheme));
+			}
+		}
+
 		public bool ShowDarkTheme
 		{
 			get
@@ -146,8 +170,9 @@ namespace LaserPathEngraver.UI.Win
 			set
 			{
 				_theme = Theme.Dark;
-				_userConfiguration.Update(config => config.Theme = _theme);
+				_userConfiguration.Update(UpdateUserConfigTheme);
 				RaisePropertyChanged(nameof(Theme));
+				RaisePropertyChanged(nameof(ShowCustomTheme));
 				RaisePropertyChanged(nameof(ShowDarkTheme));
 				RaisePropertyChanged(nameof(ShowLightTheme));
 			}
@@ -162,8 +187,9 @@ namespace LaserPathEngraver.UI.Win
 			set
 			{
 				_theme = Theme.Light;
-				_userConfiguration.Update(config => config.Theme = _theme);
+				_userConfiguration.Update(UpdateUserConfigTheme);
 				RaisePropertyChanged(nameof(Theme));
+				RaisePropertyChanged(nameof(ShowCustomTheme));
 				RaisePropertyChanged(nameof(ShowDarkTheme));
 				RaisePropertyChanged(nameof(ShowLightTheme));
 			}
@@ -567,7 +593,7 @@ namespace LaserPathEngraver.UI.Win
 		{
 			_theme.PropertyChanged += (object? sender, PropertyChangedEventArgs e) =>
 			{
-				_userConfiguration.Update(target => target.Theme = _theme);
+				_userConfiguration.Update(UpdateUserConfigTheme);
 				RaisePropertyChanged(nameof(Theme));
 			};
 
@@ -591,6 +617,12 @@ namespace LaserPathEngraver.UI.Win
 			};
 
 			OnThemeChanged();
+		}
+
+		private void UpdateUserConfigTheme(UserConfiguration config)
+		{
+			config.Theme = _theme;
+			config.CustomTheme = _customTheme;
 		}
 
 		#region INotifyPropertyChanged

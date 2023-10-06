@@ -132,6 +132,9 @@
   <data name="ContinueButtonText" xml:space="preserve">
     <value>Continue</value>
   </data>
+  <data name="CustomThemeText" xml:space="preserve">
+    <value>Custom</value>
+  </data>
   <data name="DarkThemeText" xml:space="preserve">
     <value>Dark</value>
   </data>
