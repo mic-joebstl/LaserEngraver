@@ -173,4 +173,11 @@ namespace LaserPathEngraver.Core.Devices
 
 	public delegate void DevicePositionChangedEventHandler(Device sender, DevicePositionChangedEventArgs args);
 
+	public class UnexpectedDeviceDisconnectionException : Exception
+	{
+		public UnexpectedDeviceDisconnectionException()
+			: base(Resources.Localization.Texts.UnexpectedDeviceDisconnectedExceptionMessage)
+		{ }
+	}
+
 }

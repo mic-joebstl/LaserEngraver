@@ -109,6 +109,20 @@ namespace LaserPathEngraver.Core.Jobs
 						Status = JobStatus.Cancelled;
 						Dispose();
 					}
+					catch(UnexpectedDeviceDisconnectionException ex)
+					{
+						if (this is IPausableJob pausable)
+						{
+							pausable.Pause();
+						}
+						else
+						{
+							Status = JobStatus.Failed;
+							Dispose();
+						}
+						_exception = ex;
+						throw;
+					}
 					catch (Exception ex)
 					{
 						_exception = ex;

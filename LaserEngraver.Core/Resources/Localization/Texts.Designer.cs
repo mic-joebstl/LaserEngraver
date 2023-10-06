@@ -86,5 +86,14 @@ namespace LaserPathEngraver.Core.Resources.Localization {
                 return ResourceManager.GetString("MoveAbsoluteJobTitle", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Device disconnected unexpectedly.
+        /// </summary>
+        internal static string UnexpectedDeviceDisconnectedExceptionMessage {
+            get {
+                return ResourceManager.GetString("UnexpectedDeviceDisconnectedExceptionMessage", resourceCulture);
+            }
+        }
     }
 }

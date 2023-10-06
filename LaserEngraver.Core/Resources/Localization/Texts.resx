@@ -126,4 +126,7 @@
   <data name="MoveAbsoluteJobTitle" xml:space="preserve">
     <value>Positioning</value>
   </data>
+  <data name="UnexpectedDeviceDisconnectedExceptionMessage" xml:space="preserve">
+    <value>Device disconnected unexpectedly</value>
+  </data>
 </root>
