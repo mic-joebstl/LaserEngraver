@@ -99,7 +99,7 @@ namespace LaserPathEngraver.UI.Win
 				RaisePropertyChanged(nameof(IsEditable));
 			};
 
-			_deviceDispatcher.JobStatusChanged += (Job sender, JobStatusChangedEventArgs args) =>
+			_deviceDispatcher.JobStatusChanged += (object sender, JobStatusChangedEventArgs args) =>
 			{
 				RaisePropertyChanged(nameof(JobStatusText));
 				cancelCommand.NotifyCanExecuteChanged();

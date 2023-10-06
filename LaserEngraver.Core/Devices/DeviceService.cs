@@ -36,11 +36,40 @@ namespace LaserPathEngraver.Core.Devices
 
 		public Point? DevicePosition => _device?.Position;
 
-		public JobStatus JobStatus => _currentJob?.Status ?? JobStatus.None;
+		private Job? CurrentJob 
+		{
+			get => _currentJob;
+			set
+			{
+				lock (_syncRoot)
+				{
+					if (_currentJob != null)
+					{
+						if (_currentJob.Status == JobStatus.Running)
+						{
+							_currentJob.Cancel();
+						}
+						else
+						{
+							_currentJob.Dispose();
+						}
+						_currentJob.StatusChanged -= OnJobStatusChanged;
+					}
+					_currentJob = value;
+					OnJobStatusChanged(this, new JobStatusChangedEventArgs(JobStatus));
+					if (_currentJob != null)
+					{
+						_currentJob.StatusChanged += OnJobStatusChanged;
+					}
+				}
+			}
+		}
 
-		public string? JobTitle => _currentJob?.Title;
+		public JobStatus JobStatus => CurrentJob?.Status ?? JobStatus.None;
 
-		public TimeSpan JobElapsedDuration => _currentJob?.ElapsedDuration ?? TimeSpan.Zero;
+		public string? JobTitle => CurrentJob?.Title;
+
+		public TimeSpan JobElapsedDuration => CurrentJob?.ElapsedDuration ?? TimeSpan.Zero;
 
 		public async Task Connect(CancellationToken cancellationToken)
 		{
@@ -84,7 +113,7 @@ namespace LaserPathEngraver.Core.Devices
 			DeviceStatusChanged?.Invoke(sender, args);
 		}
 
-		private void OnJobStatusChanged(Job sender, JobStatusChangedEventArgs jobStatusChangedEventArgs)
+		private void OnJobStatusChanged(object sender, JobStatusChangedEventArgs jobStatusChangedEventArgs)
 		{
 			JobStatusChanged?.Invoke(sender, jobStatusChangedEventArgs);
 		}
@@ -110,6 +139,7 @@ namespace LaserPathEngraver.Core.Devices
 						if (_device == device)
 						{
 							_device = null;
+							CurrentJob = null;
 						}
 						device.StatusChanged -= OnDeviceStatusChanged;
 					}
@@ -125,20 +155,7 @@ namespace LaserPathEngraver.Core.Devices
 			Device device;
 			lock (_syncRoot)
 			{
-				if (_currentJob != null)
-				{
-					if (_currentJob.Status == JobStatus.Running)
-					{
-						_currentJob.Cancel();
-					}
-					else
-					{
-						_currentJob.Dispose();
-					}
-					_currentJob.StatusChanged -= OnJobStatusChanged;
-				}
-				_currentJob = job;
-				_currentJob.StatusChanged += OnJobStatusChanged;
+				CurrentJob = job;
 				device = _device ?? throw new InvalidOperationException("Device not connected");
 			}
 
@@ -147,7 +164,7 @@ namespace LaserPathEngraver.Core.Devices
 
 		public void CancelJob() 
 		{
-			_currentJob?.Cancel();
+			CurrentJob?.Cancel();
 		}
 	}
 }

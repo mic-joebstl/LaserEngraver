@@ -31,7 +31,7 @@ namespace LaserPathEngraver.Core.Jobs
 		public JobStatus Status { get; private set; }
 	}
 
-	public delegate void JobStatusChangedEventHandler(Job sender, JobStatusChangedEventArgs jobStatusChangedEventArgs);
+	public delegate void JobStatusChangedEventHandler(object sender, JobStatusChangedEventArgs jobStatusChangedEventArgs);
 
 	public abstract class Job : INotifyPropertyChanged, IDisposable
 	{
