@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -44,7 +45,7 @@ namespace LaserPathEngraver.Core.Jobs
 		private IEnumerable<IEngravePoint> GetSortedPoints()
 		{
 			var relevantPoints = _source.Where(x => !x.IsVisited && x.Intensity > 0);
-			if (_configuration.PlottingMode == BurnPlottingMode.Rasterized)
+			if (_configuration.PlottingMode == BurnPlottingMode.Raster)
 			{
 				var points = relevantPoints
 					.OrderBy(x => x.Y)
@@ -58,46 +59,62 @@ namespace LaserPathEngraver.Core.Jobs
 			{
 				var unhandledPoints = new HashSet<IEngravePoint>(relevantPoints);
 
-				IEnumerable<IEngravePoint> HandleCluster(IEngravePoint point)
+				int clusterSize = 1;
+				int clusterSizeSqr = 1;
 				{
-					if (unhandledPoints.Remove(point))
+					int? minX = null;
+					int? minY = null;
+					int? maxX = null;
+					int? maxY = null;
+					foreach (var point in unhandledPoints)
 					{
-						yield return point;
-
-						var neighbor = unhandledPoints.FirstOrDefault(other =>
-						{
-							var x = other.X - point.X;
-							var y = other.Y - point.Y;
-							return x * x + y * y <= 2;
-						});
-
-						if (neighbor is not null)
-						{
-							foreach (var p in HandleCluster(neighbor))
-							{
-								yield return p;
-							}
-						}
+						if (minX is null || minX > point.X)
+							minX = point.X;
+						if (maxX is null || maxX < point.X)
+							maxX = point.X;
+						if (minY is null || minY > point.Y)
+							minY = point.Y;
+						if (maxY is null || maxY < point.Y)
+							maxY = point.Y;
 					}
+
+					int width = minX is not null && maxX is not null ? maxX.Value - minX.Value : 1;
+					int height = minY is not null && maxY is not null ? maxY.Value - minY.Value : 1;
+					int diameter = (int)Math.Sqrt(width * width + height * height);
+
+					clusterSize = diameter / 20;
+					clusterSize = clusterSize == 0 ? 1 : clusterSize;
+					int log = Math.Clamp((int)Math.Log2(clusterSize), 1, 16) - 1;
+
+					clusterSize = 2 << log;
+					clusterSizeSqr = clusterSize * clusterSize;
 				}
 
-				while (unhandledPoints.Count > 0)
+				bool TryGetNextPoint(IEngravePoint? currentPoint, [MaybeNullWhen(false)] out IEngravePoint nextPoint)
 				{
-					_currentPoint = _currentPoint is null ? unhandledPoints.First() :
-						unhandledPoints
-							//the exact vector length is not necessary to find the nearest point, just a comparable absolute weighting value
-							.OrderBy(p =>
-							{
-								var x = p.X - _currentPoint.X;
-								var y = p.Y - _currentPoint.Y;
-								return x * x + y * y;
-							})
-							.First();
+					nextPoint = unhandledPoints?
+						.Where(other => other != currentPoint)
+						.OrderBy(other =>
+						{
+							var x = other.X - (currentPoint?.X ?? 0);
+							var y = other.Y - (currentPoint?.Y ?? 0);
+							var sqrDistance = x * x + y * y;
+							var trim = sqrDistance % clusterSizeSqr;
+							return sqrDistance - trim;
+						})
+						.ThenBy(other => other.Y)
+						.ThenBy(other => other.X > (currentPoint?.X ?? 0) ? 0 : 1)
+						.ThenBy(other => other.X - (currentPoint?.X ?? 0))
+						.FirstOrDefault();
 
-					foreach (var p in HandleCluster(_currentPoint))
+					return nextPoint != null;
+				}
+
+				while (TryGetNextPoint(_currentPoint, out var nextPoint))
+				{
+					if (unhandledPoints.Remove(nextPoint))
 					{
-						yield return p;
-						_currentPoint = p;
+						yield return _currentPoint = nextPoint;
 					}
 				}
 			}
@@ -148,12 +165,15 @@ namespace LaserPathEngraver.Core.Jobs
 				point.IsVisited = true;
 
 #if DEBUG
-				var targetTime = i++ * delayMilliseconds;
-				var elapsedTime = sw.ElapsedMilliseconds;
-				var currentDelay = targetTime - elapsedTime;
-				if (currentDelay > 0)
+				if (mockDevice is not null)
 				{
-					await Task.Delay(TimeSpan.FromMilliseconds(currentDelay), cancellationToken);
+					var targetTime = i++ * delayMilliseconds;
+					var elapsedTime = sw.ElapsedMilliseconds;
+					var currentDelay = targetTime - elapsedTime;
+					if (currentDelay > 0)
+					{
+						await Task.Delay(TimeSpan.FromMilliseconds(currentDelay), cancellationToken);
+					}
 				}
 #endif
 

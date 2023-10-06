@@ -14,7 +14,7 @@ namespace LaserPathEngraver.Core.Devices.Serial
 		FanOff = 0x05,
 		Reset = 0x06,
 		Connect = 0x0A,
-		Engrave = 0x09, //?
+		Engrave = 0x09,
 		Stop = 0x16,
 		HomeTopLeft = 0x17,
 		Pause = 0x18,

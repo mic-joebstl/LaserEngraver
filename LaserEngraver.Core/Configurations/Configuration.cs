@@ -10,8 +10,8 @@ namespace LaserPathEngraver.Core.Configurations
 		public double HeightDots { get; set; } = 1608;
 		public DeviceType Type { get; set; }
 #if DEBUG
-//= DeviceType.Mock;
-= DeviceType.Serial;
+= DeviceType.Mock;
+		//= DeviceType.Serial;
 #endif
 		public TimeSpan ConnectionTimeout { get; set; } = TimeSpan.FromSeconds(15);
 		public string? PortName { get; set; }
@@ -37,7 +37,7 @@ namespace LaserPathEngraver.Core.Configurations
 		public byte Intensity { get; set; } = 0xff;
 		public byte Duration { get; set; } = 0xff;
 		public byte FixedIntensityThreshold { get; set; } = 0x7f;
-		public BurnPlottingMode PlottingMode { get; set; } = BurnPlottingMode.NearestNeighbor;
+		public BurnPlottingMode PlottingMode { get; set; } = BurnPlottingMode.RasterOptimized;
 		public BurnIntensityMode IntensityMode { get; set; } = BurnIntensityMode.Variable;
 	}
 
@@ -49,7 +49,7 @@ namespace LaserPathEngraver.Core.Configurations
 
 	public enum BurnPlottingMode
 	{
-		Rasterized,
-		NearestNeighbor
+		Raster,
+		RasterOptimized
 	}
 }

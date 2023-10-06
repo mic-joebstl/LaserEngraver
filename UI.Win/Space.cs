@@ -15,7 +15,6 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
-using System.Windows.Media.Media3D;
 using System.Windows.Threading;
 
 namespace LaserPathEngraver.UI.Win
@@ -46,7 +45,7 @@ namespace LaserPathEngraver.UI.Win
 		private TimeSpan _renderCanvasInterval;
 		private TimeSpan _renderBitmapInterval;
 		private DispatcherTimer _renderCanvasTimer;
-		private System.Threading.Timer _renderBitmapTimer;
+		private BackgroundWorker _renderBitmapTimer;
 		private double _canvasWidthDot;
 		private double _canvasHeightDot;
 		private double _deviceResolutionDpi;
@@ -83,14 +82,31 @@ namespace LaserPathEngraver.UI.Win
 			_offsetY = 0;
 			_renderStopwatch = new Stopwatch();
 			_renderCanvasInterval = TimeSpan.FromMilliseconds(8);
-			_renderBitmapInterval = TimeSpan.FromMilliseconds(500);
+			_renderBitmapInterval = TimeSpan.FromMilliseconds(250);
 
 			_renderCanvasTimer = new DispatcherTimer(DispatcherPriority.Render);
 			_renderCanvasTimer.Interval = _renderCanvasInterval;
 			_renderCanvasTimer.Tick += OnRenderCanvasTimer;
 			_renderCanvasTimer.Start();
 
-			_renderBitmapTimer = new System.Threading.Timer((_) => _burnArea?.RenderImage(), null, TimeSpan.Zero, _renderBitmapInterval);
+			_renderBitmapTimer = new BackgroundWorker();
+			_renderBitmapTimer.DoWork += async (object? sender, DoWorkEventArgs e) =>
+			{
+				try
+				{
+					while (!_renderBitmapTimer.CancellationPending)
+					{
+						_burnArea?.RenderImage();
+						await Task.Delay(_renderBitmapInterval);
+					}
+					e.Cancel = true;
+				}
+				catch (Exception)
+				{
+					//TODO MainWindow.ErrorMessage
+				}
+			};
+			_renderBitmapTimer.RunWorkerAsync();
 
 			_burnBoundsRectangle = new BurnRectangle();
 			_burnBoundsRectangle.Size = new Size((double)_canvasWidthDot, (double)_canvasHeightDot);
@@ -138,6 +154,7 @@ namespace LaserPathEngraver.UI.Win
 			CenterRenderArea();
 		}
 
+
 		#endregion
 
 		#region Properties
@@ -153,7 +170,7 @@ namespace LaserPathEngraver.UI.Win
 		public double ScreenResolutionDpi
 		{
 			get => _screenResolutionDpi;
-			set 
+			set
 			{
 				if (value != _screenResolutionDpi)
 				{
@@ -162,10 +179,10 @@ namespace LaserPathEngraver.UI.Win
 					RaisePropertyChanged(nameof(ImageScale));
 					RaisePropertyChanged(nameof(ImageScalePercent));
 					RaisePropertyChanged(nameof(Scale));
-					
+
 				}
 			}
-		} 
+		}
 
 		public BurnArea BurnArea => _burnArea;
 
@@ -385,9 +402,9 @@ namespace LaserPathEngraver.UI.Win
 		public double Scale
 		{
 			get => _scale;
-			set 
+			set
 			{
-				if(_scale != value)
+				if (_scale != value)
 				{
 					_scale = value;
 					UpdateVisuals();
@@ -508,31 +525,31 @@ namespace LaserPathEngraver.UI.Win
 			}
 		}
 
-		public bool IsPlottingModeRasterizedEnabled
+		public bool IsPlottingModeRasterEnabled
 		{
 			get
 			{
-				return _burnConfiguration.Value.PlottingMode == BurnPlottingMode.Rasterized;
+				return _burnConfiguration.Value.PlottingMode == BurnPlottingMode.Raster;
 			}
 			set
 			{
-				_burnConfiguration.Update(config => config.PlottingMode = value ? BurnPlottingMode.Rasterized : BurnPlottingMode.NearestNeighbor);
-				RaisePropertyChanged(nameof(IsPlottingModeRasterizedEnabled));
-				RaisePropertyChanged(nameof(IsPlottingModePathEnabled));
+				_burnConfiguration.Update(config => config.PlottingMode = value ? BurnPlottingMode.Raster : BurnPlottingMode.RasterOptimized);
+				RaisePropertyChanged(nameof(IsPlottingModeRasterEnabled));
+				RaisePropertyChanged(nameof(IsPlottingModeRasterOptimizedEnabled));
 			}
 		}
 
-		public bool IsPlottingModePathEnabled
+		public bool IsPlottingModeRasterOptimizedEnabled
 		{
 			get
 			{
-				return _burnConfiguration.Value.PlottingMode == BurnPlottingMode.NearestNeighbor;
+				return _burnConfiguration.Value.PlottingMode == BurnPlottingMode.RasterOptimized;
 			}
 			set
 			{
-				_burnConfiguration.Update(config => config.PlottingMode = value ? BurnPlottingMode.NearestNeighbor : BurnPlottingMode.Rasterized);
-				RaisePropertyChanged(nameof(IsPlottingModeRasterizedEnabled));
-				RaisePropertyChanged(nameof(IsPlottingModePathEnabled));
+				_burnConfiguration.Update(config => config.PlottingMode = value ? BurnPlottingMode.RasterOptimized : BurnPlottingMode.Raster);
+				RaisePropertyChanged(nameof(IsPlottingModeRasterEnabled));
+				RaisePropertyChanged(nameof(IsPlottingModeRasterOptimizedEnabled));
 			}
 		}
 

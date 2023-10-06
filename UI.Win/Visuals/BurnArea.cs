@@ -30,13 +30,14 @@ namespace LaserPathEngraver.UI.Win.Visuals
 		private Image _image;
 		private System.Drawing.Bitmap? _originalBitmap;
 		private System.Drawing.Bitmap? _scaledBitmap;
-		private BitmapImage? _bitmapImage;
+		private WriteableBitmap? _bitmapImage;
 		private MemoryStream? _imageStream;
 		private List<BurnTarget> _targets;
 		private Point _position;
 		private Size _size;
 		private System.Drawing.RectangleF? _boundingRect;
 		private bool _requiresRenderUpdate;
+		private bool _requiresPartialRenderUpdate;
 		private bool _requiresTargetUpdate;
 		private DateTime _targetUpdateRequestUtcDate = DateTime.MinValue;
 		private TimeSpan _targetUpdateDebounceTime = TimeSpan.FromMilliseconds(320);
@@ -82,6 +83,7 @@ namespace LaserPathEngraver.UI.Win.Visuals
 				{
 					_size = value;
 					_requiresRenderUpdate = true;
+					_requiresPartialRenderUpdate = false;
 					if (_resizing)
 						return;
 					ResizeToBoundingRect();
@@ -162,14 +164,14 @@ namespace LaserPathEngraver.UI.Win.Visuals
 
 		public void RenderImage()
 		{
-			if (!_requiresRenderUpdate && !RequiresTargetUpdate())
+			if (!_requiresRenderUpdate && !_requiresPartialRenderUpdate && !RequiresTargetUpdate())
 				return;
 
 			_renderSync.Wait();
 
 			try
 			{
-				if (!_requiresRenderUpdate && !RequiresTargetUpdate())
+				if (!_requiresRenderUpdate && !_requiresPartialRenderUpdate && !RequiresTargetUpdate())
 					return;
 
 				var targets = _targets;
@@ -193,50 +195,85 @@ namespace LaserPathEngraver.UI.Win.Visuals
 
 						var theme = _theme;
 						var defaultColor = theme is null ? Color.FromArgb(0, 0, 0, 0) : (Color?)null;
-						var format = System.Drawing.Imaging.PixelFormat.Format32bppArgb;
-						int bitsPerPixel = ((int)format & 0xff00) >> 8;
-						int bytesPerPixel = (bitsPerPixel + 7) / 8;
-						int stride = 4 * ((width * bytesPerPixel + 3) / 4);
-						var imageBuffer = new byte[width * height * bytesPerPixel];
 
-						Parallel.For(0, targets.Count, i =>
+						var writeableBitmap = _bitmapImage;
+						if (_requiresPartialRenderUpdate && writeableBitmap is not null)
 						{
-							var target = targets[i];
-							var byteIndex = target.Y * width * bytesPerPixel + target.X * bytesPerPixel;
-							var fillValue = target.Intensity;
-							var color = target.IsVisited ?
-								theme.GetBurnVisitedColor(fillValue)
-								: defaultColor ?? theme.GetBurnGradientColor(fillValue);
-
-							imageBuffer[byteIndex + 3] = color.A;
-							imageBuffer[byteIndex + 2] = color.R;
-							imageBuffer[byteIndex + 1] = color.G;
-							imageBuffer[byteIndex + 0] = color.B;
-						});
-
-						GCHandle pinnedArray = GCHandle.Alloc(imageBuffer, GCHandleType.Pinned);
-						try
-						{
-							IntPtr pointer = pinnedArray.AddrOfPinnedObject();
-							var bitmap = new System.Drawing.Bitmap(width, height, stride, format, pointer);
-							var ms = new MemoryStream();
-							bitmap.Save(ms, ImageFormat.Png);
-							ms.Position = 0;
-							
-							_windowDispatcher.BeginInvoke(() =>
+							foreach (var target in _targets.Where(t => !t.IsDrawn))
 							{
-								Interlocked.Exchange(ref _imageStream, ms)?.Dispose();
+								var fillValue = target.Intensity;
+								var color = target.IsVisited ?
+									theme.GetBurnVisitedColor(fillValue)
+									: defaultColor ?? theme.GetBurnGradientColor(fillValue);
+								target.IsDrawn = true;
 
-								_bitmapImage = new BitmapImage();
-								_bitmapImage.BeginInit();
-								_bitmapImage.StreamSource = ms;
-								_bitmapImage.EndInit();
-								_image.Source = _bitmapImage;
-							});
+								byte[] colorData =
+								{
+									color.B,
+									color.G,
+									color.R,
+									color.A
+								};
+
+								var rect = new Int32Rect(target.X, target.Y, 1, 1);
+
+								_windowDispatcher.Invoke(() =>
+								{
+									writeableBitmap.WritePixels(rect, colorData, 4, 0);
+								});
+							}
 						}
-						finally
+						else
 						{
-							pinnedArray.Free();
+							var format = System.Drawing.Imaging.PixelFormat.Format32bppArgb;
+							int bitsPerPixel = ((int)format & 0xff00) >> 8;
+							int bytesPerPixel = (bitsPerPixel + 7) / 8;
+							int stride = 4 * ((width * bytesPerPixel + 3) / 4);
+							var imageBuffer = new byte[width * height * bytesPerPixel];
+
+							Parallel.For(0, targets.Count, i =>
+							{
+								var target = targets[i];
+								var byteIndex = target.Y * width * bytesPerPixel + target.X * bytesPerPixel;
+								var fillValue = target.Intensity;
+								var color = target.IsVisited ?
+									theme.GetBurnVisitedColor(fillValue)
+									: defaultColor ?? theme.GetBurnGradientColor(fillValue);
+
+								imageBuffer[byteIndex + 3] = color.A;
+								imageBuffer[byteIndex + 2] = color.R;
+								imageBuffer[byteIndex + 1] = color.G;
+								imageBuffer[byteIndex + 0] = color.B;
+
+								target.IsDrawn = true;
+							});
+
+							GCHandle pinnedArray = GCHandle.Alloc(imageBuffer, GCHandleType.Pinned);
+							try
+							{
+								IntPtr pointer = pinnedArray.AddrOfPinnedObject();
+								var bitmap = new System.Drawing.Bitmap(width, height, stride, format, pointer);
+								var ms = new MemoryStream();
+								bitmap.Save(ms, ImageFormat.Png);
+								ms.Position = 0;
+
+								_windowDispatcher.BeginInvoke(() =>
+								{
+									Interlocked.Exchange(ref _imageStream, ms)?.Dispose();
+
+									var tempImage = new BitmapImage();
+									tempImage.BeginInit();
+									tempImage.StreamSource = ms;
+									tempImage.EndInit();
+
+									_bitmapImage = new WriteableBitmap(tempImage);
+									_image.Source = _bitmapImage;
+								});
+							}
+							finally
+							{
+								pinnedArray.Free();
+							}
 						}
 					}
 				}
@@ -387,6 +424,7 @@ namespace LaserPathEngraver.UI.Win.Visuals
 		private void RequestTargetUpdate()
 		{
 			_requiresTargetUpdate = true;
+			_requiresPartialRenderUpdate = false;
 			_targetUpdateRequestUtcDate = DateTime.UtcNow;
 		}
 
@@ -412,6 +450,7 @@ namespace LaserPathEngraver.UI.Win.Visuals
 			{
 				_theme = theme;
 				_requiresRenderUpdate = true;
+				_requiresPartialRenderUpdate = false;
 			}
 		}
 
@@ -437,10 +476,12 @@ namespace LaserPathEngraver.UI.Win.Visuals
 					if (_isVisited != value)
 					{
 						_isVisited = value;
-						_owner._requiresRenderUpdate = true;
+						IsDrawn = false;
+						_owner._requiresPartialRenderUpdate = true;
 					}
 				}
 			}
+			public bool IsDrawn { get; set; }
 			public byte Intensity { get; set; } = 0xff;
 		}
 

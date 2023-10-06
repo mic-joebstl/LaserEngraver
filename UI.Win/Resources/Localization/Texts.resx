@@ -257,10 +257,10 @@ Exact duration depends on the device, so it is specified here in percent.
   <data name="PauseButtonText" xml:space="preserve">
     <value>Pause</value>
   </data>
-  <data name="PlottingModePathText" xml:space="preserve">
-    <value>Path</value>
+  <data name="PlottingModeRasterOptimizedText" xml:space="preserve">
+    <value>Raster optimized</value>
   </data>
-  <data name="PlottingModeRasterizedText" xml:space="preserve">
+  <data name="PlottingModeRasterText" xml:space="preserve">
     <value>Rasterized</value>
   </data>
   <data name="PlottingModeTitle" xml:space="preserve">

@@ -404,20 +404,20 @@ namespace LaserPathEngraver.UI.Win.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Path.
+        ///   Looks up a localized string similar to Raster optimized.
         /// </summary>
-        public static string PlottingModePathText {
+        public static string PlottingModeRasterOptimizedText {
             get {
-                return ResourceManager.GetString("PlottingModePathText", resourceCulture);
+                return ResourceManager.GetString("PlottingModeRasterOptimizedText", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to Rasterized.
         /// </summary>
-        public static string PlottingModeRasterizedText {
+        public static string PlottingModeRasterText {
             get {
-                return ResourceManager.GetString("PlottingModeRasterizedText", resourceCulture);
+                return ResourceManager.GetString("PlottingModeRasterText", resourceCulture);
             }
         }
         

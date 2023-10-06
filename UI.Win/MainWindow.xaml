@@ -391,12 +391,12 @@
 						</Grid.ColumnDefinitions>
 
 						<CheckBox Grid.Column="0"
-						          IsChecked="{Binding Space.IsPlottingModeRasterizedEnabled}"
-						          Content="{x:Static localization:Texts.PlottingModeRasterizedText}"
+						          IsChecked="{Binding Space.IsPlottingModeRasterEnabled}"
+						          Content="{x:Static localization:Texts.PlottingModeRasterText}"
 						          IsEnabled="{Binding IsEditable, Mode=OneWay}" />
 						<CheckBox Grid.Column="1"
-						          IsChecked="{Binding Space.IsPlottingModePathEnabled}"
-						          Content="{x:Static localization:Texts.PlottingModePathText}"
+						          IsChecked="{Binding Space.IsPlottingModeRasterOptimizedEnabled}"
+						          Content="{x:Static localization:Texts.PlottingModeRasterOptimizedText}"
 						          IsEnabled="{Binding IsEditable, Mode=OneWay}" />
 					</Grid>
 

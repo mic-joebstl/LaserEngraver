@@ -100,7 +100,6 @@ namespace LaserPathEngraver.Core.Devices.Serial
 
 		public override async Task HomingAsync(CancellationToken cancellationToken)
 		{
-
 			using (var tx = StatusIntermediateTransition(DeviceStatus.Ready, DeviceStatus.Executing))
 			{
 				tx.Open();
