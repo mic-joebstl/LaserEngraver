@@ -280,9 +280,9 @@ namespace LaserPathEngraver.UI.Win.Visuals
 			var scaledBitmap = new System.Drawing.Bitmap((int)width, (int)height);
 			var graph = System.Drawing.Graphics.FromImage(scaledBitmap);
 
-			graph.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.High;
+			graph.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
 			graph.CompositingQuality = System.Drawing.Drawing2D.CompositingQuality.HighQuality;
-			//graph.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+			graph.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
 
 			graph.FillRectangle(brush, new System.Drawing.RectangleF(0, 0, (float)width, (float)height));
 			graph.DrawImage(originalBitmap, 0, 0, width, height);

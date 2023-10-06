@@ -43,7 +43,7 @@ namespace LaserPathEngraver.Core.Jobs
 		private IEnumerable<IEngravePoint> GetSortedPoints()
 		{
 			return _source
-				.Where(x => !x.IsVisited)
+				.Where(x => !x.IsVisited && x.Intensity > 0)
 				.OrderBy(x => x.Y)
 				.ThenBy(x => x.Y % 2 == 0 ? x.X : x.X * -1);
 
