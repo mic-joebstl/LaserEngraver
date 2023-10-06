@@ -1,48 +1,42 @@
 # Laser Engraver
-Intended as an alternative to the software that is shipped with K3/K5 laser engravers.  
+This project serves as an alternative to the software that comes with K3/K5 laser engravers.  
 
-## Why
-The original software is limited in its capabilities as it supports rasterized engraving only.  
-I intend to speed up the engraving process with this tool by analyzing the provided image and finding the shortest path for the laser to follow.  
-So far I have not quite achieved this goal yet, as the engraver has a high latency for acknowleging received commands and performs single line engraving commands more quickly.  
+## Motivation
+The original software only supports rasterized engraving, which limits its capabilities.  
+This project aims to enhance the engraving process by analyzing the input image and determining the shortest path for the laser to follow, thereby potentially speeding up the process.  
+However, due to the high latency of the engraver in acknowledging received commands and its quicker performance with single line engraving commands, this goal has not been fully realized yet.
 
 ## Installation
-Clone the repo or download the source and compile the application using Visual Studio.  
-As of now, there is only a build profile for Windows, as I don't use Linux with a GUI.  
-In the future there will be releases with prebuilt executables.  
-
+To install, either clone the repository or download the source code and compile the application using Visual Studio.  
+Currently, only a Windows build profile is available as I don't use Linux with a GUI. Future releases will include prebuilt executables.
 ## How to use
 
 ### Engrave
-To do this, drag an image file into the window, press *Connect*, set your engraving preferences and *Start*.  
+Drag an image file into the window, click *Connect*, set your engraving preferences, and click *Start*.  
 
 ![demo](./res/demo.png)
 
-The highlighted area shows what has been engraved already,  
-and the dot shows the current position of the laser.  
+The highlighted area represents what has already been engraved, while the dot indicates the current position of the laser.  
 
 ### Settings
-*Depth* sets the duration for which the engraver stays at a position.  
-Exact duration depends on the device, so it is specified here in percent.  
+- **Depth** determines how long the engraver stays at a position. The exact duration depends on the device and is specified here in percent.  
+- **Variable burn intensity**: If enabled, burn intensity is determined by pixel brightness (including alpha channel).
+- **Max. Power**: When **Variable burn intensity** is enabled, this option limits burn intensity to a maximum value.
+- **Power**: Specifies fixed burn intensity for pixels to be engraved when **Variable burn intensity** is disabled.
+- **Threshold**: Determines at what percent brightness a pixel is engraved when *Variable burn intensity* is disabled.
+- **Rasterized**: Engraves pixels in rows in a grid pattern.
+- **Raster optimized**: Begins engraving at any pixel and directly navigates to the next pixel to be engraved.
+- **Show halo**: A visual setting that does not affect engraving.
 
-- *Variable burn intensity*: If active, the burn intensity is determined by the brightness of the pixel (including alpha channel).
-- *Max. Power* limits the burn intensity to a maximum value when *Variable burn intensity* is active.
-- *Power* specifies the fixed burn intensity of the pixels to be engraved if *Variable burn intensity* is disabled.
-- *Threshold* is the value in percent at which brightness a pixel is engraved if *Variable burn intensity* is disabled.
-- *Rasterized* engraves the pixels in rows in a grid pattern.
-- *Raster optimized* starts engraving at any pixel and navigates directly to the next pixel to be engraved from there.
-- *Show halo* is a purely visual setting and has no effect on engraving.
-
-### Keyboard shortcuts
-- `Ctrl` + `Left mouse button` moves the view. The *Auto center view* setting is reset.
-- `Ctrl` + `Mouse wheel` and `Ctrl` + `+`/`-` sets the zoom level.
-- `Ctrl` + `0` resets the zoom level.
+### Keyboard Shortcuts
+- `Ctrl` + `Left mouse button`: Moves the view (resets *Auto center view* setting).
+- `Ctrl` + `Mouse wheel` and `Ctrl` + `+`/`-`: Adjusts zoom level.
+- `Ctrl` + `0`: Resets zoom level.
 
 ## Configuration
-All settings are stored in `appsettings.json`.  
-If the file doesn't exist, it's created at startup with default settings.  
-Most settings can be configured using the UI, but some (like custom themes and device settings) must be configured in the file directly.  
-In this section I will only go into detail for settings that can only be set in `appsettings.json`.  
+All settings are stored in `appsettings.json`. If this file does not exist, it will be created at startup with default settings.  
+While most settings can be configured via the UI, some (like custom themes and device settings) must be directly configured in the file.  
+This section details settings that can only be set in `appsettings.json`.
 
 ### Example
 ```json
@@ -85,19 +79,19 @@ In this section I will only go into detail for settings that can only be set in 
 This section should not be modified, as it is preconfigured for K3/K5 laser engravers.  
 Other models are not supported as of now.  
 
-- DPI: dots per inch
-- WidthDots/HeightDots: width and height of the canvas
-- Type: When set to 1 (default in debug-builds), the application is in demo-mode (i.e. a mockup device is simulated). Select 2 (default in release-builds) for USB devices. Other devices are not supported yet.
+- **DPI**: Dots per inch
+- **WidthDots**/**HeightDots**: Width and height of the canvas
+- **Type**: Set to 1 for demo-mode (default in debug-builds), which simulates a mockup device. Select 2 for USB devices (default in release-builds). Other devices are not supported.
 
 ### UserConfiguration
-- Culture: The application is fully localized in german `de` and english `en`.  
-- Theme: This setting is overwritten when selecting a theme (dark/light). If you wish to customize these settings, change `Theme` to `CustomTheme`, otherwise these settings will be overwritten.  
+- **Culture**: The application is fully localized in both German (`de`) and English (`en`).
+- **Theme**: This setting is overwritten when a theme (dark/light) is selected. If you wish to customize these settings, change `Theme` to `CustomTheme`. Otherwise, these settings will be overwritten.
 
 ### BurnConfiguration
-Specifies how the engraving should be performed.  
+This section specifies how the engraving should be performed.  
 All of these settings can be configured using the UI.  
 
-## Demo
-If you don't have a K3/K5 laser engraver or just want to try this tool out,  
+## Demo Mode
+If you don't have a K3/K5 laser engraver or if you just want to try out this tool,  
 set the `Type` setting in the `DeviceConfiguration` section in `appsettings.json` to 1.  
-This will put the application in demo-mode, i.e. simulate a mockup-device.  
+This will put the application in demo mode, simulating a mockup device.
