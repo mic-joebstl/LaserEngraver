@@ -17,6 +17,7 @@ using LaserPathEngraver.Core.Devices;
 using CommunityToolkit.Mvvm.Input;
 using System.Threading;
 using LaserPathEngraver.Core.Jobs;
+using System.Windows.Input;
 
 namespace LaserPathEngraver.UI.Win
 {
@@ -55,12 +56,12 @@ namespace LaserPathEngraver.UI.Win
 					try
 					{
 						ErrorMessage = null;
-						if(_deviceDispatcher.DeviceStatus == DeviceStatus.Disconnected)
+						if (_deviceDispatcher.DeviceStatus == DeviceStatus.Disconnected)
 						{
 							await _deviceDispatcher.Connect(cancellationToken);
 							await _deviceDispatcher.ExecuteJob(new HomingJob(), cancellationToken);
 						}
-						else if(_deviceDispatcher.DeviceStatus == DeviceStatus.Ready)
+						else if (_deviceDispatcher.DeviceStatus == DeviceStatus.Ready)
 						{
 							await _deviceDispatcher.Disconnect(cancellationToken);
 						}
@@ -70,13 +71,14 @@ namespace LaserPathEngraver.UI.Win
 						ErrorMessage = ex.Message;
 					}
 				},
-				canExecute: () => _deviceDispatcher.DeviceStatus == DeviceStatus.Disconnected || _deviceDispatcher.DeviceStatus == DeviceStatus.Ready
+				canExecute: () => IsEditable
 			);
 
 			_deviceDispatcher.DeviceStatusChanged += (Device sender, DeviceStatusChangedEventArgs args) =>
 			{
 				RaisePropertyChanged(nameof(ConnectCommandText));
 				RaisePropertyChanged(nameof(DeviceStatusText));
+				RaisePropertyChanged(nameof(IsEditable));
 			};
 
 			_deviceDispatcher.JobStatusChanged += (Job sender, JobStatusChangedEventArgs args) =>
@@ -200,6 +202,30 @@ namespace LaserPathEngraver.UI.Win
 
 		public IAsyncRelayCommand ConnectCommand { get; private set; }
 
+		public Cursor CanvasCursor
+		{
+			get
+			{
+				if (System.Windows.Input.Keyboard.IsKeyDown(System.Windows.Input.Key.LeftCtrl))
+				{
+					return Cursors.SizeAll;
+				}
+				else if(IsEditable)
+				{
+					var topLeft = Space.SpacePositionToScreenPosition(new System.Windows.Point(0, 0));
+					var bottomRight = Space.SpacePositionToScreenPosition(new System.Windows.Point(Space.CanvasWidthDot, Space.CanvasHeightDot));
+					var pos = _mouseLastPos;
+					if (pos.X >= topLeft.X && pos.X <= bottomRight.X && pos.Y >= topLeft.Y && pos.Y <= bottomRight.Y)
+					{
+						return Cursors.Hand;
+					}
+				}
+				return Cursors.Arrow;
+			}
+		}
+
+		public bool IsEditable => DeviceDispatcher.DeviceStatus == DeviceStatus.Disconnected || DeviceDispatcher.DeviceStatus == DeviceStatus.Ready;
+
 		private void OnSpaceMouseDown(object? sender, System.Windows.Input.MouseButtonEventArgs e)
 		{
 			if (e.LeftButton == System.Windows.Input.MouseButtonState.Pressed)
@@ -208,9 +234,12 @@ namespace LaserPathEngraver.UI.Win
 				{
 					e.MouseDevice.Capture(_space.Canvas);
 				}
-				else if (e.Source is FrameworkElement element && element.DataContext is BurnArea burnArea)
+				else if (e.Source is FrameworkElement element && element.DataContext is BurnArea)
 				{
-					e.MouseDevice.Capture(element);
+					if (IsEditable)
+					{
+						e.MouseDevice.Capture(element);
+					}
 				}
 				_mouseLastPos = e.GetPosition(_space.Canvas);
 			}
@@ -242,6 +271,7 @@ namespace LaserPathEngraver.UI.Win
 				}
 			}
 			_mouseLastPos = e.GetPosition(_space.Canvas);
+			RaisePropertyChanged(nameof(CanvasCursor));
 		}
 
 		private void OnSpaceMouseUp(object? sender, System.Windows.Input.MouseButtonEventArgs e)
@@ -261,8 +291,6 @@ namespace LaserPathEngraver.UI.Win
 		{
 			if (System.Windows.Input.Keyboard.IsKeyDown(System.Windows.Input.Key.LeftCtrl))
 			{
-				_space.Canvas.Cursor = System.Windows.Input.Cursors.ScrollAll;
-
 				if (System.Windows.Input.Keyboard.IsKeyDown(System.Windows.Input.Key.OemPlus) ||
 					System.Windows.Input.Keyboard.IsKeyDown(System.Windows.Input.Key.Add))
 				{
@@ -279,40 +307,17 @@ namespace LaserPathEngraver.UI.Win
 					_space.Scale = 1;
 				}
 			}
-			else
-				_space.Canvas.Cursor = System.Windows.Input.Cursors.Hand;
-
+			RaisePropertyChanged(nameof(CanvasCursor));
 		}
 
 		public void OnSpaceKeyUp(object sender, System.Windows.Input.KeyEventArgs e)
 		{
-			if (System.Windows.Input.Keyboard.IsKeyUp(System.Windows.Input.Key.LeftCtrl))
-			{
-				_space.Canvas.Cursor = System.Windows.Input.Cursors.Hand;
-			}
+			RaisePropertyChanged(nameof(CanvasCursor));
 		}
 
 		public void OnSpaceDragOver(object sender, DragEventArgs e)
 		{
-			var dropEnabled = false;
-			if (e.Data.GetDataPresent(DataFormats.FileDrop, true))
-			{
-				string[]? filenames = e.Data.GetData(DataFormats.FileDrop, true) as string[];
-				if (filenames != null)
-				{
-					foreach (var filePath in filenames)
-					{
-						var extension = System.IO.Path.GetExtension(filePath);
-						if (extension != null && (new[] { ".bmp", ".gif", ".exif", ".jpg", ".jpeg", ".png", ".tif", ".tiff" }).Any(x => extension.Equals(x, StringComparison.OrdinalIgnoreCase)))
-						{
-							dropEnabled = true;
-							break;
-						}
-					}
-				}
-			}
-
-			if (!dropEnabled)
+			if (!TryGetFirstSupportedFilePath(e, out _))
 			{
 				e.Effects = DragDropEffects.None;
 				e.Handled = true;
@@ -321,22 +326,32 @@ namespace LaserPathEngraver.UI.Win
 
 		public void OnSpaceDrop(object sender, DragEventArgs e)
 		{
-			if (e.Data.GetDataPresent(DataFormats.FileDrop, true))
+			if (TryGetFirstSupportedFilePath(e, out var filePath))
+			{
+				_space.LoadBitmap(filePath);
+			}
+		}
+
+		private bool TryGetFirstSupportedFilePath(DragEventArgs e, out string filePath)
+		{
+			if (IsEditable && e.Data.GetDataPresent(DataFormats.FileDrop, true))
 			{
 				string[]? filenames = e.Data.GetData(DataFormats.FileDrop, true) as string[];
 				if (filenames != null)
 				{
-					foreach (var filePath in filenames)
+					foreach (var path in filenames)
 					{
-						var extension = System.IO.Path.GetExtension(filePath);
+						var extension = System.IO.Path.GetExtension(path);
 						if (extension != null && (new[] { ".bmp", ".gif", ".exif", ".jpg", ".jpeg", ".png", ".tif", ".tiff" }).Any(x => extension.Equals(x, StringComparison.OrdinalIgnoreCase)))
 						{
-							_space.LoadBitmap(filePath);
-							break;
+							filePath = path;
+							return true;
 						}
 					}
 				}
 			}
+			filePath = "";
+			return false;
 		}
 
 		#region INotifyPropertyChanged

@@ -37,10 +37,12 @@
 		                AllowDrop="True"
 		                DragOver="ContentControl_DragOver"
 		                Drop="ContentControl_Drop"
+		                Cursor="{Binding CanvasCursor}"
 		                local:SizeObserver.Observe="True"
 		                local:SizeObserver.ObservedWidth="{Binding Space.ObservableWidth, Mode=OneWayToSource}"
 		                local:SizeObserver.ObservedHeight="{Binding Space.ObservableHeight, Mode=OneWayToSource}">
 		</ContentControl>
+
 		<Grid VerticalAlignment="Top" HorizontalAlignment="Left"
 		      Margin="15">
 
@@ -72,7 +74,7 @@
 
 					<StackPanel Orientation="Horizontal"
 					            Margin="0,7.5,0,7.5">
-						<TextBox Width="70" Height="30">
+						<TextBox Width="70" Height="30" IsEnabled="{Binding IsEditable}">
 							<TextBox.Text>
 								<Binding Path="Space.EngravingDuration"
 								         UpdateSourceTrigger="LostFocus"
@@ -86,7 +88,8 @@
 						</TextBox>
 						<Label Foreground="White"
 						       FontSize="16"
-						       Content="{x:Static localization:Texts.EngravingDurationText}" />
+						       Content="{x:Static localization:Texts.EngravingDurationText}"
+						       IsEnabled="{Binding IsEditable}" />
 					</StackPanel>
 
 					<Slider Minimum="0"
@@ -94,11 +97,12 @@
 					        Width="200"
 					        TickFrequency="1"
 					        Value="{Binding Path=Space.EngravingDuration, Converter={StaticResource ByteScaleConverter}}"
-					        HorizontalAlignment="Left" />
+					        HorizontalAlignment="Left"
+					        IsEnabled="{Binding IsEditable}" />
 
 					<StackPanel Orientation="Horizontal"
 					            Margin="0,7.5,0,7.5">
-						<TextBox Width="70" Height="30">
+						<TextBox Width="70" Height="30" IsEnabled="{Binding IsEditable}">
 							<TextBox.Text>
 								<Binding Path="Space.EngravingPower"
 								         UpdateSourceTrigger="LostFocus"
@@ -112,7 +116,8 @@
 						</TextBox>
 						<Label Foreground="White"
 						       FontSize="16"
-						       Content="{x:Static localization:Texts.MaximumEngravingPowerText}">
+						       Content="{x:Static localization:Texts.MaximumEngravingPowerText}"
+						       IsEnabled="{Binding IsEditable}">
 							<Label.Style>
 								<Style TargetType="{x:Type Label}">
 									<Style.Triggers>
@@ -126,13 +131,68 @@
 												<Setter Property="Visibility" Value="Collapsed" />
 											</DataTrigger.Setters>
 										</DataTrigger>
+										<DataTrigger Binding="{Binding IsEnabled, Mode=OneTime}" Value="True">
+											<Setter Property="Opacity" Value="1" />
+										</DataTrigger>
+										<DataTrigger Binding="{Binding IsEnabled, Mode=OneTime}" Value="False">
+											<Setter Property="Opacity" Value="0.4" />
+										</DataTrigger>
+										<Trigger Property="IsEnabled" Value="True">
+											<Trigger.EnterActions>
+												<BeginStoryboard>
+													<Storyboard>
+														<DoubleAnimation Storyboard.TargetProperty="Opacity"
+														                 To="1"
+														                 Duration="0:0:0.4"
+														                 AccelerationRatio="0.1"
+														                 DecelerationRatio="0.9" />
+													</Storyboard>
+												</BeginStoryboard>
+											</Trigger.EnterActions>
+											<Trigger.ExitActions>
+												<BeginStoryboard>
+													<Storyboard>
+														<DoubleAnimation Storyboard.TargetProperty="Opacity"
+														                 To="0.4"
+														                 Duration="0:0:0.4"
+														                 AccelerationRatio="0.1"
+														                 DecelerationRatio="0.9" />
+													</Storyboard>
+												</BeginStoryboard>
+											</Trigger.ExitActions>
+										</Trigger>
+										<Trigger Property="IsEnabled" Value="False">
+											<Trigger.EnterActions>
+												<BeginStoryboard>
+													<Storyboard>
+														<DoubleAnimation Storyboard.TargetProperty="Opacity"
+														                 To="0.4"
+														                 Duration="0:0:0.4"
+														                 AccelerationRatio="0.1"
+														                 DecelerationRatio="0.9" />
+													</Storyboard>
+												</BeginStoryboard>
+											</Trigger.EnterActions>
+											<Trigger.ExitActions>
+												<BeginStoryboard>
+													<Storyboard>
+														<DoubleAnimation Storyboard.TargetProperty="Opacity"
+														                 To="1"
+														                 Duration="0:0:0.4"
+														                 AccelerationRatio="0.1"
+														                 DecelerationRatio="0.9" />
+													</Storyboard>
+												</BeginStoryboard>
+											</Trigger.ExitActions>
+										</Trigger>
 									</Style.Triggers>
 								</Style>
 							</Label.Style>
 						</Label>
 						<Label Foreground="White"
 						       FontSize="16"
-						       Content="{x:Static localization:Texts.EngravingPowerText}">
+						       Content="{x:Static localization:Texts.EngravingPowerText}"
+						       IsEnabled="{Binding IsEditable}">
 							<Label.Style>
 								<Style TargetType="{x:Type Label}">
 									<Style.Triggers>
@@ -146,6 +206,60 @@
 												<Setter Property="Visibility" Value="Visible" />
 											</DataTrigger.Setters>
 										</DataTrigger>
+										<DataTrigger Binding="{Binding IsEnabled, Mode=OneTime}" Value="True">
+											<Setter Property="Opacity" Value="1" />
+										</DataTrigger>
+										<DataTrigger Binding="{Binding IsEnabled, Mode=OneTime}" Value="False">
+											<Setter Property="Opacity" Value="0.4" />
+										</DataTrigger>
+										<Trigger Property="IsEnabled" Value="True">
+											<Trigger.EnterActions>
+												<BeginStoryboard>
+													<Storyboard>
+														<DoubleAnimation Storyboard.TargetProperty="Opacity"
+														                 To="1"
+														                 Duration="0:0:0.4"
+														                 AccelerationRatio="0.1"
+														                 DecelerationRatio="0.9" />
+													</Storyboard>
+												</BeginStoryboard>
+											</Trigger.EnterActions>
+											<Trigger.ExitActions>
+												<BeginStoryboard>
+													<Storyboard>
+														<DoubleAnimation Storyboard.TargetProperty="Opacity"
+														                 To="0.4"
+														                 Duration="0:0:0.4"
+														                 AccelerationRatio="0.1"
+														                 DecelerationRatio="0.9" />
+													</Storyboard>
+												</BeginStoryboard>
+											</Trigger.ExitActions>
+										</Trigger>
+										<Trigger Property="IsEnabled" Value="False">
+											<Trigger.EnterActions>
+												<BeginStoryboard>
+													<Storyboard>
+														<DoubleAnimation Storyboard.TargetProperty="Opacity"
+														                 To="0.4"
+														                 Duration="0:0:0.4"
+														                 AccelerationRatio="0.1"
+														                 DecelerationRatio="0.9" />
+													</Storyboard>
+												</BeginStoryboard>
+											</Trigger.EnterActions>
+											<Trigger.ExitActions>
+												<BeginStoryboard>
+													<Storyboard>
+														<DoubleAnimation Storyboard.TargetProperty="Opacity"
+														                 To="1"
+														                 Duration="0:0:0.4"
+														                 AccelerationRatio="0.1"
+														                 DecelerationRatio="0.9" />
+													</Storyboard>
+												</BeginStoryboard>
+											</Trigger.ExitActions>
+										</Trigger>
 									</Style.Triggers>
 								</Style>
 							</Label.Style>
@@ -157,7 +271,8 @@
 					        Width="200"
 					        TickFrequency="1"
 					        Value="{Binding Path=Space.EngravingPower, Converter={StaticResource ByteScaleConverter}}"
-					        HorizontalAlignment="Left" />
+					        HorizontalAlignment="Left"
+					        IsEnabled="{Binding IsEditable}" />
 
 					<StackPanel Orientation="Vertical">
 						<StackPanel.Style>
@@ -220,7 +335,7 @@
 						</StackPanel.Style>
 						<StackPanel Orientation="Horizontal"
 						            Margin="0,7.5,0,7.5">
-							<TextBox Width="70" Height="30">
+							<TextBox Width="70" Height="30" IsEnabled="{Binding IsEditable}">
 								<TextBox.Text>
 									<Binding Path="Space.FixedPowerThreshold"
 									         UpdateSourceTrigger="LostFocus"
@@ -234,7 +349,8 @@
 							</TextBox>
 							<Label Foreground="White"
 							       FontSize="16"
-							       Content="{x:Static localization:Texts.FixedEngravingPowerThresholdText}" />
+							       Content="{x:Static localization:Texts.FixedEngravingPowerThresholdText}"
+							       IsEnabled="{Binding IsEditable}" />
 						</StackPanel>
 
 						<Slider Minimum="0"
@@ -242,24 +358,29 @@
 						        Width="200"
 						        TickFrequency="1"
 						        Value="{Binding Path=Space.FixedPowerThreshold, Converter={StaticResource ByteScaleConverter}}"
-						        HorizontalAlignment="Left" />
+						        HorizontalAlignment="Left"
+						        IsEnabled="{Binding IsEditable}" />
 					</StackPanel>
 
 					<CheckBox Margin="0,12.5,0,0"
 					          IsChecked="{Binding Space.IsPowerVarible}"
-					          Content="{x:Static localization:Texts.IsPowerVariableText}" />
+					          Content="{x:Static localization:Texts.IsPowerVariableText}"
+					          IsEnabled="{Binding IsEditable}" />
 
 					<StackPanel Orientation="Vertical">
 						<Label FontSize="16"
 						       Foreground="White"
 						       Margin="-5,12.5,0,0"
-						       Content="{x:Static localization:Texts.PlottingModeTitle}" />
+						       Content="{x:Static localization:Texts.PlottingModeTitle}"
+						       IsEnabled="{Binding IsEditable}" />
 						<CheckBox Margin="12.5,5,0,0"
 						          IsChecked="{Binding Space.IsPlottingModeRasterizedEnabled}"
-						          Content="{x:Static localization:Texts.PlottingModeRasterizedText}" />
+						          Content="{x:Static localization:Texts.PlottingModeRasterizedText}"
+						          IsEnabled="{Binding IsEditable}" />
 						<CheckBox Margin="12.5,12.5,0,0"
 						          IsChecked="{Binding Space.IsPlottingModePathEnabled}"
-						          Content="{x:Static localization:Texts.PlottingModePathText}" />
+						          Content="{x:Static localization:Texts.PlottingModePathText}"
+						          IsEnabled="{Binding IsEditable}" />
 					</StackPanel>
 					
 
@@ -336,7 +457,7 @@
 								</Style.Triggers>
 							</Style>
 						</StackPanel.Style>
-						<TextBox Width="70" Height="30">
+						<TextBox Width="70" Height="30" IsEnabled="{Binding IsEditable}">
 							<TextBox.Text>
 								<Binding Path="Space.ImageWidthDot"
 								         UpdateSourceTrigger="PropertyChanged"
@@ -349,7 +470,8 @@
 						</TextBox>
 						<Label Foreground="White"
 						       FontSize="16"
-						       Content="{x:Static localization:Texts.WidthPxText}" />
+						       Content="{x:Static localization:Texts.WidthPxText}"
+						       IsEnabled="{Binding IsEditable}" />
 					</StackPanel>
 
 					<StackPanel Orientation="Horizontal"
@@ -370,7 +492,7 @@
 								</Style.Triggers>
 							</Style>
 						</StackPanel.Style>
-						<TextBox Width="70" Height="30">
+						<TextBox Width="70" Height="30" IsEnabled="{Binding IsEditable}">
 							<TextBox.Text>
 								<Binding Path="Space.ImageWidthCm"
 								         UpdateSourceTrigger="PropertyChanged"
@@ -383,7 +505,8 @@
 						</TextBox>
 						<Label Foreground="White"
 						       FontSize="16"
-						       Content="{x:Static localization:Texts.WidthCmText}" />
+						       Content="{x:Static localization:Texts.WidthCmText}"
+						       IsEnabled="{Binding IsEditable}" />
 					</StackPanel>
 
 					<StackPanel Orientation="Horizontal"
@@ -404,7 +527,7 @@
 								</Style.Triggers>
 							</Style>
 						</StackPanel.Style>
-						<TextBox Width="70" Height="30">
+						<TextBox Width="70" Height="30" IsEnabled="{Binding IsEditable}">
 							<TextBox.Text>
 								<Binding Path="Space.ImageHeightDot"
 								         UpdateSourceTrigger="PropertyChanged"
@@ -417,7 +540,8 @@
 						</TextBox>
 						<Label Foreground="White"
 						       FontSize="16"
-						       Content="{x:Static localization:Texts.HeightPxText}" />
+						       Content="{x:Static localization:Texts.HeightPxText}"
+						       IsEnabled="{Binding IsEditable}" />
 					</StackPanel>
 
 					<StackPanel Orientation="Horizontal"
@@ -438,7 +562,7 @@
 								</Style.Triggers>
 							</Style>
 						</StackPanel.Style>
-						<TextBox Width="70" Height="30">
+						<TextBox Width="70" Height="30" IsEnabled="{Binding IsEditable}">
 							<TextBox.Text>
 								<Binding Path="Space.ImageHeightCm"
 								         UpdateSourceTrigger="PropertyChanged"
@@ -451,12 +575,14 @@
 						</TextBox>
 						<Label Foreground="White"
 						       FontSize="16"
-						       Content="{x:Static localization:Texts.HeightCmText}" />
+						       Content="{x:Static localization:Texts.HeightCmText}"
+						       IsEnabled="{Binding IsEditable}" />
 					</StackPanel>
 
 					<CheckBox Margin="0,12.5,0,0"
 					          IsChecked="{Binding Space.PreserveAspectRatio}"
-					          Content="{x:Static localization:Texts.PreserveAspectRatioText}" />
+					          Content="{x:Static localization:Texts.PreserveAspectRatioText}"
+					          IsEnabled="{Binding IsEditable}" />
 
 				</StackPanel>
 			</ScrollViewer>

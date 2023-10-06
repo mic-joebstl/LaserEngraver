@@ -68,7 +68,6 @@ namespace LaserPathEngraver.UI.Win
 			_canvas.Height = 0;
 			_canvas.HorizontalAlignment = HorizontalAlignment.Left;
 			_canvas.VerticalAlignment = VerticalAlignment.Top;
-			_canvas.Cursor = System.Windows.Input.Cursors.Hand;
 			_canvas.Background = System.Windows.Media.Brushes.Transparent;
 
 			_renderRate = 0;
@@ -484,14 +483,14 @@ namespace LaserPathEngraver.UI.Win
 
 		#region Methods
 
-		private Point ScreenPositionToSpacePosition(Point position)
+		public Point ScreenPositionToSpacePosition(Point position)
 		{
 			double x = (position.X - _canvas.ActualWidth / 2) / _scale - _offsetX;
 			double y = (position.Y - _canvas.ActualHeight / 2) / _scale - _offsetY;
 			return new Point(x, y);
 		}
 
-		private Point SpacePositionToScreenPosition(Point position)
+		public Point SpacePositionToScreenPosition(Point position)
 		{
 			double x = (position.X + _offsetX) * _scale + _canvas.ActualWidth / 2;
 			double y = (position.Y + _offsetY) * _scale + _canvas.ActualHeight / 2;
