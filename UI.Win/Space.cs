@@ -128,6 +128,8 @@ namespace LaserPathEngraver.UI.Win
 				}
 			};
 			AddVisualToCanvas(_burnTarget);
+
+			CenterRenderArea();
 		}
 
 		#endregion
@@ -541,7 +543,7 @@ namespace LaserPathEngraver.UI.Win
 					shape.Height = visual.Size.Height;
 
 					var position = SpacePositionToScreenPosition(visual.Position);
-					Canvas.SetTop(shape, position.Y -(shape.Height / 2));
+					Canvas.SetTop(shape, position.Y - (shape.Height / 2));
 					Canvas.SetLeft(shape, position.X - (shape.Width / 2));
 				}
 				else
@@ -601,40 +603,7 @@ namespace LaserPathEngraver.UI.Win
 
 			if (AutoCenterView)
 			{
-				double offsetX = 0;
-				double offsetY = 0;
-
-				var visuals = GetAutoCenterVisuals().ToArray();
-				if (visuals.Length > 0)
-				{
-					foreach (var visual in visuals)
-					{
-						offsetX -= visual.Position.X + visual.Size.Width / 2;
-						offsetY -= visual.Position.Y + visual.Size.Height / 2;
-					}
-					offsetX /= visuals.Length;
-					offsetY /= visuals.Length;
-
-					var deltaX = offsetX - _offsetX;
-					var deltaY = offsetY - _offsetY;
-
-					if (deltaX != 0 || deltaY != 0)
-					{
-						var moveFactor = 1 / _renderRate * 3;
-						moveFactor = moveFactor > 1 ? 1 : moveFactor;
-
-						var moveX = deltaX * moveFactor;
-						var moveY = deltaY * moveFactor;
-
-						var minValue = 0.1 / _scale;
-
-						moveX = moveX > minValue || moveX < -minValue ? moveX : deltaX;
-						moveY = moveY > minValue || moveY < -minValue ? moveY : deltaY;
-
-						_offsetX += moveX;
-						_offsetY += moveY;
-					}
-				}
+				CenterRenderArea(1 / _renderRate * 3);
 			}
 
 			UpdateVisuals(updatePositions: true, updateBitmap: false);
@@ -660,6 +629,43 @@ namespace LaserPathEngraver.UI.Win
 				RaisePropertyChanged(nameof(ImageWidthCm));
 				RaisePropertyChanged(nameof(ImageBoundingRect));
 				_burnBitmapRectangle.Size = _burnArea.Size;
+			}
+		}
+
+		private void CenterRenderArea(double moveFactor = 1)
+		{
+			double offsetX = 0;
+			double offsetY = 0;
+
+			var visuals = GetAutoCenterVisuals().ToArray();
+			if (visuals.Length > 0)
+			{
+				foreach (var visual in visuals)
+				{
+					offsetX -= visual.Position.X + visual.Size.Width / 2;
+					offsetY -= visual.Position.Y + visual.Size.Height / 2;
+				}
+				offsetX /= visuals.Length;
+				offsetY /= visuals.Length;
+
+				var deltaX = offsetX - _offsetX;
+				var deltaY = offsetY - _offsetY;
+
+				if (deltaX != 0 || deltaY != 0)
+				{
+					moveFactor = moveFactor > 1 ? 1 : moveFactor < 0 ? 0 : moveFactor;
+
+					var moveX = deltaX * moveFactor;
+					var moveY = deltaY * moveFactor;
+
+					var minValue = 0.1 / _scale;
+
+					moveX = moveX > minValue || moveX < -minValue ? moveX : deltaX;
+					moveY = moveY > minValue || moveY < -minValue ? moveY : deltaY;
+
+					_offsetX += moveX;
+					_offsetY += moveY;
+				}
 			}
 		}
 

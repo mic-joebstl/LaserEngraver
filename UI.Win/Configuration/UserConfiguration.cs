@@ -1,5 +1,6 @@
 ﻿using LaserPathEngraver.Core.Configurations;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
@@ -28,6 +29,9 @@ namespace LaserPathEngraver.UI.Win.Configuration
 		private SolidColorBrush _canvasBackground;
 		private SolidColorBrush _sectionBackground;
 		private SolidColorBrush _burnTargetBackground;
+		private Color _burnStartColor;
+		private Color _burnEndColor;
+		private ConcurrentDictionary<byte, Color> _burnGradientMap;
 
 		public Theme()
 		{
@@ -35,6 +39,9 @@ namespace LaserPathEngraver.UI.Win.Configuration
 			_canvasBackground = SystemColors.ControlLightLightBrush;
 			_sectionBackground = SystemColors.ControlLightBrush;
 			_burnTargetBackground = SystemColors.ControlLightLightBrush;
+			_burnStartColor = Color.FromRgb(0xff, 0xff, 0xff);
+			_burnEndColor = Color.FromRgb(0x00, 0x00, 0x00);
+			_burnGradientMap = new ConcurrentDictionary<byte, Color>(4, 0xff);
 		}
 
 		public SolidColorBrush Foreground
@@ -89,6 +96,34 @@ namespace LaserPathEngraver.UI.Win.Configuration
 			}
 		}
 
+		public Color BurnStartColor
+		{
+			get => _burnStartColor;
+			set
+			{
+				if (_burnStartColor != value)
+				{
+					_burnStartColor = value;
+					_burnGradientMap.Clear();
+					OnPropertyChanged(nameof(_burnStartColor));
+				}
+			}
+		}
+
+		public Color BurnEndColor
+		{
+			get => _burnEndColor;
+			set
+			{
+				if (_burnEndColor != value)
+				{
+					_burnEndColor = value;
+					_burnGradientMap.Clear();
+					OnPropertyChanged(nameof(_burnEndColor));
+				}
+			}
+		}
+
 		public event PropertyChangedEventHandler? PropertyChanged;
 
 		protected virtual void OnPropertyChanged(string propertyName)
@@ -104,6 +139,8 @@ namespace LaserPathEngraver.UI.Win.Configuration
 			CanvasBackground = new SolidColorBrush(Color.FromRgb(0xdd, 0xdd, 0xdd)),
 			SectionBackground = new SolidColorBrush(Color.FromRgb(0xbb, 0xbb, 0xbb)),
 			BurnTargetBackground = new SolidColorBrush(Color.FromRgb(0xff, 0xff, 0xff)),
+			BurnStartColor = Color.FromArgb(0x00, 0x00, 0x00, 0x00),
+			BurnEndColor = Color.FromArgb(0xff, 0x00, 0x00, 0x00),
 		};
 
 		public static Theme Dark => new()
@@ -112,6 +149,8 @@ namespace LaserPathEngraver.UI.Win.Configuration
 			CanvasBackground = new SolidColorBrush(Color.FromRgb(0x11, 0x11, 0x11)),
 			SectionBackground = new SolidColorBrush(Color.FromRgb(0x00, 0x00, 0x00)),
 			BurnTargetBackground = new SolidColorBrush(Color.FromRgb(0x00, 0x00, 0x00)),
+			BurnStartColor = Color.FromArgb(0x00, 0xff, 0xff, 0xff),
+			BurnEndColor = Color.FromArgb(0xff, 0xff, 0xff, 0xff),
 		};
 
 		public override bool Equals(object? obj) => obj is Theme theme
@@ -123,5 +162,31 @@ namespace LaserPathEngraver.UI.Win.Configuration
 			Foreground.Color.GetHashCode()
 			^ CanvasBackground.Color.GetHashCode()
 			^ SectionBackground.Color.GetHashCode();
+
+		public Color GetBurnGradientColor(byte value)
+			=> _burnGradientMap.GetOrAdd(value, CalculateBurnGradientColor);
+
+		private Color CalculateBurnGradientColor(byte value)
+		{
+			var aMin = BurnStartColor.A;
+			var aMax = BurnEndColor.A;
+
+			var rMin = BurnStartColor.R;
+			var rMax = BurnEndColor.R;
+
+			var gMin = BurnStartColor.G;
+			var gMax = BurnEndColor.G;
+
+			var bMin = BurnStartColor.B;
+			var bMax = BurnEndColor.B;
+
+			return Color.FromArgb
+			(
+				a: (byte)(aMin + ((aMax - aMin) * value / 255d)),
+				r: (byte)(rMin + ((rMax - rMin) * value / 255d)),
+				g: (byte)(gMin + ((gMax - gMin) * value / 255d)),
+				b: (byte)(bMin + ((bMax - bMin) * value / 255d))
+			);
+		}
 	}
 }

@@ -24,6 +24,7 @@ namespace LaserPathEngraver.UI.Win.Visuals
 	public class BurnArea : IVisual, INotifyPropertyChanged
 	{
 		private SemaphoreSlim _renderSync;
+		private Theme? _theme;
 		private Rectangle _rectangle;
 		private System.Drawing.Bitmap? _originalBitmap;
 		private System.Drawing.Bitmap? _scaledBitmap;
@@ -36,7 +37,7 @@ namespace LaserPathEngraver.UI.Win.Visuals
 		private bool _requiresRenderUpdate;
 		private bool _requiresTargetUpdate;
 		private DateTime _targetUpdateRequestUtcDate = DateTime.MinValue;
-		private TimeSpan _targetUpdateDebounceTime = TimeSpan.FromMilliseconds(640);
+		private TimeSpan _targetUpdateDebounceTime = TimeSpan.FromMilliseconds(320);
 		private bool _resizing = false;
 		private byte _engraverPower = 0xff;
 		private byte _fixedPowerThreshold = 0xff;
@@ -176,6 +177,8 @@ namespace LaserPathEngraver.UI.Win.Visuals
 						width = _scaledBitmap.Width;
 						height = _scaledBitmap.Height;
 
+						var theme = _theme;
+						var defaultColor = theme is null ? Color.FromArgb(0, 0, 0, 0) : (Color?)null;
 						var format = System.Drawing.Imaging.PixelFormat.Format32bppArgb;
 						int bitsPerPixel = ((int)format & 0xff00) >> 8;
 						int bytesPerPixel = (bitsPerPixel + 7) / 8;
@@ -186,11 +189,13 @@ namespace LaserPathEngraver.UI.Win.Visuals
 						{
 							var target = _targets[i];
 							var byteIndex = target.Y * width * bytesPerPixel + target.X * bytesPerPixel;
+							var fillValue = (byte)(0xff * target.FillRatio);
+							var color = defaultColor ?? theme.GetBurnGradientColor(fillValue);
 
-							imageBuffer[byteIndex] = 0xff;
-							imageBuffer[byteIndex + 1] = 0xff;
-							imageBuffer[byteIndex + 2] = 0xff;
-							imageBuffer[byteIndex + 3] = (byte)(0xff * target.FillRatio);
+							imageBuffer[byteIndex] = color.R;
+							imageBuffer[byteIndex + 1] = color.B;
+							imageBuffer[byteIndex + 2] = color.G;
+							imageBuffer[byteIndex + 3] = color.A;
 						});
 
 						GCHandle pinnedArray = GCHandle.Alloc(imageBuffer, GCHandleType.Pinned);
@@ -375,7 +380,13 @@ namespace LaserPathEngraver.UI.Win.Visuals
 		#region IVisual Methods
 
 		public void ApplyTheme(Theme theme)
-		{ }
+		{
+			if (_theme != theme)
+			{
+				_theme = theme;
+				_requiresRenderUpdate = true;
+			}
+		}
 
 		#endregion
 
