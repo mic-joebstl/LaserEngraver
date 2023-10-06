@@ -70,6 +70,7 @@
 					<Label FontSize="20"
 					       Foreground="White"
 					       Margin="0,0,0,0"
+					       Padding="0,5,5,5"
 					       Content="{x:Static localization:Texts.EngravingTitle}" />
 
 					<StackPanel Orientation="Horizontal"
@@ -370,7 +371,7 @@
 					<StackPanel Orientation="Vertical">
 						<Label FontSize="16"
 						       Foreground="White"
-						       Margin="-5,12.5,0,0"
+						       Margin="0,12.5,0,0"
 						       Content="{x:Static localization:Texts.PlottingModeTitle}"
 						       IsEnabled="{Binding IsEditable}" />
 						<CheckBox Margin="12.5,5,0,0"
@@ -387,6 +388,7 @@
 					<Label FontSize="20"
 					       Foreground="White"
 					       Margin="0,30,0,0"
+					       Padding="0,5,5,5"
 					       Content="{x:Static localization:Texts.ViewTitle}" />
 					
 					<StackPanel Orientation="Horizontal"
@@ -424,7 +426,7 @@
 					<StackPanel Orientation="Horizontal">
 						<Label FontSize="16"
 						       Foreground="White"
-						       Margin="-5,12.5,25,0"
+						       Margin="0,12.5,25,0"
 						       Content="{x:Static localization:Texts.UnitText}" />
 						<CheckBox Margin="0,12.5,25,0"
 						          IsChecked="{Binding ShowUnitCm}"
@@ -437,6 +439,7 @@
 					<Label FontSize="20"
 					       Foreground="White"
 					       Margin="0,30,0,0"
+					       Padding="0,5,5,5"
 					       Content="{x:Static localization:Texts.ImageTitle}" />
 
 					<StackPanel Orientation="Horizontal"
@@ -617,9 +620,10 @@
 					<Label FontSize="20"
 					       Foreground="White"
 					       Margin="0,0,0,0"
+					       Padding="0,5,5,5"
 					       Content="{x:Static localization:Texts.StatusTitle}" />
 
-					<StackPanel Orientation="Vertical" Margin="5">
+					<StackPanel Orientation="Vertical" Margin="0,5,5,5">
 						<Label Content="{x:Static localization:Texts.UpdateRateTitle}"
 						       Foreground="White"
 						       FontSize="14"
@@ -633,7 +637,7 @@
 						       Margin="-5,0,5,0" />
 					</StackPanel>
 
-					<StackPanel Orientation="Vertical" Margin="5">
+					<StackPanel Orientation="Vertical" Margin="0,5,5,5">
 						<Label Content="{x:Static localization:Texts.DeviceStatusTitle}"
 						       Foreground="White"
 						       FontSize="14"
@@ -645,7 +649,7 @@
 						       Padding="0" />
 					</StackPanel>
 
-					<StackPanel Orientation="Vertical" Margin="5">
+					<StackPanel Orientation="Vertical" Margin="0,5,5,5">
 						<Label Content="{x:Static localization:Texts.JobStatusTitle}"
 						       Foreground="White"
 						       FontSize="14"
@@ -657,7 +661,7 @@
 						       Padding="0" />
 					</StackPanel>
 
-					<StackPanel Orientation="Vertical" Margin="5">
+					<StackPanel Orientation="Vertical" Margin="0,5,5,5">
 						<Label Content="{x:Static localization:Texts.JobElapsedDurationTitle}"
 						       Foreground="White"
 						       FontSize="14"
@@ -675,6 +679,7 @@
 					<Label FontSize="20"
 					       Foreground="White"
 					       Margin="0,30,0,0"
+					       Padding="0,5,5,5"
 					       Content="{x:Static localization:Texts.ActionsTitle}" />
 
 					<Button Margin="0,12.5,0,0"
