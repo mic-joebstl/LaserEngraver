@@ -43,7 +43,6 @@ namespace LaserPathEngraver.UI.Win
 			}
 		}
 
-
 		private void ContentControl_KeyDown(object sender, KeyEventArgs e)
 		{
 			_viewModel.OnSpaceKeyDown(sender, e);
@@ -52,6 +51,16 @@ namespace LaserPathEngraver.UI.Win
 		private void ContentControl_KeyUp(object sender, KeyEventArgs e)
 		{
 			_viewModel.OnSpaceKeyUp(sender, e);
+		}
+
+		private void ContentControl_DragOver(object sender, DragEventArgs e)
+		{
+			_viewModel.OnSpaceDragOver(sender, e);
+		}
+
+		private void ContentControl_Drop(object sender, DragEventArgs e)
+		{
+			_viewModel.OnSpaceDrop(sender, e);
 		}
 
 		public event PropertyChangedEventHandler? PropertyChanged;

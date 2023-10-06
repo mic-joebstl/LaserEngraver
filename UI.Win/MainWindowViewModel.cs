@@ -11,6 +11,7 @@ using System.Collections;
 using System.Windows.Threading;
 using LaserPathEngraver.Core.Configurations;
 using Microsoft.Extensions.Options;
+using System.Linq;
 
 namespace LaserPathEngraver.UI.Win
 {
@@ -163,10 +164,15 @@ namespace LaserPathEngraver.UI.Win
 				{
 					_space.Scale += _space.Scale / 10;
 				}
-				if (System.Windows.Input.Keyboard.IsKeyDown(System.Windows.Input.Key.OemMinus) ||
+				else if (System.Windows.Input.Keyboard.IsKeyDown(System.Windows.Input.Key.OemMinus) ||
 					System.Windows.Input.Keyboard.IsKeyDown(System.Windows.Input.Key.Subtract))
 				{
 					_space.Scale -= _space.Scale / 10;
+				}
+				else if (System.Windows.Input.Keyboard.IsKeyDown(System.Windows.Input.Key.D0) ||
+					System.Windows.Input.Keyboard.IsKeyDown(System.Windows.Input.Key.NumPad0))
+				{
+					_space.Scale = 1;
 				}
 			}
 			else
@@ -179,6 +185,53 @@ namespace LaserPathEngraver.UI.Win
 			if (System.Windows.Input.Keyboard.IsKeyUp(System.Windows.Input.Key.LeftCtrl))
 			{
 				_space.Canvas.Cursor = System.Windows.Input.Cursors.Hand;
+			}
+		}
+
+		public void OnSpaceDragOver(object sender, DragEventArgs e)
+		{
+			var dropEnabled = false;
+			if (e.Data.GetDataPresent(DataFormats.FileDrop, true))
+			{
+				string[]? filenames = e.Data.GetData(DataFormats.FileDrop, true) as string[];
+				if (filenames != null)
+				{
+					foreach (var filePath in filenames)
+					{
+						var extension = System.IO.Path.GetExtension(filePath);
+						if (extension != null && (new[] { ".bmp", ".gif", ".exif", ".jpg", ".jpeg", ".png", ".tif", ".tiff" }).Any(x => extension.Equals(x, StringComparison.OrdinalIgnoreCase)))
+						{
+							dropEnabled = true;
+							break;
+						}
+					}
+				}
+			}
+
+			if (!dropEnabled)
+			{
+				e.Effects = DragDropEffects.None;
+				e.Handled = true;
+			}
+		}
+
+		public void OnSpaceDrop(object sender, DragEventArgs e)
+		{
+			if (e.Data.GetDataPresent(DataFormats.FileDrop, true))
+			{
+				string[]? filenames = e.Data.GetData(DataFormats.FileDrop, true) as string[];
+				if (filenames != null)
+				{
+					foreach (var filePath in filenames)
+					{
+						var extension = System.IO.Path.GetExtension(filePath);
+						if (extension != null && (new[] { ".bmp", ".gif", ".exif", ".jpg", ".jpeg", ".png", ".tif", ".tiff" }).Any(x => extension.Equals(x, StringComparison.OrdinalIgnoreCase)))
+						{
+							_space.LoadBitmap(filePath);
+							break;
+						}
+					}
+				}
 			}
 		}
 

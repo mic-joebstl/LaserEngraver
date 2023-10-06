@@ -30,6 +30,9 @@
 		                HorizontalContentAlignment="Stretch"
 		                VerticalContentAlignment="Stretch"
 		                ClipToBounds="True"
+		                AllowDrop="True"
+		                DragOver="ContentControl_DragOver"
+		                Drop="ContentControl_Drop"
 		                local:SizeObserver.Observe="True"
 		                local:SizeObserver.ObservedWidth="{Binding Space.ObservableWidth, Mode=OneWayToSource}"
 		                local:SizeObserver.ObservedHeight="{Binding Space.ObservableHeight, Mode=OneWayToSource}">
@@ -222,7 +225,7 @@
 								         UpdateSourceTrigger="PropertyChanged"
 								         StringFormat="N2">
 									<Binding.ValidationRules>
-										<local.rules:DecimalValidationRule Minimum="1" />
+										<local.rules:DecimalValidationRule Minimum="1" Maximum="1440" />
 									</Binding.ValidationRules>
 								</Binding>
 							</TextBox.Text>
@@ -240,7 +243,7 @@
 								         UpdateSourceTrigger="PropertyChanged"
 								         StringFormat="N2">
 									<Binding.ValidationRules>
-										<local.rules:DecimalValidationRule Minimum="1" />
+										<local.rules:DecimalValidationRule Minimum="1" Maximum="1440" />
 									</Binding.ValidationRules>
 								</Binding>
 							</TextBox.Text>
