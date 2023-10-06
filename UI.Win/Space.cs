@@ -106,6 +106,9 @@ namespace LaserPathEngraver.UI.Win
 			_burnArea.Size = new Size(0, 0);
 			_burnArea.Position = new Point((double)_canvasWidthDot / 2, (double)_canvasHeightDot / 2);
 			_burnArea.BoundingRect = new System.Drawing.RectangleF(0, 0, (float)CanvasWidthDot, (float)CanvasHeightDot);
+			_burnArea.EngravingPower = EngravingPower;
+			_burnArea.FixedPowerThreshold = FixedPowerThreshold;
+			_burnArea.IsPowerVariable = IsPowerVarible;
 			AddVisualToCanvas(_burnArea);
 		}
 
@@ -373,6 +376,7 @@ namespace LaserPathEngraver.UI.Win
 			set
 			{
 				_burnConfiguration.Update(config => config.IntensityMode = value ? BurnIntensityMode.Variable : BurnIntensityMode.Fixed);
+				_burnArea.IsPowerVariable = IsPowerVarible;
 				RaisePropertyChanged(nameof(IsPowerVarible));
 			}
 		}
@@ -386,6 +390,7 @@ namespace LaserPathEngraver.UI.Win
 			set
 			{
 				_burnConfiguration.Update(config => config.Intensity = value);
+				_burnArea.EngravingPower = EngravingPower;
 				RaisePropertyChanged(nameof(EngravingPower));
 			}
 		}
@@ -412,6 +417,7 @@ namespace LaserPathEngraver.UI.Win
 			set
 			{
 				_burnConfiguration.Update(config => config.FixedIntensityThreshold = value);
+				_burnArea.FixedPowerThreshold = FixedPowerThreshold;
 				RaisePropertyChanged(nameof(FixedPowerThreshold));
 			}
 		}

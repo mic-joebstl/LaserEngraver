@@ -29,7 +29,7 @@ namespace LaserPathEngraver.Core.Configurations
 	{
 		public byte Intensity { get; set; } = 0xff;
 		public byte Duration { get; set; } = 0xff;
-		public byte FixedIntensityThreshold { get; set; } = 0xff;
+		public byte FixedIntensityThreshold { get; set; } = 0x7f;
 		public BurnPlottingMode PlottingMode { get; set; } = BurnPlottingMode.NearestNeighbor;
 		public BurnIntensityMode IntensityMode { get; set; } = BurnIntensityMode.Variable;
 

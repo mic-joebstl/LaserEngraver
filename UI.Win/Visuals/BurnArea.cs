@@ -1,4 +1,5 @@
-﻿using System;
+﻿using LaserPathEngraver.Core.Configurations;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -32,7 +33,13 @@ namespace LaserPathEngraver.UI.Win.Visuals
 		private Size _size;
 		private System.Drawing.RectangleF? _boundingRect;
 		private bool _requiresRenderUpdate;
+		private bool _requiresTargetUpdate;
+		private DateTime _targetUpdateRequestUtcDate = DateTime.MinValue;
+		private TimeSpan _targetUpdateDebounceTime = TimeSpan.FromMilliseconds(160);
 		private bool _resizing = false;
+		private byte _engraverPower = 0xff;
+		private byte _fixedPowerThreshold = 0xff;
+		private bool _isPowerVariable = false;
 
 		public BurnArea()
 		{
@@ -76,6 +83,48 @@ namespace LaserPathEngraver.UI.Win.Visuals
 			}
 		}
 
+		public bool IsPowerVariable
+		{
+			get => _isPowerVariable;
+			set
+			{
+				if (_isPowerVariable != value)
+				{
+					_isPowerVariable = value;
+					RequestTargetUpdate();
+					RaisePropertyChanged(nameof(IsPowerVariable));
+				}
+			}
+		}
+
+		public byte EngravingPower
+		{
+			get => _engraverPower;
+			set 
+			{
+				if(_engraverPower != value)
+				{
+					_engraverPower = value;
+					RequestTargetUpdate();
+					RaisePropertyChanged(nameof(EngravingPower));
+				}
+			}
+		}
+
+		public byte FixedPowerThreshold
+		{
+			get => _fixedPowerThreshold;
+			set
+			{
+				if (_fixedPowerThreshold != value)
+				{
+					_fixedPowerThreshold = value;
+					RequestTargetUpdate();
+					RaisePropertyChanged(nameof(FixedPowerThreshold));
+				}
+			}
+		}
+
 		public System.Drawing.RectangleF? BoundingRect
 		{
 			get => _boundingRect;
@@ -94,21 +143,21 @@ namespace LaserPathEngraver.UI.Win.Visuals
 
 		public void RenderImage()
 		{
-			if (!_requiresRenderUpdate)
+			if (!_requiresRenderUpdate && !RequiresTargetUpdate())
 				return;
 
 			_renderSync.Wait();
 			try
 			{
-				if (!_requiresRenderUpdate)
+				if (!_requiresRenderUpdate && !RequiresTargetUpdate())
 					return;
 
-				if (_scaledBitmap is null || _originalBitmap is null)
+				if (_originalBitmap is null)
 				{
 					_targets.Clear();
 				}
 
-				if (_scaledBitmap != null)
+				if (_originalBitmap != null)
 				{
 					_image = new BitmapImage();
 					_imageStream?.Dispose();
@@ -117,46 +166,49 @@ namespace LaserPathEngraver.UI.Win.Visuals
 
 					var width = (int)(Size.Width < 1 ? 1 : Size.Width);
 					var height = (int)(Size.Height < 1 ? 1 : Size.Height);
-					if (_scaledBitmap != null && (width != _scaledBitmap.Width || height != _scaledBitmap.Height))
+					if (_originalBitmap != null && RequiresTargetUpdate() || _scaledBitmap != null && (width != _scaledBitmap.Width || height != _scaledBitmap.Height))
 					{
 						ScaleBitmap();
 					}
-					width = _scaledBitmap.Width;
-					height = _scaledBitmap.Height;
-
-					var format = System.Drawing.Imaging.PixelFormat.Format32bppArgb;
-					int bitsPerPixel = ((int)format & 0xff00) >> 8;
-					int bytesPerPixel = (bitsPerPixel + 7) / 8;
-					int stride = 4 * ((width * bytesPerPixel + 3) / 4);
-					var imageBuffer = new byte[width * height * bytesPerPixel];
-
-					Parallel.For(0, _targets.Count, i =>
+					if (_scaledBitmap != null)
 					{
-						var target = _targets[i];
-						var byteIndex = target.Y * width * bytesPerPixel + target.X * bytesPerPixel;
+						width = _scaledBitmap.Width;
+						height = _scaledBitmap.Height;
 
-						imageBuffer[byteIndex] = 0xff;
-						imageBuffer[byteIndex + 1] = 0xff;
-						imageBuffer[byteIndex + 2] = 0xff;
-						imageBuffer[byteIndex + 3] = (byte)(0xff * target.FillRatio);
-					});
+						var format = System.Drawing.Imaging.PixelFormat.Format32bppArgb;
+						int bitsPerPixel = ((int)format & 0xff00) >> 8;
+						int bytesPerPixel = (bitsPerPixel + 7) / 8;
+						int stride = 4 * ((width * bytesPerPixel + 3) / 4);
+						var imageBuffer = new byte[width * height * bytesPerPixel];
 
-					GCHandle pinnedArray = GCHandle.Alloc(imageBuffer, GCHandleType.Pinned);
-					try
-					{
-						IntPtr pointer = pinnedArray.AddrOfPinnedObject();
-						var bitmap = new System.Drawing.Bitmap(width, height, stride, format, pointer);
-						bitmap.Save(ms, ImageFormat.Png);
-						ms.Position = 0;
-						_image.StreamSource = ms;
-						_image.EndInit();
+						Parallel.For(0, _targets.Count, i =>
+						{
+							var target = _targets[i];
+							var byteIndex = target.Y * width * bytesPerPixel + target.X * bytesPerPixel;
 
+							imageBuffer[byteIndex] = 0xff;
+							imageBuffer[byteIndex + 1] = 0xff;
+							imageBuffer[byteIndex + 2] = 0xff;
+							imageBuffer[byteIndex + 3] = (byte)(0xff * target.FillRatio);
+						});
+
+						GCHandle pinnedArray = GCHandle.Alloc(imageBuffer, GCHandleType.Pinned);
+						try
+						{
+							IntPtr pointer = pinnedArray.AddrOfPinnedObject();
+							var bitmap = new System.Drawing.Bitmap(width, height, stride, format, pointer);
+							bitmap.Save(ms, ImageFormat.Png);
+							ms.Position = 0;
+							_image.StreamSource = ms;
+							_image.EndInit();
+
+						}
+						finally
+						{
+							pinnedArray.Free();
+						}
+						_rectangle.Fill = new ImageBrush(_image);
 					}
-					finally
-					{
-						pinnedArray.Free();
-					}
-					_rectangle.Fill = new ImageBrush(_image);
 				}
 
 				_requiresRenderUpdate = false;
@@ -215,6 +267,12 @@ namespace LaserPathEngraver.UI.Win.Visuals
 			_scaledBitmap = scaledBitmap;
 
 			_targets.Clear();
+
+			var isPowerVariable = IsPowerVariable;
+			var maxPower = EngravingPower;
+			var minPower = isPowerVariable ? 0 : FixedPowerThreshold;
+			var intensityFactor = (double)maxPower / 0xff;
+
 			for (int x = 0; x < _scaledBitmap.Width; x++)
 			{
 				for (int y = 0; y < _scaledBitmap.Height; y++)
@@ -222,6 +280,20 @@ namespace LaserPathEngraver.UI.Win.Visuals
 					var pixel = scaledBitmap.GetPixel(x, y);
 					var value = (0xff - pixel.R + 0xff - pixel.G + 0xff - pixel.B) / 3d;
 					value *= pixel.A / 0xff;
+					if (value < minPower)
+					{
+						value = 0;
+					}
+					else if(isPowerVariable)
+					{
+						value *= intensityFactor;
+					}
+					else
+					{
+						value = maxPower;
+					}
+
+
 					var target = new BurnTarget
 					{
 						FillRatio = value / 0xff,
@@ -231,6 +303,7 @@ namespace LaserPathEngraver.UI.Win.Visuals
 					_targets.Add(target);
 				}
 			}
+			_requiresTargetUpdate = false;
 		}
 
 		private void ResizeToBoundingRect()
@@ -276,6 +349,17 @@ namespace LaserPathEngraver.UI.Win.Visuals
 				Position = position;
 				Size = size;
 			}
+		}
+
+		private void RequestTargetUpdate()
+		{
+			_requiresTargetUpdate = true;
+			_targetUpdateRequestUtcDate = DateTime.UtcNow;
+		}
+
+		private bool RequiresTargetUpdate() 
+		{
+			return _requiresTargetUpdate && DateTime.UtcNow - _targetUpdateRequestUtcDate > _targetUpdateDebounceTime;
 		}
 
 		#region INotifyPropertyChanged
