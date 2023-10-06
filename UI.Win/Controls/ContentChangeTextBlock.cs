@@ -8,23 +8,22 @@ using System.Windows;
 
 namespace LaserPathEngraver.UI.Win.Controls
 {
-	public class ContentChangeLabel : Label
+	public class ContentChangeTextBlock : TextBlock
 	{
-		// Register a custom routed event using the Bubble routing strategy.
 		public static readonly RoutedEvent ContentChangedEvent = EventManager.RegisterRoutedEvent(
 			name: "ContentChanged",
 			routingStrategy: RoutingStrategy.Bubble,
 			handlerType: typeof(RoutedEventHandler),
-			ownerType: typeof(ContentChangeLabel));
+			ownerType: typeof(ContentChangeTextBlock));
 
-		public ContentChangeLabel()
+		public ContentChangeTextBlock()
 		{
-			var dpd = System.ComponentModel.DependencyPropertyDescriptor.FromProperty(Label.ContentProperty, typeof(Label));
+			var dpd = System.ComponentModel.DependencyPropertyDescriptor.FromProperty(TextBlock.TextProperty, typeof(TextBlock));
 			if (dpd != null)
 			{
 				dpd.AddValueChanged(this, (object? sender, EventArgs e) =>
 				{
-					if (Content != null)
+					if (Text != null)
 					{
 						RaiseEvent(new RoutedEventArgs(ContentChangedEvent));
 					}

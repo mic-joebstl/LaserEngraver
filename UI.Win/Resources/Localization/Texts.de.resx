@@ -126,6 +126,27 @@
   <data name="ConnectButtonText" xml:space="preserve">
     <value>Verbinden</value>
   </data>
+  <data name="DeviceStatusConnectingText" xml:space="preserve">
+    <value>Verbindung wird hergestellt</value>
+  </data>
+  <data name="DeviceStatusDisconnectedText" xml:space="preserve">
+    <value>Verbindung getrennt</value>
+  </data>
+  <data name="DeviceStatusDisconnectingText" xml:space="preserve">
+    <value>Verbindung wird getrennt</value>
+  </data>
+  <data name="DeviceStatusExecutingText" xml:space="preserve">
+    <value>In Ausführung</value>
+  </data>
+  <data name="DeviceStatusReadyText" xml:space="preserve">
+    <value>Bereit</value>
+  </data>
+  <data name="DeviceStatusTitle" xml:space="preserve">
+    <value>Gerätestatus</value>
+  </data>
+  <data name="DisconnectButtonText" xml:space="preserve">
+    <value>Verbindung trennen</value>
+  </data>
   <data name="EnableVisualEffectsText" xml:space="preserve">
     <value>Halo anzeigen</value>
   </data>
@@ -185,6 +206,24 @@ Genaue Dauer ist vom Gerät abhängig, daher hier in Prozent anzugeben.
   <data name="IsPowerVariableText" xml:space="preserve">
     <value>Variable Brennstärke</value>
   </data>
+  <data name="JobStatusDoneText" xml:space="preserve">
+    <value>Erledigt</value>
+  </data>
+  <data name="JobStatusNoneText" xml:space="preserve">
+    <value>Kein Auftrag aktiv</value>
+  </data>
+  <data name="JobStatusPausedText" xml:space="preserve">
+    <value>Pausiert</value>
+  </data>
+  <data name="JobStatusRunningText" xml:space="preserve">
+    <value>Wird ausgeführt</value>
+  </data>
+  <data name="JobStatusStoppedText" xml:space="preserve">
+    <value>Gestoppt</value>
+  </data>
+  <data name="JobStatusTitle" xml:space="preserve">
+    <value>Auftragsstatus</value>
+  </data>
   <data name="MaximumEngravingPowerText" xml:space="preserve">
     <value>Max. Brennstärke [%]</value>
   </data>
@@ -223,6 +262,9 @@ Genaue Dauer ist vom Gerät abhängig, daher hier in Prozent anzugeben.
   </data>
   <data name="UnitText" xml:space="preserve">
     <value>Einheit</value>
+  </data>
+  <data name="UpdateRateTitle" xml:space="preserve">
+    <value>Updaterate</value>
   </data>
   <data name="ViewTitle" xml:space="preserve">
     <value>Ansicht</value>

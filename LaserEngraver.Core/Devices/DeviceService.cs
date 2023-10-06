@@ -48,7 +48,7 @@ namespace LaserPathEngraver.Core.Devices
 						else if (_deviceConfiguration.Type == DeviceType.Mock)
 						{
 							_device = new MockDevice();
-							_device.StatusChanged += (Device device, DeviceStatusChangedEventArgs args) => DeviceStatusChanged?.Invoke(device, args);
+							_device.StatusChanged += OnDeviceStatusChanged;
 						}
 						else
 						{
@@ -58,9 +58,14 @@ namespace LaserPathEngraver.Core.Devices
 				}
 			}
 
-			DeviceStatusChanged?.Invoke(_device, new DeviceStatusChangedEventArgs(_device.Status));
+			DeviceStatusChanged?.Invoke(_device, new DeviceStatusChangedEventArgs(DeviceStatus));
 			PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(DeviceStatus)));
 			await _device.ConnectAsync(cancellationToken);
+		}
+
+		private void OnDeviceStatusChanged(Device sender, DeviceStatusChangedEventArgs args)
+		{
+			DeviceStatusChanged?.Invoke(sender, args);
 		}
 
 		public async Task Disconnect(CancellationToken cancellationToken)
@@ -73,14 +78,21 @@ namespace LaserPathEngraver.Core.Devices
 					if (_device != null)
 					{
 						device = _device;
-						_device = null;
 					}
 				}
 
 				if (device != null)
 				{
 					await device.DisconnectAsync(cancellationToken);
-					DeviceStatusChanged?.Invoke(_device, new DeviceStatusChangedEventArgs(_device.Status));
+					lock (_syncRoot)
+					{
+						if (_device == device)
+						{
+							_device = null;
+						}
+						device.StatusChanged -= OnDeviceStatusChanged;
+					}
+					DeviceStatusChanged?.Invoke(device, new DeviceStatusChangedEventArgs(DeviceStatus));
 					PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(DeviceStatus)));
 				}
 			}

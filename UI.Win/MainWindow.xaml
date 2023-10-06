@@ -3,8 +3,8 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:local="clr-namespace:LaserPathEngraver.UI.Win"
         xmlns:controls="clr-namespace:LaserPathEngraver.UI.Win.Controls"
-        xmlns:local.converters="clr-namespace:LaserPathEngraver.UI.Win.Converters"
-        xmlns:local.rules="clr-namespace:LaserPathEngraver.UI.Win.Rules"
+        xmlns:converters="clr-namespace:LaserPathEngraver.UI.Win.Converters"
+        xmlns:rules="clr-namespace:LaserPathEngraver.UI.Win.Rules"
         xmlns:localization="clr-namespace:LaserPathEngraver.UI.Win.Resources.Localization"
         Title="{x:Static localization:Texts.Title}" Height="640" Width="1337"
         Background="#111"
@@ -20,8 +20,8 @@
 			<ResourceDictionary.MergedDictionaries>
 				<ResourceDictionary Source="Styles.xaml" />
 			</ResourceDictionary.MergedDictionaries>
-			<local.converters:LogScaleConverter x:Key="LogScaleConverter" />
-			<local.converters:ByteScaleConverter x:Key="ByteScaleConverter" MinValue="0" MaxValue="100" />
+			<converters:LogScaleConverter x:Key="LogScaleConverter" />
+			<converters:ByteScaleConverter x:Key="ByteScaleConverter" MinValue="0" MaxValue="100" />
 		</ResourceDictionary>
 	</Window.Resources>
 	<Grid>
@@ -79,7 +79,7 @@
 								         StringFormat="N0"
 								         Converter="{StaticResource ByteScaleConverter}">
 									<Binding.ValidationRules>
-										<local.rules:DoubleValidationRule Minimum="1" Maximum="100" />
+										<rules:DoubleValidationRule Minimum="1" Maximum="100" />
 									</Binding.ValidationRules>
 								</Binding>
 							</TextBox.Text>
@@ -105,7 +105,7 @@
 								         StringFormat="N0"
 								         Converter="{StaticResource ByteScaleConverter}">
 									<Binding.ValidationRules>
-										<local.rules:DoubleValidationRule Minimum="1" Maximum="100" />
+										<rules:DoubleValidationRule Minimum="1" Maximum="100" />
 									</Binding.ValidationRules>
 								</Binding>
 							</TextBox.Text>
@@ -227,7 +227,7 @@
 									         StringFormat="N0"
 									         Converter="{StaticResource ByteScaleConverter}">
 										<Binding.ValidationRules>
-											<local.rules:DoubleValidationRule Minimum="1" Maximum="100" />
+											<rules:DoubleValidationRule Minimum="1" Maximum="100" />
 										</Binding.ValidationRules>
 									</Binding>
 								</TextBox.Text>
@@ -276,7 +276,7 @@
 								         UpdateSourceTrigger="PropertyChanged"
 								         StringFormat="N2">
 									<Binding.ValidationRules>
-										<local.rules:DoubleValidationRule Minimum="1" Maximum="1000" />
+										<rules:DoubleValidationRule Minimum="1" Maximum="1000" />
 									</Binding.ValidationRules>
 								</Binding>
 							</TextBox.Text>
@@ -342,7 +342,7 @@
 								         UpdateSourceTrigger="PropertyChanged"
 								         StringFormat="N2">
 									<Binding.ValidationRules>
-										<local.rules:DoubleValidationRule Minimum="1" Maximum="1440" />
+										<rules:DoubleValidationRule Minimum="1" Maximum="1440" />
 									</Binding.ValidationRules>
 								</Binding>
 							</TextBox.Text>
@@ -376,7 +376,7 @@
 								         UpdateSourceTrigger="PropertyChanged"
 								         StringFormat="N2">
 									<Binding.ValidationRules>
-										<local.rules:DoubleValidationRule Minimum="1" Maximum="1440" />
+										<rules:DoubleValidationRule Minimum="1" Maximum="1440" />
 									</Binding.ValidationRules>
 								</Binding>
 							</TextBox.Text>
@@ -410,7 +410,7 @@
 								         UpdateSourceTrigger="PropertyChanged"
 								         StringFormat="N2">
 									<Binding.ValidationRules>
-										<local.rules:DoubleValidationRule Minimum="1" Maximum="30" />
+										<rules:DoubleValidationRule Minimum="1" Maximum="30" />
 									</Binding.ValidationRules>
 								</Binding>
 							</TextBox.Text>
@@ -444,7 +444,7 @@
 								         UpdateSourceTrigger="PropertyChanged"
 								         StringFormat="N2">
 									<Binding.ValidationRules>
-										<local.rules:DoubleValidationRule Minimum="1" Maximum="30" />
+										<rules:DoubleValidationRule Minimum="1" Maximum="30" />
 									</Binding.ValidationRules>
 								</Binding>
 							</TextBox.Text>
@@ -493,12 +493,45 @@
 					       Margin="0,0,0,0"
 					       Content="{x:Static localization:Texts.StatusTitle}" />
 
-					<Label Content="{Binding Space.RenderRate}"
-					       Foreground="White"
-					       FontSize="16"
-					       ContentStringFormat="{x:Static localization:Texts.RenderRateFormatText}" />
+					<StackPanel Orientation="Vertical" Margin="5">
+						<Label Content="{x:Static localization:Texts.UpdateRateTitle}"
+						       Foreground="White"
+						       FontSize="14"
+						       Padding="0" />
+						<Label Content="{Binding Space.RenderRate}"
+						       ContentStringFormat="{x:Static localization:Texts.RenderRateFormatText}"
+						       Foreground="White"
+						       FontSize="16"
+						       FontWeight="Bold"
+						       Padding="0"
+						       Margin="-5,0,5,0" />
+					</StackPanel>
 
-					
+					<StackPanel Orientation="Vertical" Margin="5">
+						<Label Content="{x:Static localization:Texts.DeviceStatusTitle}"
+						       Foreground="White"
+						       FontSize="14"
+						       Padding="0" />
+						<Label Content="{Binding DeviceStatusText}"
+						       Foreground="White"
+						       FontSize="16"
+						       FontWeight="Bold"
+						       Padding="0" />
+					</StackPanel>
+
+					<StackPanel Orientation="Vertical" Margin="5">
+						<Label Content="{x:Static localization:Texts.JobStatusTitle}"
+						       Foreground="White"
+						       FontSize="14"
+						       Padding="0" />
+						<Label Content="{Binding JobStatusText}"
+						       Foreground="White"
+						       FontSize="16"
+						       FontWeight="Bold"
+						       Padding="0" />
+					</StackPanel>
+
+
 					<Label FontSize="20"
 					       Foreground="White"
 					       Margin="0,30,0,0"
@@ -506,18 +539,20 @@
 
 					<Button Margin="0,12.5,0,0"
 					        Command="{Binding ConnectCommand}"
-					        Content="{x:Static localization:Texts.ConnectButtonText}" />
+					        Content="{Binding ConnectCommandText}" />
 
-					<controls:ContentChangeLabel
+					<controls:ContentChangeTextBlock
 						FontSize="16"
 						Foreground="#FCC8C3"
 						Padding="0,30,0,0"
 						Opacity="0"
 						MaxHeight="0"
 						Height="Auto"
-						Content="{Binding ErrorMessage}">
-						<controls:ContentChangeLabel.Triggers>
-							<EventTrigger RoutedEvent="controls:ContentChangeLabel.ContentChanged">
+						MaxWidth="300"
+						TextWrapping="Wrap"
+						Text="{Binding ErrorMessage}">
+						<controls:ContentChangeTextBlock.Triggers>
+							<EventTrigger RoutedEvent="controls:ContentChangeTextBlock.ContentChanged">
 								<BeginStoryboard>
 									<Storyboard>
 										<DoubleAnimation Storyboard.TargetProperty="MaxHeight"
@@ -547,8 +582,8 @@
 									</Storyboard>
 								</BeginStoryboard>
 							</EventTrigger>
-						</controls:ContentChangeLabel.Triggers>
-					</controls:ContentChangeLabel>
+						</controls:ContentChangeTextBlock.Triggers>
+					</controls:ContentChangeTextBlock>
 
 				</StackPanel>
 			</ScrollViewer>

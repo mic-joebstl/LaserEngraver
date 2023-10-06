@@ -88,6 +88,69 @@ namespace LaserPathEngraver.UI.Win.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Connecting.
+        /// </summary>
+        public static string DeviceStatusConnectingText {
+            get {
+                return ResourceManager.GetString("DeviceStatusConnectingText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Disconnected.
+        /// </summary>
+        public static string DeviceStatusDisconnectedText {
+            get {
+                return ResourceManager.GetString("DeviceStatusDisconnectedText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Disconnecting.
+        /// </summary>
+        public static string DeviceStatusDisconnectingText {
+            get {
+                return ResourceManager.GetString("DeviceStatusDisconnectingText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Executing.
+        /// </summary>
+        public static string DeviceStatusExecutingText {
+            get {
+                return ResourceManager.GetString("DeviceStatusExecutingText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Ready.
+        /// </summary>
+        public static string DeviceStatusReadyText {
+            get {
+                return ResourceManager.GetString("DeviceStatusReadyText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Device Status.
+        /// </summary>
+        public static string DeviceStatusTitle {
+            get {
+                return ResourceManager.GetString("DeviceStatusTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Disconnect.
+        /// </summary>
+        public static string DisconnectButtonText {
+            get {
+                return ResourceManager.GetString("DisconnectButtonText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Show halo.
         /// </summary>
         public static string EnableVisualEffectsText {
@@ -184,6 +247,60 @@ namespace LaserPathEngraver.UI.Win.Resources.Localization {
         public static string IsPowerVariableText {
             get {
                 return ResourceManager.GetString("IsPowerVariableText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Done.
+        /// </summary>
+        public static string JobStatusDoneText {
+            get {
+                return ResourceManager.GetString("JobStatusDoneText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No job active.
+        /// </summary>
+        public static string JobStatusNoneText {
+            get {
+                return ResourceManager.GetString("JobStatusNoneText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Paused.
+        /// </summary>
+        public static string JobStatusPausedText {
+            get {
+                return ResourceManager.GetString("JobStatusPausedText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Executing.
+        /// </summary>
+        public static string JobStatusRunningText {
+            get {
+                return ResourceManager.GetString("JobStatusRunningText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Stopped.
+        /// </summary>
+        public static string JobStatusStoppedText {
+            get {
+                return ResourceManager.GetString("JobStatusStoppedText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Job Status.
+        /// </summary>
+        public static string JobStatusTitle {
+            get {
+                return ResourceManager.GetString("JobStatusTitle", resourceCulture);
             }
         }
         
@@ -301,6 +418,15 @@ namespace LaserPathEngraver.UI.Win.Resources.Localization {
         public static string UnitText {
             get {
                 return ResourceManager.GetString("UnitText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Update Rate.
+        /// </summary>
+        public static string UpdateRateTitle {
+            get {
+                return ResourceManager.GetString("UpdateRateTitle", resourceCulture);
             }
         }
         

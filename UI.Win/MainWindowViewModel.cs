@@ -16,6 +16,7 @@ using LaserPathEngraver.UI.Win.Visuals;
 using LaserPathEngraver.Core.Devices;
 using CommunityToolkit.Mvvm.Input;
 using System.Threading;
+using LaserPathEngraver.Core.Jobs;
 
 namespace LaserPathEngraver.UI.Win
 {
@@ -53,15 +54,33 @@ namespace LaserPathEngraver.UI.Win
 					try
 					{
 						ErrorMessage = null;
-						await _deviceDispatcher.Connect(cancellationToken);
+						if(_deviceDispatcher.DeviceStatus == DeviceStatus.Disconnected)
+						{
+							await _deviceDispatcher.Connect(cancellationToken);
+						}
+						else if(_deviceDispatcher.DeviceStatus == DeviceStatus.Ready)
+						{
+							await _deviceDispatcher.Disconnect(cancellationToken);
+						}
 					}
 					catch (Exception ex)
 					{
 						ErrorMessage = ex.Message;
 					}
 				},
-				canExecute: () => _deviceDispatcher.DeviceStatus == DeviceStatus.Disconnected
+				canExecute: () => _deviceDispatcher.DeviceStatus == DeviceStatus.Disconnected || _deviceDispatcher.DeviceStatus == DeviceStatus.Ready
 			);
+
+			_deviceDispatcher.DeviceStatusChanged += (Device sender, DeviceStatusChangedEventArgs args) =>
+			{
+				RaisePropertyChanged(nameof(ConnectCommandText));
+				RaisePropertyChanged(nameof(DeviceStatusText));
+			};
+
+			_deviceDispatcher.JobStatusChanged += (Job sender, JobStatusChangedEventArgs args) =>
+			{
+				RaisePropertyChanged(nameof(JobStatusText));
+			};
 		}
 
 		public string? ErrorMessage
@@ -148,6 +167,27 @@ namespace LaserPathEngraver.UI.Win
 				RaisePropertyChanged(nameof(DropShadowEffect));
 			}
 		}
+
+		public string ConnectCommandText =>
+			DeviceDispatcher.DeviceStatus == DeviceStatus.Disconnected ? Resources.Localization.Texts.ConnectButtonText :
+			DeviceDispatcher.DeviceStatus == DeviceStatus.Connecting ? Resources.Localization.Texts.ConnectButtonText :
+			Resources.Localization.Texts.DisconnectButtonText;
+
+		public string? DeviceStatusText =>
+			DeviceDispatcher.DeviceStatus == DeviceStatus.Disconnected ? Resources.Localization.Texts.DeviceStatusDisconnectedText :
+			DeviceDispatcher.DeviceStatus == DeviceStatus.Connecting ? Resources.Localization.Texts.DeviceStatusConnectingText :
+			DeviceDispatcher.DeviceStatus == DeviceStatus.Ready ? Resources.Localization.Texts.DeviceStatusReadyText :
+			DeviceDispatcher.DeviceStatus == DeviceStatus.Executing ? Resources.Localization.Texts.DeviceStatusExecutingText :
+			DeviceDispatcher.DeviceStatus == DeviceStatus.Disconnecting ? Resources.Localization.Texts.DeviceStatusDisconnectingText :
+			null;
+
+		public string? JobStatusText =>
+			DeviceDispatcher.JobStatus == JobStatus.None ? Resources.Localization.Texts.JobStatusNoneText :
+			DeviceDispatcher.JobStatus == JobStatus.Running ? Resources.Localization.Texts.JobStatusRunningText :
+			DeviceDispatcher.JobStatus == JobStatus.Paused ? Resources.Localization.Texts.JobStatusPausedText :
+			DeviceDispatcher.JobStatus == JobStatus.Stopped ? Resources.Localization.Texts.JobStatusStoppedText :
+			DeviceDispatcher.JobStatus == JobStatus.Done ? Resources.Localization.Texts.JobStatusDoneText :
+			null;
 
 		public IAsyncRelayCommand ConnectCommand { get; private set; }
 
