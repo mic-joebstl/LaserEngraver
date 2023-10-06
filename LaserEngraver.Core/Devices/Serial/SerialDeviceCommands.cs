@@ -10,17 +10,18 @@ namespace LaserPathEngraver.Core.Devices.Serial
 	{
 		None = 0,
 		Move = 0x01,
-		SetHome = 0x04,
+		FanOn = 0x04,
 		FanOff = 0x05,
 		Reset = 0x06,
 		Connect = 0x0A,
 		Engrave = 0x09, //?
 		Stop = 0x16,
+		HomeTopLeft = 0x17,
 		Pause = 0x18,
 		Continue = 0x19,
-		Center = 0x1A,
-		Descrete = 0x1B,
-		NonDescrete = 0x1C,
+		HomeCenter = 0x1A,
+		Discrete = 0x1B,
+		NonDiscrete = 0x1C,
 	}
 
 	public abstract class EngraverCommand

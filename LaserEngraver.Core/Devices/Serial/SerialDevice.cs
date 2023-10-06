@@ -5,11 +5,11 @@ using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
 using System.Drawing;
-using System.IO.Ports;
 using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.IO.Ports;
 
 namespace LaserPathEngraver.Core.Devices.Serial
 {
@@ -18,10 +18,31 @@ namespace LaserPathEngraver.Core.Devices.Serial
 		private SerialPort? _serialPort;
 		private DeviceConfiguration _configuration;
 		private bool _requiresReset;
+		private SemaphoreSlim? _commandSync;
 
 		public SerialDevice(DeviceConfiguration configuration)
 		{
 			_configuration = configuration;
+		}
+
+		private void OnDataReceived(object sender, SerialDataReceivedEventArgs e)
+		{
+			if (_commandSync.CurrentCount == 0)
+			{
+				_commandSync.Release();
+			}
+
+			var com = _serialPort;
+			if (com != null && com.IsOpen)
+			{
+				var response = new byte[1];
+				com.Read(response, 0, 1);
+
+				if (response[0] != (byte)EngraverResponse.Completed)
+				{
+					throw new UnexpectedResponseException(response);
+				}
+			}
 		}
 
 		public override async Task ConnectAsync(CancellationToken cancellationToken)
@@ -30,19 +51,23 @@ namespace LaserPathEngraver.Core.Devices.Serial
 			{
 				tx.Open();
 
-				_serialPort?.Dispose();
+				var com = _serialPort;
+				if (com != null && com.IsOpen)
+				{
+					com.Dispose();
+				}
+				Interlocked.Exchange(ref _commandSync, new SemaphoreSlim(1, 1))?.Dispose();
 
-				var com = _serialPort = new SerialPort()
+				com = _serialPort = new SerialPort()
 				{
 					BaudRate = _configuration.BaudRate ?? throw new InvalidOperationException("Required configuration " + nameof(_configuration.BaudRate) + " not set"),
-					PortName = GetPortName()
+					PortName = GetPortName(),
 				};
-				_serialPort.Disposed += OnSerialPortDisposed;
-				
+				com.DataReceived += OnDataReceived;
 				com.Open();
 
 				await WriteCommand(new SimpleEngraverCommand(EngraverCommandType.Connect), cancellationToken);
-				await WriteCommand(new SimpleEngraverCommand(EngraverCommandType.NonDescrete), cancellationToken);
+				await WriteCommand(new SimpleEngraverCommand(EngraverCommandType.NonDiscrete), cancellationToken);
 
 				tx.Commit();
 			}
@@ -54,14 +79,22 @@ namespace LaserPathEngraver.Core.Devices.Serial
 			{
 				tx.Open();
 
-				await WriteCommand(new SimpleEngraverCommand(EngraverCommandType.Reset), cancellationToken);
-				await WriteCommand(new SimpleEngraverCommand(EngraverCommandType.Stop), cancellationToken);
+				try
+				{
+					await WriteCommand(new SimpleEngraverCommand(EngraverCommandType.Reset), cancellationToken);
+					await WriteCommand(new SimpleEngraverCommand(EngraverCommandType.Stop), cancellationToken);
 
-				_serialPort?.Close();
-				_serialPort?.Dispose();
-				_serialPort = null;
+					_serialPort?.Close();
+					_serialPort?.Dispose();
+					_serialPort = null;
 
-				tx.Commit();
+					tx.Commit();
+				}
+				catch (Exception)
+				{
+					Status = DeviceStatus.Disconnected;
+					throw;
+				}
 			}
 		}
 
@@ -73,8 +106,8 @@ namespace LaserPathEngraver.Core.Devices.Serial
 				tx.Open();
 
 				await WriteCommand(new SimpleEngraverCommand(EngraverCommandType.Reset), cancellationToken);
-				await WriteCommand(new SimpleEngraverCommand(EngraverCommandType.Center), cancellationToken);
-				await WriteCommand(new SimpleEngraverCommand(EngraverCommandType.SetHome), cancellationToken);
+				await WriteCommand(new SimpleEngraverCommand(EngraverCommandType.HomeCenter), cancellationToken);
+				await WriteCommand(new SimpleEngraverCommand(EngraverCommandType.Discrete), cancellationToken);
 
 				Position = new Point((int)(_configuration.WidthDots / 2), (int)(_configuration.HeightDots / 2));
 			}
@@ -142,7 +175,7 @@ namespace LaserPathEngraver.Core.Devices.Serial
 						await WriteCommand(new SimpleEngraverCommand(EngraverCommandType.Reset), cancellationToken);
 					}
 					await WriteCommand(new MoveCommand(x, y), cancellationToken);
-					
+
 					Position = new Point
 					{
 						X = Position.Value.X + x,
@@ -171,21 +204,21 @@ namespace LaserPathEngraver.Core.Devices.Serial
 		{
 			var com = _serialPort ?? throw new InvalidOperationException("Device not connected");
 
-			var request = command.Build();
-			await com.WriteAsync(request, 0, request.Length, cancellationToken);
-
-			var response = new byte[1];
-			await com.ReadAsync(response, 0, 1, cancellationToken);
-
-			if (response[0] != (byte)EngraverResponse.Completed)
+			try
 			{
-				throw new UnexpectedResponseException(response);
-			}
-		}
+				await _commandSync?.WaitAsync(cancellationToken);
 
-		private void OnSerialPortDisposed(object? sender, EventArgs e)
-		{
-			Status = DeviceStatus.Disconnected;
+				var request = command.Build();
+				com.Write(request, 0, request.Length);
+			}
+			catch (Exception)
+			{
+				if (_commandSync?.CurrentCount == 0)
+				{
+					_commandSync.Release();
+				}
+				throw;
+			}
 		}
 
 		private string GetPortName()
@@ -194,7 +227,7 @@ namespace LaserPathEngraver.Core.Devices.Serial
 			if (!String.IsNullOrEmpty(portName))
 				return portName;
 
-			var portNames = SerialPort.GetPortNames().ToArray();
+			var portNames = System.IO.Ports.SerialPort.GetPortNames().ToArray();
 			if (portNames.Length == 0)
 				throw new Exception(Resources.Localization.Texts.NoDeviceFoundException);
 			if (portNames.Length == 1)

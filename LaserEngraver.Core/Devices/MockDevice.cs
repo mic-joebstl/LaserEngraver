@@ -95,7 +95,7 @@ namespace LaserPathEngraver.Core.Devices
 					var currentDelay = targetTime - elapsedTime;
 					if (i == 0 || currentDelay > 0)
 					{
-						System.Threading.Thread.Sleep(TimeSpan.FromMilliseconds(currentDelay));
+						await Task.Delay(TimeSpan.FromMilliseconds(currentDelay));
 					}
 
 					Position = new Point
