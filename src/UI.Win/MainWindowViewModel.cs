@@ -614,6 +614,7 @@ namespace LaserEngraver.UI.Win
 			);
 			FramingCommand = framingCommand;
 
+			_debouncedStatus = DeviceStatus.Disconnected;
 			Observable
 				.FromEvent<DeviceStatusChangedEventHandler, DeviceStatusChangedEventArgs>(
 					handler => (sender, args) => handler(args),
