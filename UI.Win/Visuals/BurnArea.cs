@@ -192,10 +192,10 @@ namespace LaserPathEngraver.UI.Win.Visuals
 							var fillValue = (byte)(0xff * target.FillRatio);
 							var color = defaultColor ?? theme.GetBurnGradientColor(fillValue);
 
-							imageBuffer[byteIndex] = color.R;
-							imageBuffer[byteIndex + 1] = color.B;
-							imageBuffer[byteIndex + 2] = color.G;
 							imageBuffer[byteIndex + 3] = color.A;
+							imageBuffer[byteIndex + 2] = color.R;
+							imageBuffer[byteIndex + 1] = color.G;
+							imageBuffer[byteIndex + 0] = color.B;
 						});
 
 						GCHandle pinnedArray = GCHandle.Alloc(imageBuffer, GCHandleType.Pinned);
