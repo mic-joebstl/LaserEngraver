@@ -91,6 +91,11 @@
 					        Value="{Binding RandomMaximumSize}"
 					        HorizontalAlignment="Left" />
 
+					<Label FontSize="20"
+					       Foreground="White"
+					       Margin="0,45,0,0"
+					       Content="{x:Static localization:Texts.ViewTitle}" />
+					
 					<StackPanel Orientation="Horizontal"
 					            Margin="0,7.5,0,7.5">
 						<TextBox Width="120" Height="30">
@@ -207,35 +212,42 @@
 					<Label FontSize="20"
 					       Foreground="White"
 					       Margin="0,45,0,0"
-					       Content="New Element" />
+					       Content="{x:Static localization:Texts.ImageTitle}" />
 
 					<StackPanel Orientation="Horizontal"
 					            Margin="0,7.5,0,7.5">
-						<TextBox Width="120" Height="30"
-					             Text="{Binding NewElementMass,
-					                            UpdateSourceTrigger=PropertyChanged,
-					                            StringFormat=N0}" />
-						<Label Foreground="White"
-					           FontSize="16"
-					           Content="Mass  [ kg ]" />
-					</StackPanel>
-
-					<StackPanel Orientation="Horizontal"
-					            Margin="0,7.5,0,0">
 						<TextBox Width="120" Height="30">
 							<TextBox.Text>
-								<Binding Path="NewElementSize"
-										 UpdateSourceTrigger="PropertyChanged"
-										 StringFormat="N1">
+								<Binding Path="Space.ImageWidthDot"
+								         UpdateSourceTrigger="PropertyChanged"
+								         StringFormat="N2">
 									<Binding.ValidationRules>
-										<local.rules:DoubleValidationRule Minimum="1" />
+										<local.rules:DecimalValidationRule Minimum="1" />
 									</Binding.ValidationRules>
 								</Binding>
 							</TextBox.Text>
 						</TextBox>
 						<Label Foreground="White"
 						       FontSize="16"
-						       Content="Size" />
+						       Content="{x:Static localization:Texts.WidthPxText}" />
+					</StackPanel>
+
+					<StackPanel Orientation="Horizontal"
+					            Margin="0,7.5,0,0">
+						<TextBox Width="120" Height="30">
+							<TextBox.Text>
+								<Binding Path="Space.ImageHeightDot"
+								         UpdateSourceTrigger="PropertyChanged"
+								         StringFormat="N2">
+									<Binding.ValidationRules>
+										<local.rules:DecimalValidationRule Minimum="1" />
+									</Binding.ValidationRules>
+								</Binding>
+							</TextBox.Text>
+						</TextBox>
+						<Label Foreground="White"
+						       FontSize="16"
+						       Content="{x:Static localization:Texts.HeightPxText}" />
 					</StackPanel>
 
 				</StackPanel>

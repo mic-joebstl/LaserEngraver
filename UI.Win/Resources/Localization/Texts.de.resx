@@ -120,6 +120,12 @@
   <data name="AutoCenterViewText" xml:space="preserve">
     <value>Automatisch zentrieren</value>
   </data>
+  <data name="HeightPxText" xml:space="preserve">
+    <value>Height [px]</value>
+  </data>
+  <data name="ImageTitle" xml:space="preserve">
+    <value>Bild</value>
+  </data>
   <data name="RenderRateFormatText" xml:space="preserve">
     <value>{0:N2} Updates/s</value>
   </data>
@@ -130,5 +136,11 @@
     <value>Durch Gedrückthalten der linken Maustaste und der linken Steuerungstaste kann man innerhalb des Canvas navigieren.
 
 Mittels gedrückter Steuerungstaste und gleichzeitigem drehen am Mausrad oder durch gleichzeitigem drücken der Plus- und Minustaste oder durch das Verändern der Werte in der Textbox mit dem Label 'Scale' ist es möglich im Canvas zu zoomen.</value>
+  </data>
+  <data name="ViewTitle" xml:space="preserve">
+    <value>Ansicht</value>
+  </data>
+  <data name="WidthPxText" xml:space="preserve">
+    <value>Breite [px]</value>
   </data>
 </root>

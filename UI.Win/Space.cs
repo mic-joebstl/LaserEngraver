@@ -24,7 +24,8 @@ namespace LaserPathEngraver.UI.Win
 		private IWritableOptions<UserConfiguration> _userConfiguration;
 
 		private Canvas _canvas;
-		private BurnRectangle _burnRectangle;
+		private BurnRectangle _burnBoundsRectangle;
+		private BurnRectangle _burnBitmapRectangle;
 		private BurnArea _burnArea;
 
 		private double _scale;
@@ -41,6 +42,8 @@ namespace LaserPathEngraver.UI.Win
 		private decimal _canvasWidthDot;
 		private decimal _canvasHeightDot;
 		private decimal _resolutionDpi;
+		private decimal _imageWidthDot;
+		private decimal _imageHeightDot;
 
 		#endregion
 
@@ -76,16 +79,24 @@ namespace LaserPathEngraver.UI.Win
 			_dispatcherTimer.Tick += OnRender;
 			_dispatcherTimer.Start();
 
-			_burnRectangle = new BurnRectangle();
-			_burnRectangle.Size = new Size((double)_canvasWidthDot, (double)_canvasHeightDot);
-			_burnRectangle.Shape.Stroke = System.Windows.Media.Brushes.White;
-			_burnRectangle.Shape.StrokeThickness = 2;
-			_burnRectangle.Shape.StrokeDashArray = new DoubleCollection() { 5 };
-			AddVisualToCanvas(_burnRectangle);
+			_burnBoundsRectangle = new BurnRectangle();
+			_burnBoundsRectangle.Size = new Size((double)_canvasWidthDot, (double)_canvasHeightDot);
+			_burnBoundsRectangle.Shape.Stroke = System.Windows.Media.Brushes.White;
+			_burnBoundsRectangle.Shape.StrokeThickness = 2;
+			_burnBoundsRectangle.Shape.StrokeDashArray = new DoubleCollection() { 5 };
+			AddVisualToCanvas(_burnBoundsRectangle);
 
+			_burnBitmapRectangle = new BurnRectangle();
+			_burnBitmapRectangle.Shape.Stroke = System.Windows.Media.Brushes.White;
+			_burnBitmapRectangle.Shape.StrokeThickness = 1;
+			_burnBitmapRectangle.Shape.StrokeDashArray = new DoubleCollection() { 2.5 };
+			AddVisualToCanvas(_burnBitmapRectangle);
+			
 			_burnArea = new BurnArea();
-			_burnArea.Size = new Size((double)_canvasWidthDot, (double)_canvasHeightDot);
 			AddVisualToCanvas(_burnArea);
+
+			ImageWidthDot = 0;
+			ImageHeightDot = 0;
 		}
 
 		#endregion
@@ -165,6 +176,42 @@ namespace LaserPathEngraver.UI.Win
 				{
 					_canvasHeightDot = value;
 					RaisePropertyChanged(nameof(CanvasHeightDot));
+				}
+			}
+		}
+
+		public decimal ImageWidthDot
+		{
+			get
+			{
+				return _imageWidthDot;
+			}
+			set
+			{
+				if (_imageWidthDot != value)
+				{
+					_imageWidthDot = value;
+					_burnBitmapRectangle.Size = new Size((double)value, _burnBitmapRectangle.Size.Height);
+					_burnArea.Size = new Size((double)value, _burnArea.Size.Height);
+					RaisePropertyChanged(nameof(ImageWidthDot));
+				}
+			}
+		}
+
+		public decimal ImageHeightDot
+		{
+			get
+			{
+				return _imageHeightDot;
+			}
+			set
+			{
+				if (_imageHeightDot != value)
+				{
+					_imageHeightDot = value;
+					_burnBitmapRectangle.Size = new Size(_burnBitmapRectangle.Size.Width, (double)value);
+					_burnArea.Size = new Size(_burnArea.Size.Width, (double)value);
+					RaisePropertyChanged(nameof(ImageHeightDot));
 				}
 			}
 		}
@@ -275,7 +322,8 @@ namespace LaserPathEngraver.UI.Win
 
 		private IEnumerable<IVisual> GetVisuals()
 		{
-			yield return _burnRectangle;
+			yield return _burnBoundsRectangle;
+			yield return _burnBitmapRectangle;
 			yield return _burnArea;
 		}
 

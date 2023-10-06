@@ -62,8 +62,8 @@ namespace LaserPathEngraver.UI.Win.Visuals
 			_image.BeginInit();
 			var ms = _imageStream = new MemoryStream();
 
-			var width = (int)Size.Width;
-			var height = (int)Size.Height;
+			var width = (int)(Size.Width < 1 ? 1 : Size.Width);
+			var height = (int)(Size.Height < 1 ? 1 : Size.Height);
 			var format = System.Drawing.Imaging.PixelFormat.Format32bppArgb;
 			int bitsPerPixel = ((int)format & 0xff00) >> 8;
 			int bytesPerPixel = (bitsPerPixel + 7) / 8;
@@ -79,7 +79,7 @@ namespace LaserPathEngraver.UI.Win.Visuals
 					imageBuffer[byteIndex] =     0xff;
 					imageBuffer[byteIndex + 1] = 0xff;
 					imageBuffer[byteIndex + 2] = 0xff;
-					//imageBuffer[byteIndex+3] = (byte)(1d / 800 * r * 0xff);
+					//imageBuffer[byteIndex + 3] = (byte)(1d / 800 * r * 0xff);
 					imageBuffer[byteIndex + 3] = (byte)randy.Next(0, 0xff);
 				}
 			});

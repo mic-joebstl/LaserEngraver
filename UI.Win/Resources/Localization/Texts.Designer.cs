@@ -70,6 +70,24 @@ namespace LaserPathEngraver.UI.Win.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Height [px].
+        /// </summary>
+        public static string HeightPxText {
+            get {
+                return ResourceManager.GetString("HeightPxText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Image.
+        /// </summary>
+        public static string ImageTitle {
+            get {
+                return ResourceManager.GetString("ImageTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to {0:N2} Updates/s.
         /// </summary>
         public static string RenderRateFormatText {
@@ -93,6 +111,24 @@ namespace LaserPathEngraver.UI.Win.Resources.Localization {
         public static string TutorialDescription {
             get {
                 return ResourceManager.GetString("TutorialDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to View.
+        /// </summary>
+        public static string ViewTitle {
+            get {
+                return ResourceManager.GetString("ViewTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Width [px].
+        /// </summary>
+        public static string WidthPxText {
+            get {
+                return ResourceManager.GetString("WidthPxText", resourceCulture);
             }
         }
     }
