@@ -9,16 +9,18 @@ using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
+using System.Reactive.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using System.Windows.Media.Media3D;
 using System.Windows.Threading;
 
 namespace LaserPathEngraver.UI.Win
 {
-	public class Space : INotifyPropertyChanged
+	public class Space : INotifyPropertyChanged, IDisposable
 	{
 		#region Fields
 
@@ -44,7 +46,7 @@ namespace LaserPathEngraver.UI.Win
 		private TimeSpan _renderCanvasInterval;
 		private TimeSpan _renderBitmapInterval;
 		private DispatcherTimer _renderCanvasTimer;
-		private DispatcherTimer _renderBitmapTimer;
+		private System.Threading.Timer _renderBitmapTimer;
 		private double _canvasWidthDot;
 		private double _canvasHeightDot;
 		private double _deviceResolutionDpi;
@@ -88,10 +90,7 @@ namespace LaserPathEngraver.UI.Win
 			_renderCanvasTimer.Tick += OnRenderCanvasTimer;
 			_renderCanvasTimer.Start();
 
-			_renderBitmapTimer = new DispatcherTimer(DispatcherPriority.Render);
-			_renderBitmapTimer.Interval = _renderBitmapInterval;
-			_renderBitmapTimer.Tick += OnRenderBitmapTimer;
-			_renderBitmapTimer.Start();
+			_renderBitmapTimer = new System.Threading.Timer((_) => _burnArea?.RenderImage(), null, TimeSpan.Zero, _renderBitmapInterval);
 
 			_burnBoundsRectangle = new BurnRectangle();
 			_burnBoundsRectangle.Size = new Size((double)_canvasWidthDot, (double)_canvasHeightDot);
@@ -579,47 +578,36 @@ namespace LaserPathEngraver.UI.Win
 			yield return _burnArea;
 		}
 
-		private void UpdateVisuals(bool updatePositions = true, bool updateBitmap = true)
+		private void UpdateVisuals()
 		{
 			foreach (var visual in GetVisuals())
 			{
-				UpdateVisual(visual, updatePositions, updateBitmap);
+				UpdateVisual(visual);
 			}
 		}
 
-		private void UpdateVisual(IVisual visual, bool updatePositions = true, bool updateBitmap = true)
+		private void UpdateVisual(IVisual visual)
 		{
-			if (updatePositions)
+			var shape = visual.Element;
+			if (visual is BurnTarget)
 			{
-				var shape = visual.Element;
-				if (visual is BurnTarget)
-				{
-					//BurnTarget has a fixed size
-					shape.Width = visual.Size.Width;
-					shape.Height = visual.Size.Height;
+				//BurnTarget has a fixed size
+				shape.Width = visual.Size.Width;
+				shape.Height = visual.Size.Height;
 
-					var pointWidth = _scale;
-					var position = SpacePositionToScreenPosition(new Point((int)visual.Position.X, (int)visual.Position.Y));
-					Canvas.SetTop(shape, position.Y - (shape.Height / 2) + pointWidth / 2);
-					Canvas.SetLeft(shape, position.X - (shape.Width / 2) + pointWidth / 2);
-				}
-				else
-				{
-					shape.Width = visual.Size.Width * _scale;
-					shape.Height = visual.Size.Height * _scale;
-
-					var position = SpacePositionToScreenPosition(new Point((int)visual.Position.X, (int)visual.Position.Y));
-					Canvas.SetTop(shape, position.Y);
-					Canvas.SetLeft(shape, position.X);
-				}
+				var pointWidth = _scale;
+				var position = SpacePositionToScreenPosition(new Point((int)visual.Position.X, (int)visual.Position.Y));
+				Canvas.SetTop(shape, position.Y - (shape.Height / 2) + pointWidth / 2);
+				Canvas.SetLeft(shape, position.X - (shape.Width / 2) + pointWidth / 2);
 			}
-
-			if (updateBitmap)
+			else
 			{
-				if (visual is BurnArea burnarea)
-				{
-					burnarea.RenderImage();
-				}
+				shape.Width = visual.Size.Width * _scale;
+				shape.Height = visual.Size.Height * _scale;
+
+				var position = SpacePositionToScreenPosition(new Point((int)visual.Position.X, (int)visual.Position.Y));
+				Canvas.SetTop(shape, position.Y);
+				Canvas.SetLeft(shape, position.X);
 			}
 		}
 
@@ -663,12 +651,7 @@ namespace LaserPathEngraver.UI.Win
 				CenterRenderArea(1 / _renderRate * 3);
 			}
 
-			UpdateVisuals(updatePositions: true, updateBitmap: false);
-		}
-
-		private void OnRenderBitmapTimer(object? sender, EventArgs e)
-		{
-			UpdateVisuals(updatePositions: false, updateBitmap: true);
+			UpdateVisuals();
 		}
 
 		private void OnBurnAreaPropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -731,6 +714,12 @@ namespace LaserPathEngraver.UI.Win
 		public void LoadBitmap(string filePath)
 		{
 			_burnArea.LoadBitmap(filePath);
+		}
+
+		public void Dispose()
+		{
+			_renderBitmapTimer.Dispose();
+			_renderCanvasTimer.Stop();
 		}
 
 		#endregion

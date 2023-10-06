@@ -77,6 +77,8 @@ namespace LaserPathEngraver.Core.Devices
 				long i = 0;
 				while (Position != null && (Position.Value.X != position.X || Position.Value.Y != position.Y))
 				{
+					cancellationToken.ThrowIfCancellationRequested();
+
 					var vector = new Point
 					{
 						X = position.X - Position.Value.X,
@@ -93,7 +95,7 @@ namespace LaserPathEngraver.Core.Devices
 					var currentDelay = targetTime - elapsedTime;
 					if (i == 0 || currentDelay > 0)
 					{
-						await Task.Delay(TimeSpan.FromMilliseconds(currentDelay), cancellationToken);
+						System.Threading.Thread.Sleep(TimeSpan.FromMilliseconds(currentDelay));
 					}
 
 					Position = new Point

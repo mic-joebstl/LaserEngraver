@@ -514,7 +514,7 @@ namespace LaserPathEngraver.UI.Win
 						}
 						else if (_deviceDispatcher.DeviceStatus == DeviceStatus.Ready && DeviceDispatcher.JobStatus != JobStatus.Running && DeviceDispatcher.JobStatus != JobStatus.Paused)
 						{
-							System.Threading.Tasks.Task.Run(async () =>
+							var th = new Thread(async () =>
 							{
 								try
 								{
@@ -538,6 +538,7 @@ namespace LaserPathEngraver.UI.Win
 									ErrorMessage = ex.Message;
 								}
 							});
+							th.Start();
 						}
 					}
 					catch (Exception ex)
@@ -613,7 +614,7 @@ namespace LaserPathEngraver.UI.Win
 				.Throttle(TimeSpan.FromMilliseconds(80))
 				.Subscribe((args) =>
 				{
-					_windowDispatcher.Invoke(() =>
+					_windowDispatcher.BeginInvoke(() =>
 					{
 						_debouncedStatus = _deviceDispatcher.DeviceStatus;
 						RaisePropertyChanged(nameof(DeviceStatusText));
@@ -622,7 +623,7 @@ namespace LaserPathEngraver.UI.Win
 
 			_deviceDispatcher.DeviceStatusChanged += (Device sender, DeviceStatusChangedEventArgs args) =>
 			{
-				_windowDispatcher.Invoke(() =>
+				_windowDispatcher.BeginInvoke(() =>
 				{
 					RaisePropertyChanged(nameof(ConnectCommandText));
 					RaisePropertyChanged(nameof(StartCommandText));
@@ -640,7 +641,7 @@ namespace LaserPathEngraver.UI.Win
 
 			_deviceDispatcher.JobStatusChanged += (object sender, JobStatusChangedEventArgs args) =>
 			{
-				_windowDispatcher.Invoke(() =>
+				_windowDispatcher.BeginInvoke(() =>
 				{
 					RaisePropertyChanged(nameof(JobStatusText));
 					RaisePropertyChanged(nameof(StartCommandText));
@@ -654,7 +655,7 @@ namespace LaserPathEngraver.UI.Win
 
 			Space.PropertyChanged += (object? sender, PropertyChangedEventArgs e) =>
 			{
-				_windowDispatcher.Invoke(() =>
+				_windowDispatcher.BeginInvoke(() =>
 				{
 					if (e.PropertyName == nameof(Space.ImageBoundingRect))
 					{
@@ -664,7 +665,7 @@ namespace LaserPathEngraver.UI.Win
 			};
 			Space.BurnArea.PropertyChanged += (object? sender, PropertyChangedEventArgs e) =>
 			{
-				_windowDispatcher.Invoke(() =>
+				_windowDispatcher.BeginInvoke(() =>
 				{
 					if (e.PropertyName == nameof(Space.BurnArea.Points))
 					{

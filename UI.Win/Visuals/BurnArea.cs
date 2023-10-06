@@ -19,6 +19,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Media.Media3D;
 using System.Windows.Media.Media3D.Converters;
 using System.Windows.Shapes;
+using System.Windows.Threading;
 
 namespace LaserPathEngraver.UI.Win.Visuals
 {
@@ -43,14 +44,17 @@ namespace LaserPathEngraver.UI.Win.Visuals
 		private byte _engraverPower = 0xff;
 		private byte _fixedPowerThreshold = 0xff;
 		private bool _isPowerVariable = false;
+		private Dispatcher _windowDispatcher;
 
 		public BurnArea()
 		{
 			_image = new Image();
+			_image.SnapsToDevicePixels = true;
 			_image.DataContext = this;
-			_targets = new List<BurnTarget>();
+			_targets = new List<BurnTarget>(0);
 			_renderSync = new SemaphoreSlim(1, 1);
 			_requiresRenderUpdate = true;
+			_windowDispatcher = Dispatcher.CurrentDispatcher;
 		}
 
 		public Point Position
@@ -103,9 +107,9 @@ namespace LaserPathEngraver.UI.Win.Visuals
 		public byte EngravingPower
 		{
 			get => _engraverPower;
-			set 
+			set
 			{
-				if(_engraverPower != value)
+				if (_engraverPower != value)
 				{
 					_engraverPower = value;
 					RequestTargetUpdate();
@@ -162,33 +166,29 @@ namespace LaserPathEngraver.UI.Win.Visuals
 				return;
 
 			_renderSync.Wait();
+
 			try
 			{
 				if (!_requiresRenderUpdate && !RequiresTargetUpdate())
 					return;
 
-				if (_originalBitmap is null)
-				{
-					_targets.Clear();
-				}
+				var targets = _targets;
+				var originalBitmap = _originalBitmap;
 
-				if (_originalBitmap != null)
+				if (originalBitmap != null)
 				{
-					_bitmapImage = new BitmapImage();
-					_imageStream?.Dispose();
-					_bitmapImage.BeginInit();
-					var ms = _imageStream = new MemoryStream();
-
 					var width = (int)(Size.Width < 1 ? 1 : Size.Width);
 					var height = (int)(Size.Height < 1 ? 1 : Size.Height);
-					if (_originalBitmap != null && RequiresTargetUpdate() || _scaledBitmap != null && (width != _scaledBitmap.Width || height != _scaledBitmap.Height))
+					var scaledBitmap = _scaledBitmap;
+					if (originalBitmap != null && RequiresTargetUpdate() || scaledBitmap == null || (width != scaledBitmap.Width || height != scaledBitmap.Height))
 					{
-						ScaleBitmap();
+						scaledBitmap = ScaleBitmap();
+						targets = _targets;
 					}
-					if (_scaledBitmap != null)
+					if (scaledBitmap != null)
 					{
-						width = _scaledBitmap.Width;
-						height = _scaledBitmap.Height;
+						width = scaledBitmap.Width;
+						height = scaledBitmap.Height;
 						_size = new Size(width, height);
 
 						var theme = _theme;
@@ -199,12 +199,12 @@ namespace LaserPathEngraver.UI.Win.Visuals
 						int stride = 4 * ((width * bytesPerPixel + 3) / 4);
 						var imageBuffer = new byte[width * height * bytesPerPixel];
 
-						Parallel.For(0, _targets.Count, i =>
+						Parallel.For(0, targets.Count, i =>
 						{
-							var target = _targets[i];
+							var target = targets[i];
 							var byteIndex = target.Y * width * bytesPerPixel + target.X * bytesPerPixel;
 							var fillValue = target.Intensity;
-							var color = target.IsVisited ? 
+							var color = target.IsVisited ?
 								theme.GetBurnVisitedColor(fillValue)
 								: defaultColor ?? theme.GetBurnGradientColor(fillValue);
 
@@ -219,17 +219,25 @@ namespace LaserPathEngraver.UI.Win.Visuals
 						{
 							IntPtr pointer = pinnedArray.AddrOfPinnedObject();
 							var bitmap = new System.Drawing.Bitmap(width, height, stride, format, pointer);
+							var ms = new MemoryStream();
 							bitmap.Save(ms, ImageFormat.Png);
 							ms.Position = 0;
-							_bitmapImage.StreamSource = ms;
-							_bitmapImage.EndInit();
+							
+							_windowDispatcher.BeginInvoke(() =>
+							{
+								Interlocked.Exchange(ref _imageStream, ms)?.Dispose();
+
+								_bitmapImage = new BitmapImage();
+								_bitmapImage.BeginInit();
+								_bitmapImage.StreamSource = ms;
+								_bitmapImage.EndInit();
+								_image.Source = _bitmapImage;
+							});
 						}
 						finally
 						{
 							pinnedArray.Free();
 						}
-						_image.SnapsToDevicePixels = true;
-						_image.Source = _bitmapImage;
 					}
 				}
 
@@ -243,7 +251,6 @@ namespace LaserPathEngraver.UI.Win.Visuals
 
 		public void LoadBitmap(string filePath)
 		{
-			_requiresRenderUpdate = true;
 			_originalBitmap = new System.Drawing.Bitmap(filePath);
 			Size = new Size
 			{
@@ -262,42 +269,42 @@ namespace LaserPathEngraver.UI.Win.Visuals
 				};
 			}
 
-			ScaleBitmap();
+			RequestTargetUpdate();
+			RenderImage();
 		}
 
-		private void ScaleBitmap()
+		private System.Drawing.Bitmap? ScaleBitmap()
 		{
 			var originalBitmap = _originalBitmap;
 			if (originalBitmap is null)
 			{
-				_scaledBitmap = null;
-				return;
+				return _scaledBitmap = null;
 			}
 
-			var width = Size.Width < 1 ? 1 : (float)Size.Width;
-			var height = Size.Height < 1 ? 1 : (float)Size.Height;
+			var width = (int)(Size.Width < 1 ? 1 : Size.Width);
+			var height = (int)(Size.Height < 1 ? 1 : Size.Height);
 			var brush = new System.Drawing.SolidBrush(System.Drawing.Color.Transparent);
-			var scaledBitmap = new System.Drawing.Bitmap((int)width, (int)height);
+			var scaledBitmap = new System.Drawing.Bitmap(width, height);
 			var graph = System.Drawing.Graphics.FromImage(scaledBitmap);
 
 			graph.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
 			graph.CompositingQuality = System.Drawing.Drawing2D.CompositingQuality.HighQuality;
 			graph.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
 
-			graph.FillRectangle(brush, new System.Drawing.RectangleF(0, 0, (float)width, (float)height));
+			graph.FillRectangle(brush, new System.Drawing.RectangleF(0, 0, width, height));
 			graph.DrawImage(originalBitmap, 0, 0, width, height);
-			_scaledBitmap = scaledBitmap;
 
-			_targets.Clear();
+			Interlocked.Exchange(ref _targets, new List<BurnTarget>(0));
+			var targets = new List<BurnTarget>(scaledBitmap.Width * scaledBitmap.Height);
 
 			var isPowerVariable = IsPowerVariable;
 			var maxPower = EngravingPower;
 			var minPower = isPowerVariable ? 0 : FixedPowerThreshold;
 			var intensityFactor = (double)maxPower / 0xff;
 
-			for (int x = 0; x < _scaledBitmap.Width; x++)
+			for (int x = 0; x < scaledBitmap.Width; x++)
 			{
-				for (int y = 0; y < _scaledBitmap.Height; y++)
+				for (int y = 0; y < scaledBitmap.Height; y++)
 				{
 					var pixel = scaledBitmap.GetPixel(x, y);
 					var value = (0xff - pixel.R + 0xff - pixel.G + 0xff - pixel.B) / 3d;
@@ -306,7 +313,7 @@ namespace LaserPathEngraver.UI.Win.Visuals
 					{
 						value = 0;
 					}
-					else if(isPowerVariable)
+					else if (isPowerVariable)
 					{
 						value *= intensityFactor;
 					}
@@ -321,11 +328,15 @@ namespace LaserPathEngraver.UI.Win.Visuals
 						X = x,
 						Y = y
 					};
-					_targets.Add(target);
+					targets.Add(target);
 				}
 			}
 			_requiresTargetUpdate = false;
-			RaisePropertyChanged(nameof(Points));
+			Interlocked.Exchange(ref _scaledBitmap, scaledBitmap);
+			Interlocked.Exchange(ref _targets, targets);
+
+			_windowDispatcher.BeginInvoke(() => RaisePropertyChanged(nameof(Points)));
+			return scaledBitmap;
 		}
 
 		private void ResizeToBoundingRect()
@@ -426,7 +437,7 @@ namespace LaserPathEngraver.UI.Win.Visuals
 					if (_isVisited != value)
 					{
 						_isVisited = value;
-						//_owner._requiresRenderUpdate = true;
+						_owner._requiresRenderUpdate = true;
 					}
 				}
 			}

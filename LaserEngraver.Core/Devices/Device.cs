@@ -11,13 +11,11 @@ using System.Threading.Tasks;
 
 namespace LaserPathEngraver.Core.Devices
 {
-	public abstract class Device : INotifyPropertyChanged
+	public abstract class Device
 	{
 		private readonly object _syncRoot = new object();
 		private DeviceStatus _status;
 		private Point? _position;
-
-		public event PropertyChangedEventHandler? PropertyChanged;
 
 		public event DeviceStatusChangedEventHandler? StatusChanged;
 
@@ -32,14 +30,18 @@ namespace LaserPathEngraver.Core.Devices
 			{
 				if (value != _status)
 				{
+					var triggerUpdate = false;
 					lock (_syncRoot)
 					{
 						if (value != _status)
 						{
 							_status = value;
-							StatusChanged?.Invoke(this, new DeviceStatusChangedEventArgs(value));
-							PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Status)));
+							triggerUpdate = true;
 						}
+					}
+					if (triggerUpdate)
+					{
+						StatusChanged?.Invoke(this, new DeviceStatusChangedEventArgs(value));
 					}
 				}
 			}
@@ -54,7 +56,6 @@ namespace LaserPathEngraver.Core.Devices
 				{
 					_position = value;
 					PositionChanged?.Invoke(this, new DevicePositionChangedEventArgs(value));
-					PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Position)));
 				}
 			}
 		}

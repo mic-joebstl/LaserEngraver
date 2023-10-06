@@ -38,14 +38,12 @@ namespace LaserPathEngraver.Core.Jobs
 		public void Pause();
 	}
 
-	public abstract class Job : INotifyPropertyChanged, IDisposable
+	public abstract class Job : IDisposable
 	{
 		private JobStatus _status;
 		private Stopwatch _stopWatch;
 		private Exception? _exception;
 		private CancellationTokenSource _cts;
-
-		public event PropertyChangedEventHandler? PropertyChanged;
 
 		public event JobStatusChangedEventHandler? StatusChanged;
 
@@ -63,7 +61,6 @@ namespace LaserPathEngraver.Core.Jobs
 				if (_status != value)
 				{
 					_status = value;
-					PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Status)));
 					StatusChanged?.Invoke(this, new JobStatusChangedEventArgs(value));
 				}
 			}
