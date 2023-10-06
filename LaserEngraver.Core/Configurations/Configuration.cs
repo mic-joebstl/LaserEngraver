@@ -16,5 +16,12 @@ namespace LaserPathEngraver.Core.Configurations
 		public bool ShowHelp { get; set; } = false;
 		public bool AutoCenterView { get; set; } = true;
 		public bool PreserveAspectRatio { get; set; } = true;
+		public Unit Unit { get; set; } = Unit.cm;
+	}
+
+	public enum Unit
+	{
+		px = 0,
+		cm = 1
 	}
 }

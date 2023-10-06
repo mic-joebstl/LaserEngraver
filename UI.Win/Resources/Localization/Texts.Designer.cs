@@ -79,6 +79,15 @@ namespace LaserPathEngraver.UI.Win.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Height [cm].
+        /// </summary>
+        public static string HeightCmText {
+            get {
+                return ResourceManager.GetString("HeightCmText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Height [px].
         /// </summary>
         public static string HeightPxText {
@@ -151,11 +160,47 @@ namespace LaserPathEngraver.UI.Win.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to cm.
+        /// </summary>
+        public static string UnitCmText {
+            get {
+                return ResourceManager.GetString("UnitCmText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to px.
+        /// </summary>
+        public static string UnitPxText {
+            get {
+                return ResourceManager.GetString("UnitPxText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unit.
+        /// </summary>
+        public static string UnitText {
+            get {
+                return ResourceManager.GetString("UnitText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to View.
         /// </summary>
         public static string ViewTitle {
             get {
                 return ResourceManager.GetString("ViewTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Width [cm].
+        /// </summary>
+        public static string WidthCmText {
+            get {
+                return ResourceManager.GetString("WidthCmText", resourceCulture);
             }
         }
         

@@ -103,56 +103,62 @@ namespace LaserPathEngraver.UI.Win.Visuals
 				if (!_requiresRenderUpdate)
 					return;
 
-				_image = new BitmapImage();
-				_imageStream?.Dispose();
-				_image.BeginInit();
-				var ms = _imageStream = new MemoryStream();
-
 				if (_scaledBitmap is null || _originalBitmap is null)
 				{
 					_targets.Clear();
 				}
 
-				var width = (int)(Size.Width < 1 ? 1 : Size.Width);
-				var height = (int)(Size.Height < 1 ? 1 : Size.Height);
-				if (_scaledBitmap != null && (width != _scaledBitmap.Width || height != _scaledBitmap.Height))
+				if (_scaledBitmap != null)
 				{
-					ScaleBitmap();
+					_image = new BitmapImage();
+					_imageStream?.Dispose();
+					_image.BeginInit();
+					var ms = _imageStream = new MemoryStream();
+
+					var width = (int)(Size.Width < 1 ? 1 : Size.Width);
+					var height = (int)(Size.Height < 1 ? 1 : Size.Height);
+					if (_scaledBitmap != null && (width != _scaledBitmap.Width || height != _scaledBitmap.Height))
+					{
+						ScaleBitmap();
+					}
+					width = _scaledBitmap.Width;
+					height = _scaledBitmap.Height;
+
+					var format = System.Drawing.Imaging.PixelFormat.Format32bppArgb;
+					int bitsPerPixel = ((int)format & 0xff00) >> 8;
+					int bytesPerPixel = (bitsPerPixel + 7) / 8;
+					int stride = 4 * ((width * bytesPerPixel + 3) / 4);
+					var imageBuffer = new byte[width * height * bytesPerPixel];
+
+					Parallel.For(0, _targets.Count, i =>
+					{
+						var target = _targets[i];
+						var byteIndex = target.Y * width * bytesPerPixel + target.X * bytesPerPixel;
+
+						imageBuffer[byteIndex] = 0xff;
+						imageBuffer[byteIndex + 1] = 0xff;
+						imageBuffer[byteIndex + 2] = 0xff;
+						imageBuffer[byteIndex + 3] = (byte)(0xff * target.FillRatio);
+					});
+
+					GCHandle pinnedArray = GCHandle.Alloc(imageBuffer, GCHandleType.Pinned);
+					try
+					{
+						IntPtr pointer = pinnedArray.AddrOfPinnedObject();
+						var bitmap = new System.Drawing.Bitmap(width, height, stride, format, pointer);
+						bitmap.Save(ms, ImageFormat.Png);
+						ms.Position = 0;
+						_image.StreamSource = ms;
+						_image.EndInit();
+
+					}
+					finally
+					{
+						pinnedArray.Free();
+					}
+					_rectangle.Fill = new ImageBrush(_image);
 				}
 
-				var format = System.Drawing.Imaging.PixelFormat.Format32bppArgb;
-				int bitsPerPixel = ((int)format & 0xff00) >> 8;
-				int bytesPerPixel = (bitsPerPixel + 7) / 8;
-				int stride = 4 * ((width * bytesPerPixel + 3) / 4);
-				var imageBuffer = new byte[width * height * bytesPerPixel];
-
-				Parallel.For(0, _targets.Count, i =>
-				{
-					var target = _targets[i];
-					var byteIndex = target.Y * width * bytesPerPixel + target.X * bytesPerPixel;
-
-					imageBuffer[byteIndex] = 0xff;
-					imageBuffer[byteIndex + 1] = 0xff;
-					imageBuffer[byteIndex + 2] = 0xff;
-					imageBuffer[byteIndex + 3] = (byte)(0xff * target.FillRatio);
-				});
-
-				GCHandle pinnedArray = GCHandle.Alloc(imageBuffer, GCHandleType.Pinned);
-				try
-				{
-					IntPtr pointer = pinnedArray.AddrOfPinnedObject();
-					var bitmap = new System.Drawing.Bitmap(width, height, stride, format, pointer);
-					bitmap.Save(ms, ImageFormat.Png);
-					ms.Position = 0;
-					_image.StreamSource = ms;
-					_image.EndInit();
-
-				}
-				finally
-				{
-					pinnedArray.Free();
-				}
-				_rectangle.Fill = new ImageBrush(_image);
 				_requiresRenderUpdate = false;
 			}
 			finally
@@ -209,9 +215,9 @@ namespace LaserPathEngraver.UI.Win.Visuals
 			_scaledBitmap = scaledBitmap;
 
 			_targets.Clear();
-			for (int x = 0; x < (int)width; x++)
+			for (int x = 0; x < _scaledBitmap.Width; x++)
 			{
-				for (int y = 0; y < (int)height; y++)
+				for (int y = 0; y < _scaledBitmap.Height; y++)
 				{
 					var pixel = scaledBitmap.GetPixel(x, y);
 					var value = (0xff - pixel.R + 0xff - pixel.G + 0xff - pixel.B) / 3d;

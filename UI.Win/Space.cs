@@ -209,12 +209,15 @@ namespace LaserPathEngraver.UI.Win
 
 						_burnArea.Size = new Size(width, height);
 						RaisePropertyChanged(nameof(ImageWidthDot));
+						RaisePropertyChanged(nameof(ImageWidthCm));
 						RaisePropertyChanged(nameof(ImageHeightDot));
+						RaisePropertyChanged(nameof(ImageHeightCm));
 					}
 					else
 					{
 						_burnArea.Size = new Size(value, _burnArea.Size.Height);
 						RaisePropertyChanged(nameof(ImageWidthDot));
+						RaisePropertyChanged(nameof(ImageWidthCm));
 					}
 				}
 			}
@@ -239,15 +242,30 @@ namespace LaserPathEngraver.UI.Win
 
 						_burnArea.Size = new Size(width, height);
 						RaisePropertyChanged(nameof(ImageWidthDot));
+						RaisePropertyChanged(nameof(ImageWidthCm));
 						RaisePropertyChanged(nameof(ImageHeightDot));
+						RaisePropertyChanged(nameof(ImageHeightCm));
 					}
 					else
 					{
 						_burnArea.Size = new Size(_burnArea.Size.Width, value);
 						RaisePropertyChanged(nameof(ImageHeightDot));
+						RaisePropertyChanged(nameof(ImageHeightCm));
 					}
 				}
 			}
+		}
+
+		public double ImageWidthCm
+		{
+			get => ImageWidthDot / _resolutionDpi * 2.54;
+			set => ImageWidthDot = value / 2.54 * _resolutionDpi;
+		}
+
+		public double ImageHeightCm
+		{
+			get => ImageHeightDot / _resolutionDpi * 2.54;
+			set => ImageHeightDot = value / 2.54 * _resolutionDpi;
 		}
 
 		public bool PreserveAspectRatio
@@ -499,6 +517,8 @@ namespace LaserPathEngraver.UI.Win
 			{
 				RaisePropertyChanged(nameof(ImageHeightDot));
 				RaisePropertyChanged(nameof(ImageWidthDot));
+				RaisePropertyChanged(nameof(ImageHeightCm));
+				RaisePropertyChanged(nameof(ImageWidthCm));
 				_burnBitmapRectangle.Size = _burnArea.Size;
 			}
 		}

@@ -133,6 +133,19 @@
 					          IsChecked="{Binding Space.AutoCenterView}"
 					          Content="{x:Static localization:Texts.AutoCenterViewText}" />
 
+					<StackPanel Orientation="Horizontal">
+						<Label FontSize="16"
+						       Foreground="White"
+						       Margin="-5,12.5,25,0"
+						       Content="{x:Static localization:Texts.UnitText}" />
+						<CheckBox Margin="0,12.5,25,0"
+						          IsChecked="{Binding ShowUnitCm}"
+						          Content="{x:Static localization:Texts.UnitCmText}" />
+						<CheckBox Margin="0,12.5,0,0"
+						          IsChecked="{Binding ShowUnitPx}"
+						          Content="{x:Static localization:Texts.UnitPxText}" />
+					</StackPanel>
+
 					<Label FontSize="20"
 					       Foreground="White"
 					       Margin="0,45,0,0"
@@ -140,6 +153,22 @@
 
 					<StackPanel Orientation="Horizontal"
 					            Margin="0,7.5,0,7.5">
+						<StackPanel.Style>
+							<Style TargetType="{x:Type StackPanel}">
+								<Style.Triggers>
+									<DataTrigger Binding="{Binding ShowUnitPx}" Value="True">
+										<DataTrigger.Setters>
+											<Setter Property="Visibility" Value="Visible" />
+										</DataTrigger.Setters>
+									</DataTrigger>
+									<DataTrigger Binding="{Binding ShowUnitPx}" Value="False">
+										<DataTrigger.Setters>
+											<Setter Property="Visibility" Value="Collapsed" />
+										</DataTrigger.Setters>
+									</DataTrigger>
+								</Style.Triggers>
+							</Style>
+						</StackPanel.Style>
 						<TextBox Width="120" Height="30">
 							<TextBox.Text>
 								<Binding Path="Space.ImageWidthDot"
@@ -157,10 +186,26 @@
 					</StackPanel>
 
 					<StackPanel Orientation="Horizontal"
-					            Margin="0,7.5,0,0">
+					            Margin="0,7.5,0,7.5">
+						<StackPanel.Style>
+							<Style TargetType="{x:Type StackPanel}">
+								<Style.Triggers>
+									<DataTrigger Binding="{Binding ShowUnitCm}" Value="True">
+										<DataTrigger.Setters>
+											<Setter Property="Visibility" Value="Visible" />
+										</DataTrigger.Setters>
+									</DataTrigger>
+									<DataTrigger Binding="{Binding ShowUnitCm}" Value="False">
+										<DataTrigger.Setters>
+											<Setter Property="Visibility" Value="Collapsed" />
+										</DataTrigger.Setters>
+									</DataTrigger>
+								</Style.Triggers>
+							</Style>
+						</StackPanel.Style>
 						<TextBox Width="120" Height="30">
 							<TextBox.Text>
-								<Binding Path="Space.ImageHeightDot"
+								<Binding Path="Space.ImageWidthCm"
 								         UpdateSourceTrigger="PropertyChanged"
 								         StringFormat="N2">
 									<Binding.ValidationRules>
@@ -171,7 +216,75 @@
 						</TextBox>
 						<Label Foreground="White"
 						       FontSize="16"
+						       Content="{x:Static localization:Texts.WidthCmText}" />
+					</StackPanel>
+
+					<StackPanel Orientation="Horizontal"
+					            Margin="0,7.5,0,0">
+						<StackPanel.Style>
+							<Style TargetType="{x:Type StackPanel}">
+								<Style.Triggers>
+									<DataTrigger Binding="{Binding ShowUnitPx}" Value="True">
+										<DataTrigger.Setters>
+											<Setter Property="Visibility" Value="Visible" />
+										</DataTrigger.Setters>
+									</DataTrigger>
+									<DataTrigger Binding="{Binding ShowUnitPx}" Value="False">
+										<DataTrigger.Setters>
+											<Setter Property="Visibility" Value="Collapsed" />
+										</DataTrigger.Setters>
+									</DataTrigger>
+								</Style.Triggers>
+							</Style>
+						</StackPanel.Style>
+						<TextBox Width="120" Height="30">
+							<TextBox.Text>
+								<Binding Path="Space.ImageHeightDot"
+								         UpdateSourceTrigger="PropertyChanged"
+								         StringFormat="N2">
+									<Binding.ValidationRules>
+										<local.rules:DoubleValidationRule Minimum="1" Maximum="30" />
+									</Binding.ValidationRules>
+								</Binding>
+							</TextBox.Text>
+						</TextBox>
+						<Label Foreground="White"
+						       FontSize="16"
 						       Content="{x:Static localization:Texts.HeightPxText}" />
+					</StackPanel>
+
+					<StackPanel Orientation="Horizontal"
+					            Margin="0,7.5,0,0">
+						<StackPanel.Style>
+							<Style TargetType="{x:Type StackPanel}">
+								<Style.Triggers>
+									<DataTrigger Binding="{Binding ShowUnitCm}" Value="True">
+										<DataTrigger.Setters>
+											<Setter Property="Visibility" Value="Visible" />
+										</DataTrigger.Setters>
+									</DataTrigger>
+									<DataTrigger Binding="{Binding ShowUnitCm}" Value="False">
+										<DataTrigger.Setters>
+											<Setter Property="Visibility" Value="Collapsed" />
+										</DataTrigger.Setters>
+									</DataTrigger>
+								</Style.Triggers>
+							</Style>
+						</StackPanel.Style>
+						<TextBox Width="120" Height="30">
+							<TextBox.Text>
+								<Binding Path="Space.ImageHeightCm"
+								         UpdateSourceTrigger="PropertyChanged"
+								         StringFormat="N2">
+									<Binding.ValidationRules>
+										<local.rules:DoubleValidationRule Minimum="1" Maximum="30" />
+									</Binding.ValidationRules>
+								</Binding>
+							</TextBox.Text>
+						</TextBox>
+						<Label Foreground="White"
+						       FontSize="16"
+						       Content="{x:Static localization:Texts.HeightCmText}" />
 					</StackPanel>
 
 					<CheckBox Margin="0,12.5,0,0"

@@ -123,8 +123,11 @@
   <data name="EnableVisualEffectsText" xml:space="preserve">
     <value>Halo anzeigen</value>
   </data>
+  <data name="HeightCmText" xml:space="preserve">
+    <value>Höhe [cm]</value>
+  </data>
   <data name="HeightPxText" xml:space="preserve">
-    <value>Height [px]</value>
+    <value>Höhe [px]</value>
   </data>
   <data name="HelpText" xml:space="preserve">
     <value>Durch Gedrückthalten der linken Maustaste und der linken Steuerungstaste kann man innerhalb des Canvas navigieren.
@@ -149,8 +152,20 @@ Mittels gedrückter Steuerungstaste und gleichzeitigem drehen am Mausrad oder du
   <data name="Title" xml:space="preserve">
     <value>Gravierer</value>
   </data>
+  <data name="UnitCmText" xml:space="preserve">
+    <value>cm</value>
+  </data>
+  <data name="UnitPxText" xml:space="preserve">
+    <value>px</value>
+  </data>
+  <data name="UnitText" xml:space="preserve">
+    <value>Einheit</value>
+  </data>
   <data name="ViewTitle" xml:space="preserve">
     <value>Ansicht</value>
+  </data>
+  <data name="WidthCmText" xml:space="preserve">
+    <value>Breite [cm]</value>
   </data>
   <data name="WidthPxText" xml:space="preserve">
     <value>Breite [px]</value>

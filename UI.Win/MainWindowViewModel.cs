@@ -87,6 +87,34 @@ namespace LaserPathEngraver.UI.Win
 			}
 		}
 
+		public bool ShowUnitCm
+		{
+			get
+			{
+				return _userConfiguration.Value.Unit == Unit.cm;
+			}
+			set
+			{
+				_userConfiguration.Update(config => config.Unit = value ? Unit.cm : Unit.px);
+				RaisePropertyChanged(nameof(ShowUnitCm));
+				RaisePropertyChanged(nameof(ShowUnitPx));
+			}
+		}
+
+		public bool ShowUnitPx
+		{
+			get
+			{
+				return _userConfiguration.Value.Unit == Unit.px;
+			}
+			set
+			{
+				_userConfiguration.Update(config => config.Unit = value ? Unit.px : Unit.cm);
+				RaisePropertyChanged(nameof(ShowUnitCm));
+				RaisePropertyChanged(nameof(ShowUnitPx));
+			}
+		}
+
 		public Effect? DropShadowEffect
 		{
 			get

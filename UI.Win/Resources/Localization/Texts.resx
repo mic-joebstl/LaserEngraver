@@ -123,6 +123,9 @@
   <data name="EnableVisualEffectsText" xml:space="preserve">
     <value>Show halo</value>
   </data>
+  <data name="HeightCmText" xml:space="preserve">
+    <value>Height [cm]</value>
+  </data>
   <data name="HeightPxText" xml:space="preserve">
     <value>Height [px]</value>
   </data>
@@ -147,8 +150,20 @@
   <data name="Title" xml:space="preserve">
     <value>Engraver</value>
   </data>
+  <data name="UnitCmText" xml:space="preserve">
+    <value>cm</value>
+  </data>
+  <data name="UnitPxText" xml:space="preserve">
+    <value>px</value>
+  </data>
+  <data name="UnitText" xml:space="preserve">
+    <value>Unit</value>
+  </data>
   <data name="ViewTitle" xml:space="preserve">
     <value>View</value>
+  </data>
+  <data name="WidthCmText" xml:space="preserve">
+    <value>Width [cm]</value>
   </data>
   <data name="WidthPxText" xml:space="preserve">
     <value>Width [px]</value>
