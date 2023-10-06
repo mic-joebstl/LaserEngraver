@@ -10,8 +10,8 @@ namespace LaserPathEngraver.Core.Configurations
 		public double HeightDots { get; set; } = 1608;
 		public DeviceType Type { get; set; }
 #if DEBUG
-= DeviceType.Mock;
-		//= DeviceType.Serial;
+		//= DeviceType.Mock;
+		= DeviceType.Serial;
 #endif
 		public TimeSpan ConnectionTimeout { get; set; } = TimeSpan.FromSeconds(15);
 		public string? PortName { get; set; }

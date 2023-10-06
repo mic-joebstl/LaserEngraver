@@ -67,7 +67,7 @@ namespace LaserPathEngraver.Core.Devices.Serial
 				com.Open();
 
 				await WriteCommand(new SimpleEngraverCommand(EngraverCommandType.Connect), cancellationToken);
-				await WriteCommand(new SimpleEngraverCommand(EngraverCommandType.NonDiscrete), cancellationToken);
+				await WriteCommand(new SimpleEngraverCommand(EngraverCommandType.Discrete), cancellationToken);
 
 				tx.Commit();
 			}
@@ -106,7 +106,6 @@ namespace LaserPathEngraver.Core.Devices.Serial
 
 				await WriteCommand(new SimpleEngraverCommand(EngraverCommandType.Reset), cancellationToken);
 				await WriteCommand(new SimpleEngraverCommand(EngraverCommandType.HomeCenter), cancellationToken);
-				await WriteCommand(new SimpleEngraverCommand(EngraverCommandType.Discrete), cancellationToken);
 
 				Position = new Point((int)(_configuration.WidthDots / 2), (int)(_configuration.HeightDots / 2));
 			}
@@ -129,6 +128,7 @@ namespace LaserPathEngraver.Core.Devices.Serial
 					if (_requiresReset)
 					{
 						await WriteCommand(new SimpleEngraverCommand(EngraverCommandType.Reset), cancellationToken);
+						_requiresReset = false;
 					}
 					await WriteCommand(new MoveCommand(x, y), cancellationToken);
 
@@ -161,17 +161,20 @@ namespace LaserPathEngraver.Core.Devices.Serial
 					};
 
 					var x = (short)(
-						vectorAbs.X >= 50 ? vector.X / vectorAbs.X * 50 :
+						vectorAbs.X >= 100 ? vector.X / vectorAbs.X * 100 :
+						vectorAbs.X >= 10 ? vector.X / vectorAbs.X * 10 :
 						vector.X != 0 ? vector.X / Math.Abs(vector.X) : 0
 					);
 					var y = (short)(
-						vectorAbs.Y >= 50 ? vector.Y / vectorAbs.Y * 50 :
+						vectorAbs.Y >= 100 ? vector.Y / vectorAbs.Y * 100 :
+						vectorAbs.Y >= 10 ? vector.Y / vectorAbs.Y * 10 :
 						vector.Y != 0 ? vector.Y / Math.Abs(vector.Y) : 0
 					);
 
 					if (_requiresReset)
 					{
 						await WriteCommand(new SimpleEngraverCommand(EngraverCommandType.Reset), cancellationToken);
+						_requiresReset = false;
 					}
 					await WriteCommand(new MoveCommand(x, y), cancellationToken);
 
@@ -228,13 +231,6 @@ namespace LaserPathEngraver.Core.Devices.Serial
 
 				await WriteCommand(new SimpleEngraverCommand(EngraverCommandType.Reset), cancellationToken);
 				await WriteCommand(command, cancellationToken);
-
-				var position = Position;
-				if (position.HasValue)
-				{
-					Position = new Point(position.Value.X + length - 1, position.Value.Y);
-				}
-
 				_requiresReset = true;
 			}
 		}
