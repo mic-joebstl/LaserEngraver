@@ -469,6 +469,10 @@
 						          Margin="0"
 						          IsChecked="{Binding ShowUnitPx}"
 						          Content="{x:Static localization:Texts.UnitPxText}" />
+						<CheckBox Grid.Column="2"
+						          Margin="0"
+						          IsChecked="{Binding ShowUnitIn}"
+						          Content="{x:Static localization:Texts.UnitInText}" />
 					</Grid>
 
 
@@ -546,6 +550,40 @@
 					</StackPanel>
 
 					<StackPanel Orientation="Horizontal"
+					            Margin="0,7.5,0,7.5">
+						<StackPanel.Style>
+							<Style TargetType="{x:Type StackPanel}">
+								<Style.Triggers>
+									<DataTrigger Binding="{Binding ShowUnitIn}" Value="True">
+										<DataTrigger.Setters>
+											<Setter Property="Visibility" Value="Visible" />
+										</DataTrigger.Setters>
+									</DataTrigger>
+									<DataTrigger Binding="{Binding ShowUnitIn}" Value="False">
+										<DataTrigger.Setters>
+											<Setter Property="Visibility" Value="Collapsed" />
+										</DataTrigger.Setters>
+									</DataTrigger>
+								</Style.Triggers>
+							</Style>
+						</StackPanel.Style>
+						<TextBox Width="70" Height="30" IsEnabled="{Binding IsEditable, Mode=OneWay}">
+							<TextBox.Text>
+								<Binding Path="Space.ImageWidthIn"
+								         UpdateSourceTrigger="PropertyChanged"
+								         StringFormat="N2">
+									<Binding.ValidationRules>
+										<rules:DoubleValidationRule Minimum="1" Maximum="12" />
+									</Binding.ValidationRules>
+								</Binding>
+							</TextBox.Text>
+						</TextBox>
+						<Label FontSize="16"
+						       Content="{x:Static localization:Texts.WidthInText}"
+						       IsEnabled="{Binding IsEditable, Mode=OneWay}" />
+					</StackPanel>
+
+					<StackPanel Orientation="Horizontal"
 					            Margin="0,7.5,0,0">
 						<StackPanel.Style>
 							<Style TargetType="{x:Type StackPanel}">
@@ -610,6 +648,40 @@
 						</TextBox>
 						<Label FontSize="16"
 						       Content="{x:Static localization:Texts.HeightCmText}"
+						       IsEnabled="{Binding IsEditable, Mode=OneWay}" />
+					</StackPanel>
+
+					<StackPanel Orientation="Horizontal"
+					            Margin="0,7.5,0,0">
+						<StackPanel.Style>
+							<Style TargetType="{x:Type StackPanel}">
+								<Style.Triggers>
+									<DataTrigger Binding="{Binding ShowUnitIn}" Value="True">
+										<DataTrigger.Setters>
+											<Setter Property="Visibility" Value="Visible" />
+										</DataTrigger.Setters>
+									</DataTrigger>
+									<DataTrigger Binding="{Binding ShowUnitIn}" Value="False">
+										<DataTrigger.Setters>
+											<Setter Property="Visibility" Value="Collapsed" />
+										</DataTrigger.Setters>
+									</DataTrigger>
+								</Style.Triggers>
+							</Style>
+						</StackPanel.Style>
+						<TextBox Width="70" Height="30" IsEnabled="{Binding IsEditable, Mode=OneWay}">
+							<TextBox.Text>
+								<Binding Path="Space.ImageHeightIn"
+								         UpdateSourceTrigger="PropertyChanged"
+								         StringFormat="N2">
+									<Binding.ValidationRules>
+										<rules:DoubleValidationRule Minimum="1" Maximum="12" />
+									</Binding.ValidationRules>
+								</Binding>
+							</TextBox.Text>
+						</TextBox>
+						<Label FontSize="16"
+						       Content="{x:Static localization:Texts.HeightInText}"
 						       IsEnabled="{Binding IsEditable, Mode=OneWay}" />
 					</StackPanel>
 

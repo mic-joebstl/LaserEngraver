@@ -18,7 +18,7 @@ namespace LaserPathEngraver.UI.Win.Configuration
 		public bool ShowHelp { get; set; } = false;
 		public bool AutoCenterView { get; set; } = true;
 		public bool PreserveAspectRatio { get; set; } = true;
-		public Unit Unit { get; set; } = Unit.cm;
+		public Unit Unit { get; set; } = Unit.Cm;
 		public Theme Theme { get; set; } = Theme.Dark;
 		public Theme? CustomTheme { get; set; }
 

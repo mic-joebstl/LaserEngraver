@@ -180,6 +180,9 @@
   <data name="HeightCmText" xml:space="preserve">
     <value>Height [cm]</value>
   </data>
+  <data name="HeightInText" xml:space="preserve">
+    <value>Height [in]</value>
+  </data>
   <data name="HeightPxText" xml:space="preserve">
     <value>Height [px]</value>
   </data>
@@ -290,6 +293,9 @@ Exact duration depends on the device, so it is specified here in percent.
   <data name="UnitCmText" xml:space="preserve">
     <value>cm</value>
   </data>
+  <data name="UnitInText" xml:space="preserve">
+    <value>in</value>
+  </data>
   <data name="UnitPxText" xml:space="preserve">
     <value>px</value>
   </data>
@@ -304,6 +310,9 @@ Exact duration depends on the device, so it is specified here in percent.
   </data>
   <data name="WidthCmText" xml:space="preserve">
     <value>Width [cm]</value>
+  </data>
+  <data name="WidthInText" xml:space="preserve">
+    <value>Width [in]</value>
   </data>
   <data name="WidthPxText" xml:space="preserve">
     <value>Width [px]</value>

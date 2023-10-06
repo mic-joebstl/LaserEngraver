@@ -27,8 +27,9 @@ namespace LaserPathEngraver.Core.Configurations
 
 	public enum Unit
 	{
-		px = 0,
-		cm = 1
+		Px = 0,
+		Cm = 1,
+		In = 2,
 	}
 
 	public class BurnConfiguration

@@ -242,16 +242,22 @@ namespace LaserPathEngraver.UI.Win
 
 						_burnArea.Size = new Size(width, height);
 						RaisePropertyChanged(nameof(ImageWidthDot));
-						RaisePropertyChanged(nameof(ImageWidthCm));
 						RaisePropertyChanged(nameof(ImageHeightDot));
+						RaisePropertyChanged(nameof(ImageWidthCm));
 						RaisePropertyChanged(nameof(ImageHeightCm));
+						RaisePropertyChanged(nameof(ImageWidthIn));
+						RaisePropertyChanged(nameof(ImageHeightIn));
 						RaisePropertyChanged(nameof(ImageBoundingRect));
 					}
 					else
 					{
 						_burnArea.Size = new Size(value, _burnArea.Size.Height);
 						RaisePropertyChanged(nameof(ImageWidthDot));
+						RaisePropertyChanged(nameof(ImageHeightDot));
 						RaisePropertyChanged(nameof(ImageWidthCm));
+						RaisePropertyChanged(nameof(ImageHeightCm));
+						RaisePropertyChanged(nameof(ImageWidthIn));
+						RaisePropertyChanged(nameof(ImageHeightIn));
 					}
 				}
 			}
@@ -276,9 +282,11 @@ namespace LaserPathEngraver.UI.Win
 
 						_burnArea.Size = new Size(width, height);
 						RaisePropertyChanged(nameof(ImageWidthDot));
-						RaisePropertyChanged(nameof(ImageWidthCm));
 						RaisePropertyChanged(nameof(ImageHeightDot));
+						RaisePropertyChanged(nameof(ImageWidthCm));
 						RaisePropertyChanged(nameof(ImageHeightCm));
+						RaisePropertyChanged(nameof(ImageWidthIn));
+						RaisePropertyChanged(nameof(ImageHeightIn));
 						RaisePropertyChanged(nameof(ImageBoundingRect));
 					}
 					else
@@ -302,6 +310,18 @@ namespace LaserPathEngraver.UI.Win
 		{
 			get => ImageHeightDot / _resolutionDpi * 2.54;
 			set => ImageHeightDot = value / 2.54 * _resolutionDpi;
+		}
+
+		public double ImageWidthIn
+		{
+			get => ImageWidthDot / _resolutionDpi;
+			set => ImageWidthDot = value * _resolutionDpi;
+		}
+
+		public double ImageHeightIn
+		{
+			get => ImageHeightDot / _resolutionDpi;
+			set => ImageHeightDot = value * _resolutionDpi;
 		}
 
 		public bool PreserveAspectRatio
@@ -627,6 +647,8 @@ namespace LaserPathEngraver.UI.Win
 				RaisePropertyChanged(nameof(ImageWidthDot));
 				RaisePropertyChanged(nameof(ImageHeightCm));
 				RaisePropertyChanged(nameof(ImageWidthCm));
+				RaisePropertyChanged(nameof(ImageHeightIn));
+				RaisePropertyChanged(nameof(ImageWidthIn));
 				RaisePropertyChanged(nameof(ImageBoundingRect));
 				_burnBitmapRectangle.Size = _burnArea.Size;
 			}

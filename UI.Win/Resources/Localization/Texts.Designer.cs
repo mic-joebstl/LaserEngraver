@@ -250,6 +250,15 @@ namespace LaserPathEngraver.UI.Win.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Height [in].
+        /// </summary>
+        public static string HeightInText {
+            get {
+                return ResourceManager.GetString("HeightInText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Height [px].
         /// </summary>
         public static string HeightPxText {
@@ -503,6 +512,15 @@ namespace LaserPathEngraver.UI.Win.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to in.
+        /// </summary>
+        public static string UnitInText {
+            get {
+                return ResourceManager.GetString("UnitInText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to px.
         /// </summary>
         public static string UnitPxText {
@@ -544,6 +562,15 @@ namespace LaserPathEngraver.UI.Win.Resources.Localization {
         public static string WidthCmText {
             get {
                 return ResourceManager.GetString("WidthCmText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Width [in].
+        /// </summary>
+        public static string WidthInText {
+            get {
+                return ResourceManager.GetString("WidthInText", resourceCulture);
             }
         }
         

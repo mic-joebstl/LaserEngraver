@@ -118,13 +118,14 @@ namespace LaserPathEngraver.UI.Win
 		{
 			get
 			{
-				return _userConfiguration.Value.Unit == Unit.cm;
+				return _userConfiguration.Value.Unit == Unit.Cm;
 			}
 			set
 			{
-				_userConfiguration.Update(config => config.Unit = value ? Unit.cm : Unit.px);
-				RaisePropertyChanged(nameof(ShowUnitCm));
+				_userConfiguration.Update(config => config.Unit = value ? Unit.Cm : Unit.Px);
 				RaisePropertyChanged(nameof(ShowUnitPx));
+				RaisePropertyChanged(nameof(ShowUnitCm));
+				RaisePropertyChanged(nameof(ShowUnitIn));
 			}
 		}
 
@@ -132,13 +133,29 @@ namespace LaserPathEngraver.UI.Win
 		{
 			get
 			{
-				return _userConfiguration.Value.Unit == Unit.px;
+				return _userConfiguration.Value.Unit == Unit.Px;
 			}
 			set
 			{
-				_userConfiguration.Update(config => config.Unit = value ? Unit.px : Unit.cm);
-				RaisePropertyChanged(nameof(ShowUnitCm));
+				_userConfiguration.Update(config => config.Unit = value ? Unit.Px : Unit.Cm);
 				RaisePropertyChanged(nameof(ShowUnitPx));
+				RaisePropertyChanged(nameof(ShowUnitCm));
+				RaisePropertyChanged(nameof(ShowUnitIn));
+			}
+		}
+
+		public bool ShowUnitIn
+		{
+			get
+			{
+				return _userConfiguration.Value.Unit == Unit.In;
+			}
+			set
+			{
+				_userConfiguration.Update(config => config.Unit = value ? Unit.In : Unit.Cm);
+				RaisePropertyChanged(nameof(ShowUnitPx));
+				RaisePropertyChanged(nameof(ShowUnitCm));
+				RaisePropertyChanged(nameof(ShowUnitIn));
 			}
 		}
 
