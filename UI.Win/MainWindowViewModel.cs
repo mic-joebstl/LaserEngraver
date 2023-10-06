@@ -30,6 +30,7 @@ namespace LaserPathEngraver.UI.Win
 		private bool _enableVisualEffects;
 		private Effect? _dropShadowEffect;
 		private System.Windows.Point _mouseLastPos;
+		private System.Windows.Point _mouseLastDownPos;
 		private DispatcherTimer _jobElapsedTimer;
 
 		public MainWindowViewModel(IWritableOptions<UserConfiguration> userConfiguration, Space space, DeviceDispatcherService deviceDispatcher)
@@ -210,10 +211,11 @@ namespace LaserPathEngraver.UI.Win
 				{
 					return Cursors.SizeAll;
 				}
-				else if(IsEditable)
+				else if (IsEditable)
 				{
-					var topLeft = Space.SpacePositionToScreenPosition(new System.Windows.Point(0, 0));
-					var bottomRight = Space.SpacePositionToScreenPosition(new System.Windows.Point(Space.CanvasWidthDot, Space.CanvasHeightDot));
+					var boundingRect = Space.CanvasBoundingRect;
+					var topLeft = Space.SpacePositionToScreenPosition(new System.Windows.Point(boundingRect.Left, boundingRect.Top));
+					var bottomRight = Space.SpacePositionToScreenPosition(new System.Windows.Point(boundingRect.Right, boundingRect.Bottom));
 					var pos = _mouseLastPos;
 					if (pos.X >= topLeft.X && pos.X <= bottomRight.X && pos.Y >= topLeft.Y && pos.Y <= bottomRight.Y)
 					{
@@ -241,7 +243,7 @@ namespace LaserPathEngraver.UI.Win
 						e.MouseDevice.Capture(element);
 					}
 				}
-				_mouseLastPos = e.GetPosition(_space.Canvas);
+				_mouseLastDownPos = _mouseLastPos = e.GetPosition(_space.Canvas);
 			}
 		}
 
@@ -276,6 +278,38 @@ namespace LaserPathEngraver.UI.Win
 
 		private void OnSpaceMouseUp(object? sender, System.Windows.Input.MouseButtonEventArgs e)
 		{
+			if (DeviceDispatcher.DeviceStatus == DeviceStatus.Ready && _mouseLastDownPos == e.GetPosition(_space.Canvas))
+			{
+				ErrorMessage = null;
+				var spacePosition = Space.ScreenPositionToSpacePosition(_mouseLastDownPos);
+				var boundingRect = Space.CanvasBoundingRect;
+				spacePosition = new System.Windows.Point
+				{
+					X = spacePosition.X < boundingRect.Left ? boundingRect.Left : spacePosition.X > boundingRect.Right ? boundingRect.Right : spacePosition.X,
+					Y = spacePosition.Y < boundingRect.Top ? boundingRect.Top : spacePosition.Y > boundingRect.Bottom ? boundingRect.Bottom : spacePosition.Y,
+				};
+
+				Dispatcher.CurrentDispatcher.BeginInvoke(async () => 
+				{
+					if (DeviceDispatcher.DeviceStatus == DeviceStatus.Ready)
+					{
+						try
+						{
+							
+
+							await _deviceDispatcher.ExecuteJob(
+								new MoveAbsoluteJob(new System.Drawing.Point { X = (int)spacePosition.X, Y = (int)spacePosition.Y }),
+								CancellationToken.None
+							);
+						}
+						catch (Exception ex)
+						{
+							ErrorMessage = ex.Message;
+						}
+					}
+				});
+			}
+
 			e.MouseDevice.Capture(null);
 		}
 

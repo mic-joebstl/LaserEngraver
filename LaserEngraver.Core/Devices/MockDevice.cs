@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -39,6 +40,51 @@ namespace LaserPathEngraver.Core.Devices
 			}
 			await Task.Delay(TimeSpan.FromSeconds(5), cancellationToken);
 			Position = new System.Drawing.Point(0, 0);
+			Status = DeviceStatus.Ready;
+		}
+
+		public override async Task MoveRelativeAsync(Point vector, CancellationToken cancellationToken)
+		{
+			lock (SyncRoot)
+			{
+				DemandState(DeviceStatus.Ready);
+				Status = DeviceStatus.Executing;
+			}
+
+			var position = Position;
+			if (position != null)
+			{
+				await Task.Delay(Math.Abs(vector.X) * TimeSpan.FromMilliseconds(1) + Math.Abs(vector.Y) * TimeSpan.FromMilliseconds(1), cancellationToken);
+				Position = new Point
+				{
+					X = position.Value.X + vector.X,
+					Y = position.Value.Y + vector.Y
+				};
+			}
+
+			Status = DeviceStatus.Ready;
+		}
+
+		public override async Task MoveAbsoluteAsync(Point position, CancellationToken cancellationToken)
+		{
+			lock (SyncRoot)
+			{
+				DemandState(DeviceStatus.Ready);
+				Status = DeviceStatus.Executing;
+			}
+
+			var oldPosition = Position;
+			if (oldPosition != null)
+			{
+				var vector = new Point
+				{
+					X = position.X - oldPosition.Value.X,
+					Y = position.Y - oldPosition.Value.Y
+				};
+				await Task.Delay(Math.Abs(vector.X) * TimeSpan.FromMilliseconds(1) + Math.Abs(vector.Y) * TimeSpan.FromMilliseconds(1), cancellationToken);
+				Position = position;
+			}
+
 			Status = DeviceStatus.Ready;
 		}
 	}

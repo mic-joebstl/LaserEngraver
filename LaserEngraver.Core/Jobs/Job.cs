@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -129,6 +130,23 @@ namespace LaserPathEngraver.Core.Jobs
 		protected override async Task ExecuteCoreAsync(Device device, CancellationToken cancellationToken)
 		{
 			await device.HomingAsync(cancellationToken);
+		}
+	}
+
+	public sealed class MoveAbsoluteJob: Job
+	{
+		private Point _position;
+
+		public MoveAbsoluteJob(Point position)
+		{
+			_position = position;
+		}
+
+		public override string Title => Resources.Localization.Texts.MoveAbsoluteJobTitle;
+
+		protected override async Task ExecuteCoreAsync(Device device, CancellationToken cancellationToken)
+		{
+			await device.MoveAbsoluteAsync(_position, cancellationToken);
 		}
 	}
 }

@@ -68,5 +68,14 @@ namespace LaserPathEngraver.Core.Resources.Localization {
                 return ResourceManager.GetString("HomingJobTitle", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Positioning.
+        /// </summary>
+        internal static string MoveAbsoluteJobTitle {
+            get {
+                return ResourceManager.GetString("MoveAbsoluteJobTitle", resourceCulture);
+            }
+        }
     }
 }

@@ -120,4 +120,7 @@
   <data name="HomingJobTitle" xml:space="preserve">
     <value>Homing</value>
   </data>
+  <data name="MoveAbsoluteJobTitle" xml:space="preserve">
+    <value>Positioning</value>
+  </data>
 </root>

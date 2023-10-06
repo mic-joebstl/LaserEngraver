@@ -106,7 +106,7 @@ namespace LaserPathEngraver.UI.Win
 			_burnArea.PropertyChanged += OnBurnAreaPropertyChanged;
 			_burnArea.Size = new Size(0, 0);
 			_burnArea.Position = new Point((double)_canvasWidthDot / 2, (double)_canvasHeightDot / 2);
-			_burnArea.BoundingRect = new System.Drawing.RectangleF(0, 0, (float)CanvasWidthDot, (float)CanvasHeightDot);
+			_burnArea.BoundingRect = CanvasBoundingRect;
 			_burnArea.EngravingPower = EngravingPower;
 			_burnArea.FixedPowerThreshold = FixedPowerThreshold;
 			_burnArea.IsPowerVariable = IsPowerVarible;
@@ -192,7 +192,8 @@ namespace LaserPathEngraver.UI.Win
 				if (_canvasWidthDot != value)
 				{
 					_canvasWidthDot = value;
-					_burnArea.BoundingRect = new System.Drawing.RectangleF(0, 0, (float)CanvasWidthDot, (float)CanvasHeightDot);
+					_burnArea.BoundingRect = CanvasBoundingRect;
+					RaisePropertyChanged(nameof(CanvasBoundingRect));
 					RaisePropertyChanged(nameof(CanvasWidthDot));
 				}
 			}
@@ -209,11 +210,14 @@ namespace LaserPathEngraver.UI.Win
 				if (_canvasHeightDot != value)
 				{
 					_canvasHeightDot = value;
-					_burnArea.BoundingRect = new System.Drawing.RectangleF(0, 0, (float)CanvasWidthDot, (float)CanvasHeightDot);
+					_burnArea.BoundingRect = CanvasBoundingRect;
+					RaisePropertyChanged(nameof(CanvasBoundingRect));
 					RaisePropertyChanged(nameof(CanvasHeightDot));
 				}
 			}
 		}
+
+		public System.Drawing.RectangleF CanvasBoundingRect => new System.Drawing.RectangleF(0, 0, (float)CanvasWidthDot, (float)CanvasHeightDot);
 
 		public double ImageWidthDot
 		{
