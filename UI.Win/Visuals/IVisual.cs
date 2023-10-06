@@ -13,7 +13,5 @@ namespace LaserPathEngraver.UI.Win.Visuals
 		Point Position { get; set; }
 		Size Size { get; set; }
 		Shape Shape { get; }
-		
-
 	}
 }

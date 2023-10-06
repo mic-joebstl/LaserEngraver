@@ -22,8 +22,11 @@ namespace LaserPathEngraver.UI.Win
 
 		private IWritableOptions<DeviceConfiguration> _deviceConfiguration;
 		private IWritableOptions<UserConfiguration> _userConfiguration;
+
 		private Canvas _canvas;
-		private BurnArea _burnableArea;
+		private BurnRectangle _burnRectangle;
+		private BurnArea _burnArea;
+
 		private double _scale;
 		private double _offsetX;
 		private double _offsetY;
@@ -33,6 +36,7 @@ namespace LaserPathEngraver.UI.Win
 		private TimeSpan _renderStopwatchDuration;
 		private double _renderRate;
 		private TimeSpan _renderInterval;
+		private TimeSpan _renderBitmapInterval;
 		private DispatcherTimer _dispatcherTimer;
 		private decimal _canvasWidthDot;
 		private decimal _canvasHeightDot;
@@ -65,18 +69,23 @@ namespace LaserPathEngraver.UI.Win
 			_offsetY = 0;
 			_renderStopwatch = new Stopwatch();
 			_renderInterval = TimeSpan.FromMilliseconds(8);
+			_renderBitmapInterval = TimeSpan.FromMilliseconds(64);
 			
 			_dispatcherTimer = new DispatcherTimer(DispatcherPriority.Background);
 			_dispatcherTimer.Interval = _renderInterval;
 			_dispatcherTimer.Tick += OnRender;
 			_dispatcherTimer.Start();
 
-			_burnableArea = new BurnArea();
-			_burnableArea.Size = new Size((double)_canvasWidthDot, (double)_canvasHeightDot);
-			_burnableArea.Shape.Stroke = System.Windows.Media.Brushes.White;
-			_burnableArea.Shape.StrokeThickness = 2;
-			_burnableArea.Shape.StrokeDashArray = new DoubleCollection() { 5 };
-			AddVisualToCanvas(_burnableArea);
+			_burnRectangle = new BurnRectangle();
+			_burnRectangle.Size = new Size((double)_canvasWidthDot, (double)_canvasHeightDot);
+			_burnRectangle.Shape.Stroke = System.Windows.Media.Brushes.White;
+			_burnRectangle.Shape.StrokeThickness = 2;
+			_burnRectangle.Shape.StrokeDashArray = new DoubleCollection() { 5 };
+			AddVisualToCanvas(_burnRectangle);
+
+			_burnArea = new BurnArea();
+			_burnArea.Size = new Size((double)_canvasWidthDot, (double)_canvasHeightDot);
+			AddVisualToCanvas(_burnArea);
 		}
 
 		#endregion
@@ -266,26 +275,38 @@ namespace LaserPathEngraver.UI.Win
 
 		private IEnumerable<IVisual> GetVisuals()
 		{
-			yield return _burnableArea;
+			yield return _burnRectangle;
+			yield return _burnArea;
 		}
 
-		private void UpdateVisuals()
+		private void UpdateVisuals(bool updatePositions = true, bool updateBitmap = true)
 		{
 			foreach (var visual in GetVisuals())
 			{
-				UpdateVisual(visual);
+				UpdateVisual(visual, updatePositions, updateBitmap);
 			}
 		}
 
-		private void UpdateVisual(IVisual visual)
+		private void UpdateVisual(IVisual visual, bool updatePositions = true, bool updateBitmap = true)
 		{
-			var shape = visual.Shape;
-			shape.Width = visual.Size.Width * _scale;
-			shape.Height = visual.Size.Height * _scale;
+			if (updatePositions)
+			{
+				var shape = visual.Shape;
+				shape.Width = visual.Size.Width * _scale;
+				shape.Height = visual.Size.Height * _scale;
 
-			var position = SpacePositionToScreenPosition(visual.Position);
-			Canvas.SetTop(shape, position.Y);
-			Canvas.SetLeft(shape, position.X);
+				var position = SpacePositionToScreenPosition(visual.Position);
+				Canvas.SetTop(shape, position.Y);
+				Canvas.SetLeft(shape, position.X);
+			}
+
+			if (updateBitmap)
+			{
+				if (visual is BurnArea burnarea)
+				{
+					burnarea.RenderImage();
+				}
+			}
 		}
 
 		private void AddVisualToCanvas(IVisual visual)
@@ -302,15 +323,18 @@ namespace LaserPathEngraver.UI.Win
 		{
 			#region RenderInterval
 
+			var updateBitmap = false;
+
 			if (!_renderStopwatch.IsRunning)
 			{
 				_renderStopwatch.Start();
 			}
 			else
 			{
-				_renderInterval = _renderStopwatch.Elapsed;
+				var elapsed = _renderStopwatch.Elapsed;
+				updateBitmap = elapsed >= _renderBitmapInterval;
 				_renderStopwatchIterations++;
-				_renderStopwatchDuration += _renderInterval;
+				_renderStopwatchDuration += elapsed;
 				_renderStopwatch.Restart();
 
 				if (_renderStopwatchDuration >= TimeSpan.FromSeconds(0.5))
@@ -345,7 +369,7 @@ namespace LaserPathEngraver.UI.Win
 				}
 			}
 
-			UpdateVisuals();
+			UpdateVisuals(updateBitmap: updateBitmap);
 		}
 
 		private void OnRender(object? sender, EventArgs e)
