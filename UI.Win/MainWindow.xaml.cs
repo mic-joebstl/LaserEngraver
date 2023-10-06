@@ -2,6 +2,7 @@
 using LaserPathEngraver.Core.Configurations;
 using LaserPathEngraver.Core.Devices;
 using LaserPathEngraver.UI.Win.Configuration;
+using LaserPathEngraver.UI.Win.Controls;
 using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
@@ -84,6 +85,41 @@ namespace LaserPathEngraver.UI.Win
 		private void ContentControl_Drop(object sender, DragEventArgs e)
 		{
 			_viewModel.OnSpaceDrop(sender, e);
+		}
+
+		private void Window_Loaded(object sender, RoutedEventArgs e)
+		{
+			var source = PresentationSource.FromVisual(this);
+			if (source != null)
+			{
+				try
+				{
+					var screenResolution = (double)this.GetDpi(WindowExtensions.DpiType.Raw);
+					if(screenResolution > 0)
+					{
+						_viewModel.Space.ScreenResolutionDpi = screenResolution;
+						var deviceResolution = _viewModel.Space.ResolutionDpi;
+						var scaleFactorScreenDevice = screenResolution / deviceResolution;
+						var scaleFactorScreenWpf = screenResolution / 96;
+						var windowHeight = _viewModel.Space.Canvas.ActualHeight;
+						var canvasHeight = _viewModel.Space.CanvasHeightDot * scaleFactorScreenDevice;
+						if (windowHeight > 0 && canvasHeight > 0)
+						{
+							//30 is double the current section marging
+							var margin = 60 * scaleFactorScreenDevice * scaleFactorScreenWpf;
+							var scale = windowHeight / (canvasHeight + margin);
+							//snap to 5%
+							scale = scale - scale % 0.05;
+
+							_viewModel.Space.Scale = scale;
+						}
+					}
+				}
+				catch (Exception ex)
+				{
+					_viewModel.ErrorMessage = ex.Message;
+				}
+			}
 		}
 
 		public event PropertyChangedEventHandler? PropertyChanged;

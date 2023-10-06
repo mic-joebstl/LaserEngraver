@@ -47,7 +47,8 @@ namespace LaserPathEngraver.UI.Win
 		private DispatcherTimer _renderBitmapTimer;
 		private double _canvasWidthDot;
 		private double _canvasHeightDot;
-		private double _resolutionDpi;
+		private double _deviceResolutionDpi;
+		private double _screenResolutionDpi;
 
 		#endregion
 
@@ -60,7 +61,8 @@ namespace LaserPathEngraver.UI.Win
 			_burnConfiguration = burnConfiguration;
 			_canvasHeightDot = deviceConfiguration.Value.HeightDots;
 			_canvasWidthDot = deviceConfiguration.Value.WidthDots;
-			_resolutionDpi = deviceConfiguration.Value.DPI;
+			_screenResolutionDpi = 96;
+			_deviceResolutionDpi = deviceConfiguration.Value.DPI;
 			_autoCenterView = userConfiguration.Value.AutoCenterView;
 			_preserveAspectRatio = userConfiguration.Value.PreserveAspectRatio;
 
@@ -143,6 +145,20 @@ namespace LaserPathEngraver.UI.Win
 				return _canvas;
 			}
 		}
+
+		public double ScreenResolutionDpi
+		{
+			get => _screenResolutionDpi;
+			set 
+			{
+				if (value != _screenResolutionDpi)
+				{
+					_screenResolutionDpi = value;
+					RaisePropertyChanged(nameof(ScreenResolutionDpi));
+					RaisePropertyChanged(nameof(Scale));
+				}
+			}
+		} 
 
 		public BurnArea BurnArea => _burnArea;
 
@@ -302,26 +318,26 @@ namespace LaserPathEngraver.UI.Win
 
 		public double ImageWidthCm
 		{
-			get => ImageWidthDot / _resolutionDpi * 2.54;
-			set => ImageWidthDot = value / 2.54 * _resolutionDpi;
+			get => ImageWidthDot / _deviceResolutionDpi * 2.54;
+			set => ImageWidthDot = value / 2.54 * _deviceResolutionDpi;
 		}
 
 		public double ImageHeightCm
 		{
-			get => ImageHeightDot / _resolutionDpi * 2.54;
-			set => ImageHeightDot = value / 2.54 * _resolutionDpi;
+			get => ImageHeightDot / _deviceResolutionDpi * 2.54;
+			set => ImageHeightDot = value / 2.54 * _deviceResolutionDpi;
 		}
 
 		public double ImageWidthIn
 		{
-			get => ImageWidthDot / _resolutionDpi;
-			set => ImageWidthDot = value * _resolutionDpi;
+			get => ImageWidthDot / _deviceResolutionDpi;
+			set => ImageWidthDot = value * _deviceResolutionDpi;
 		}
 
 		public double ImageHeightIn
 		{
-			get => ImageHeightDot / _resolutionDpi;
-			set => ImageHeightDot = value * _resolutionDpi;
+			get => ImageHeightDot / _deviceResolutionDpi;
+			set => ImageHeightDot = value * _deviceResolutionDpi;
 		}
 
 		public bool PreserveAspectRatio
@@ -339,13 +355,13 @@ namespace LaserPathEngraver.UI.Win
 		{
 			get
 			{
-				return _resolutionDpi;
+				return _deviceResolutionDpi;
 			}
 			set
 			{
-				if (_resolutionDpi != value)
+				if (_deviceResolutionDpi != value)
 				{
-					_resolutionDpi = value;
+					_deviceResolutionDpi = value;
 					RaisePropertyChanged(nameof(ResolutionDpi));
 				}
 			}
@@ -363,13 +379,15 @@ namespace LaserPathEngraver.UI.Win
 		{
 			get
 			{
-				return _scale;
+				PresentationSource.FromVisual(Canvas);
+
+				return _scale / _screenResolutionDpi * _deviceResolutionDpi;
 			}
 			set
 			{
 				if (value > 0)
 				{
-					_scale = value;
+					_scale = value / _deviceResolutionDpi * _screenResolutionDpi;
 
 					UpdateVisuals();
 					RaisePropertyChanged(nameof(Scale));

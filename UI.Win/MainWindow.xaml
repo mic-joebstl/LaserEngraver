@@ -13,6 +13,7 @@
         WindowState="Maximized"
         KeyDown="ContentControl_KeyDown"
         KeyUp="ContentControl_KeyUp"
+        Loaded="Window_Loaded"
         Icon="/Resources/Icons/icon.ico">
 	<Window.Resources>
 		<ResourceDictionary>
