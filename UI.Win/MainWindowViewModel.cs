@@ -160,7 +160,7 @@ namespace LaserPathEngraver.UI.Win
 				},
 				canExecute: () =>
 				{
-					if (!IsEditable)
+					if (!IsEditable || DeviceDispatcher.DeviceStatus != DeviceStatus.Ready)
 					{
 						return false;
 					}
@@ -396,18 +396,30 @@ namespace LaserPathEngraver.UI.Win
 		{
 			if (e.LeftButton == System.Windows.Input.MouseButtonState.Pressed)
 			{
+				_mouseLastDownPos = _mouseLastPos = e.GetPosition(_space.Canvas);
+
 				if (System.Windows.Input.Keyboard.IsKeyDown(System.Windows.Input.Key.LeftCtrl))
 				{
 					e.MouseDevice.Capture(_space.Canvas);
 				}
-				else if (e.Source is FrameworkElement element && element.DataContext is BurnArea)
+				else if (IsEditable)
 				{
-					if (IsEditable)
+					if (e.Source is FrameworkElement element && element.DataContext is BurnArea)
 					{
 						e.MouseDevice.Capture(element);
 					}
+					else
+					{
+						var boundingRect = Space.ImageBoundingRect;
+						var topLeft = Space.SpacePositionToScreenPosition(new System.Windows.Point(boundingRect.Left, boundingRect.Top));
+						var bottomRight = Space.SpacePositionToScreenPosition(new System.Windows.Point(boundingRect.Right, boundingRect.Bottom));
+						var pos = _mouseLastPos;
+						if (pos.X >= topLeft.X && pos.X <= bottomRight.X && pos.Y >= topLeft.Y && pos.Y <= bottomRight.Y)
+						{
+							e.MouseDevice.Capture(Space.BurnArea.Shape);
+						}
+					}
 				}
-				_mouseLastDownPos = _mouseLastPos = e.GetPosition(_space.Canvas);
 			}
 		}
 

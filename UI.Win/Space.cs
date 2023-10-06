@@ -145,6 +145,8 @@ namespace LaserPathEngraver.UI.Win
 			}
 		}
 
+		public BurnArea BurnArea => _burnArea;
+
 		public double ObservableWidth
 		{
 			get
