@@ -1,16 +1,11 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Windows;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
 using System.Drawing;
-using System.Windows.Interop;
-using System.Windows.Shapes;
 using System.Windows.Media.Effects;
 using System.Collections;
 using System.Windows.Threading;
 using LaserPathEngraver.Core.Configurations;
-using Microsoft.Extensions.Options;
 using System.Linq;
 using LaserPathEngraver.UI.Win.Visuals;
 using LaserPathEngraver.Core.Devices;
@@ -19,7 +14,7 @@ using System.Threading;
 using LaserPathEngraver.Core.Jobs;
 using System.Windows.Input;
 using LaserPathEngraver.UI.Win.Configuration;
-using System.Windows.Data;
+using System.Reactive.Linq;
 
 namespace LaserPathEngraver.UI.Win
 {
@@ -37,6 +32,7 @@ namespace LaserPathEngraver.UI.Win
 		private DispatcherTimer _jobElapsedTimer;
 		private Theme _theme;
 		private Theme? _customTheme;
+		private DeviceStatus? _debouncedStatus;
 
 		public MainWindowViewModel(IWritableOptions<UserConfiguration> userConfiguration, IWritableOptions<BurnConfiguration> burnConfiguration, Space space, DeviceDispatcherService deviceDispatcher)
 		{
@@ -241,11 +237,11 @@ namespace LaserPathEngraver.UI.Win
 			Resources.Localization.Texts.StartButtonText;
 
 		public string? DeviceStatusText =>
-			DeviceDispatcher.DeviceStatus == DeviceStatus.Disconnected ? Resources.Localization.Texts.DeviceStatusDisconnectedText :
-			DeviceDispatcher.DeviceStatus == DeviceStatus.Connecting ? Resources.Localization.Texts.DeviceStatusConnectingText :
-			DeviceDispatcher.DeviceStatus == DeviceStatus.Ready ? Resources.Localization.Texts.DeviceStatusReadyText :
-			DeviceDispatcher.DeviceStatus == DeviceStatus.Executing ? Resources.Localization.Texts.DeviceStatusExecutingText :
-			DeviceDispatcher.DeviceStatus == DeviceStatus.Disconnecting ? Resources.Localization.Texts.DeviceStatusDisconnectingText :
+			_debouncedStatus == DeviceStatus.Disconnected ? Resources.Localization.Texts.DeviceStatusDisconnectedText :
+			_debouncedStatus == DeviceStatus.Connecting ? Resources.Localization.Texts.DeviceStatusConnectingText :
+			_debouncedStatus == DeviceStatus.Ready ? Resources.Localization.Texts.DeviceStatusReadyText :
+			_debouncedStatus == DeviceStatus.Executing ? Resources.Localization.Texts.DeviceStatusExecutingText :
+			_debouncedStatus == DeviceStatus.Disconnecting ? Resources.Localization.Texts.DeviceStatusDisconnectingText :
 			null;
 
 		public string? JobStatusText =>
@@ -606,12 +602,29 @@ namespace LaserPathEngraver.UI.Win
 			);
 			FramingCommand = framingCommand;
 
+			Observable
+				.FromEvent<DeviceStatusChangedEventHandler, DeviceStatusChangedEventArgs>(
+					handler => (sender, args) => handler(args),
+					handler => _deviceDispatcher.DeviceStatusChanged += handler,
+					handler => _deviceDispatcher.DeviceStatusChanged -= handler
+				)
+				.Throttle(TimeSpan.FromMilliseconds(80))
+				.Subscribe((args) =>
+				{
+					_debouncedStatus = _deviceDispatcher.DeviceStatus;
+					RaisePropertyChanged(nameof(DeviceStatusText));
+				});
+
 			_deviceDispatcher.DeviceStatusChanged += (Device sender, DeviceStatusChangedEventArgs args) =>
 			{
 				RaisePropertyChanged(nameof(ConnectCommandText));
 				RaisePropertyChanged(nameof(StartCommandText));
-				RaisePropertyChanged(nameof(DeviceStatusText));
 				RaisePropertyChanged(nameof(IsEditable));
+				if (_debouncedStatus < _deviceDispatcher.DeviceStatus)
+				{
+					_debouncedStatus = _deviceDispatcher.DeviceStatus;
+					RaisePropertyChanged(nameof(DeviceStatusText));
+				}
 				connectCommand.NotifyCanExecuteChanged();
 				startCommand.NotifyCanExecuteChanged();
 				framingCommand.NotifyCanExecuteChanged();

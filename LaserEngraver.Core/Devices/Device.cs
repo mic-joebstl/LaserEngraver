@@ -144,10 +144,10 @@ namespace LaserPathEngraver.Core.Devices
 	public enum DeviceStatus
 	{
 		Disconnected = 0,
-		Connecting,
-		Ready,
-		Executing,
-		Disconnecting
+		Connecting = 1,
+		Ready = 2,
+		Executing = 3,
+		Disconnecting = 4
 	}
 
 	public class DeviceStatusChangedEventArgs : EventArgs
