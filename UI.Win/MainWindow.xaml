@@ -23,6 +23,7 @@
 			<converters:LogScaleConverter x:Key="LogScaleConverter" />
 			<converters:ByteScaleConverter x:Key="ByteScaleConverter" MinValue="0" MaxValue="100" />
 			<converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
+			<converters:ClampMaxConverter x:Key="ClampMaxConverter" />
 		</ResourceDictionary>
 	</Window.Resources>
 	<Grid>
@@ -44,8 +45,19 @@
 		                local:SizeObserver.ObservedHeight="{Binding Space.ObservableHeight, Mode=OneWayToSource}">
 		</ContentControl>
 
-		<Grid VerticalAlignment="Top" HorizontalAlignment="Left"
+		<Grid HorizontalAlignment="Left"
+		      MaxHeight="1400"
 		      Margin="15">
+			<Grid.Style>
+				<Style TargetType="{x:Type Grid}">
+					<Setter Property="VerticalAlignment" Value="Stretch" />
+					<Style.Triggers>
+						<DataTrigger Binding="{Binding ActualHeight, RelativeSource={RelativeSource AncestorType={x:Type Grid}}, Converter={StaticResource ClampMaxConverter}, ConverterParameter=1400}" Value="1400">
+							<Setter Property="VerticalAlignment" Value="Top" />
+						</DataTrigger>
+					</Style.Triggers>
+				</Style>
+			</Grid.Style>
 
 			<Border Background="{Binding Theme.SectionBackground}" CornerRadius="5">
 				<Border Opacity="0.8"
