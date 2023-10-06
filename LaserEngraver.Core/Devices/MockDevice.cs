@@ -117,5 +117,19 @@ namespace LaserPathEngraver.Core.Devices
 		{
 			return Task.CompletedTask;
 		}
+
+		public override async Task Engrave(byte intensity, byte duration, int length, CancellationToken cancellationToken)
+		{
+			using (var tx = StatusIntermediateTransition(DeviceStatus.Ready, DeviceStatus.Executing))
+			{
+				tx.Open();
+				await Task.Delay(TimeSpan.FromMilliseconds(length));
+				var position = Position;
+				if (position.HasValue)
+				{
+					Position = new Point(position.Value.X + length - 1, position.Value.Y);
+				}
+			}
+		}
 	}
 }

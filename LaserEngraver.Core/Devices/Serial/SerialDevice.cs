@@ -198,6 +198,46 @@ namespace LaserPathEngraver.Core.Devices.Serial
 				_requiresReset = true;
 			}
 		}
+		public override async Task Engrave(byte intensity, byte duration, int length, CancellationToken cancellationToken)
+		{
+			if (length < 1)
+			{
+				throw new ArgumentOutOfRangeException(nameof(length));
+			}
+
+			using (var tx = StatusIntermediateTransition(DeviceStatus.Ready, DeviceStatus.Executing))
+			{
+				tx.Open();
+
+				var bufferLength = (int)Math.Ceiling(length / 8d);
+				var buffer = new byte[bufferLength];
+				for (int ib = 0, il = 0; ib < bufferLength; ib++)
+				{
+					byte b = 0;
+					for (byte i = 7; i >= 0 && il < length; i--, il++)
+					{
+						b += (byte)(1 << i);
+					}
+					buffer[ib] = b;
+				}
+
+				var command = new EngraveCommand(intensity, duration)
+				{
+					Data = buffer
+				};
+
+				await WriteCommand(new SimpleEngraverCommand(EngraverCommandType.Reset), cancellationToken);
+				await WriteCommand(command, cancellationToken);
+
+				var position = Position;
+				if (position.HasValue)
+				{
+					Position = new Point(position.Value.X + length - 1, position.Value.Y);
+				}
+
+				_requiresReset = true;
+			}
+		}
 
 		private async Task WriteCommand(EngraverCommand command, CancellationToken cancellationToken)
 		{

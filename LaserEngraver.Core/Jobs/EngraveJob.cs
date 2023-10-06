@@ -120,6 +120,35 @@ namespace LaserPathEngraver.Core.Jobs
 			}
 		}
 
+		private IEnumerable<IEngravePoint[]> GetPointGroups()
+		{
+			int? currentX = null;
+			int? currentY = null;
+			byte? currentIntensity = null;
+			var pointGroup = new List<IEngravePoint>();
+			foreach (var point in GetSortedPoints())
+			{
+				if (currentY != point.Y || currentX is null || currentX + 1 != point.X || currentIntensity != point.Intensity)
+				{
+					if (pointGroup.Count > 0)
+					{
+						yield return pointGroup.ToArray();
+					}
+					pointGroup.Clear();
+				}
+
+				currentX = point.X;
+				currentY = point.Y;
+				currentIntensity = point.Intensity;
+
+				pointGroup.Add(point);
+			}
+			if (pointGroup.Count > 0)
+			{
+				yield return pointGroup.ToArray();
+			}
+		}
+
 		protected override async Task ExecuteCoreAsync(Device device, CancellationToken cancellationToken)
 		{
 			_signalPause = false;
@@ -131,38 +160,28 @@ namespace LaserPathEngraver.Core.Jobs
 			sw.Start();
 			long i = 0;
 			var mockDevice = device as MockDevice;
-			Point? previousPoint = default;
 #endif
 
-			foreach (var point in GetSortedPoints())
+			foreach (var pointGroup in GetPointGroups())
 			{
-				var imagePoint = new Point { X = point.X, Y = point.Y };
-				imagePoint.Offset(_pointTranslation);
+				var startingPoint = pointGroup[0];
+				var intensity = startingPoint.Intensity;
+				var imageStartingPoint = new Point { X = startingPoint.X, Y = startingPoint.Y };
+				imageStartingPoint.Offset(_pointTranslation);
 
-#if DEBUG
-				var moveImmediate =
-					mockDevice is not null &&
-					previousPoint != null &&
-					Math.Abs(imagePoint.X - previousPoint.Value.X) <= 1 &&
-					Math.Abs(imagePoint.Y - previousPoint.Value.Y) <= 1;
+				await device.MoveAbsoluteAsync(imageStartingPoint, cancellationToken);
+				await device.Engrave(intensity, duration, pointGroup.Length, cancellationToken);
 
-				if (moveImmediate)
+				foreach (var point in pointGroup)
 				{
-					mockDevice.MoveAbsoluteImmediate(imagePoint);
+					point.IsVisited = true;
 				}
-				else
+
+				if (_signalPause)
 				{
-					sw.Stop();
-					await device.MoveAbsoluteAsync(imagePoint, cancellationToken);
-					sw.Start();
+					Status = JobStatus.Paused;
+					return;
 				}
-#else
-				await device.MoveAbsoluteAsync(imagePoint, cancellationToken);
-#endif
-
-				await device.Engrave(point.Intensity, duration, cancellationToken);
-
-				point.IsVisited = true;
 
 #if DEBUG
 				if (mockDevice is not null)
@@ -176,12 +195,6 @@ namespace LaserPathEngraver.Core.Jobs
 					}
 				}
 #endif
-
-				if (_signalPause)
-				{
-					Status = JobStatus.Paused;
-					return;
-				}
 			}
 
 #if DEBUG
