@@ -593,16 +593,17 @@ namespace LaserPathEngraver.UI.Win
 					shape.Width = visual.Size.Width;
 					shape.Height = visual.Size.Height;
 
-					var position = SpacePositionToScreenPosition(visual.Position);
-					Canvas.SetTop(shape, position.Y - (shape.Height / 2));
-					Canvas.SetLeft(shape, position.X - (shape.Width / 2));
+					var pointWidth = _scale;
+					var position = SpacePositionToScreenPosition(new Point((int)visual.Position.X, (int)visual.Position.Y));
+					Canvas.SetTop(shape, position.Y - (shape.Height / 2) + pointWidth / 2);
+					Canvas.SetLeft(shape, position.X - (shape.Width / 2) + pointWidth / 2);
 				}
 				else
 				{
 					shape.Width = visual.Size.Width * _scale + shape.StrokeThickness * 2;
 					shape.Height = visual.Size.Height * _scale + shape.StrokeThickness * 2;
 
-					var position = SpacePositionToScreenPosition(visual.Position);
+					var position = SpacePositionToScreenPosition(new Point((int)visual.Position.X, (int)visual.Position.Y));
 					Canvas.SetTop(shape, position.Y - shape.StrokeThickness);
 					Canvas.SetLeft(shape, position.X - shape.StrokeThickness);
 				}
