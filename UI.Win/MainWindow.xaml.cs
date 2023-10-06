@@ -30,8 +30,19 @@ namespace LaserPathEngraver.UI.Win
 			InitializeComponent();
 			_viewModel = new MainWindowViewModel(userConfiguration, space);
 			DataContext = _viewModel;
-			SizeChanged += (o, e) => { RaisePropertyChanged(nameof(TutorialViewBox)); };
-			_TutorialBox.SizeChanged += (o, e) => { RaisePropertyChanged(nameof(TutorialViewBox)); };
+			SizeChanged += (o, e) =>
+			{
+				RaisePropertyChanged(nameof(TutorialViewBox));
+				RaisePropertyChanged(nameof(ActionsViewBox));
+			};
+			_TutorialBox.SizeChanged += (o, e) =>
+			{
+				RaisePropertyChanged(nameof(TutorialViewBox));
+			};
+			_ActionsViewBox.SizeChanged += (o, e) =>
+			{
+				RaisePropertyChanged(nameof(ActionsViewBox));
+			};
 		}
 
 		public Rect TutorialViewBox
@@ -40,6 +51,15 @@ namespace LaserPathEngraver.UI.Win
 			{
 				Point relativePoint = _TutorialBox.TransformToAncestor(this).Transform(new Point(-5, -5));
 				return new Rect(relativePoint, new Size(_TutorialBox.ActualWidth, _TutorialBox.ActualHeight));
+			}
+		}
+
+		public Rect ActionsViewBox
+		{
+			get
+			{
+				Point relativePoint = _ActionsViewBox.TransformToAncestor(this).Transform(new Point(-5, -5));
+				return new Rect(relativePoint, new Size(_ActionsViewBox.ActualWidth, _ActionsViewBox.ActualHeight));
 			}
 		}
 

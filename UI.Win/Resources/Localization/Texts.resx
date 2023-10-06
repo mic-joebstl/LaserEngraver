@@ -117,8 +117,14 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="ActionsTitle" xml:space="preserve">
+    <value>Actions</value>
+  </data>
   <data name="AutoCenterViewText" xml:space="preserve">
     <value>Auto center view</value>
+  </data>
+  <data name="ConnectButtonText" xml:space="preserve">
+    <value>Connect</value>
   </data>
   <data name="EnableVisualEffectsText" xml:space="preserve">
     <value>Show halo</value>
@@ -142,13 +148,42 @@
     <value>Height [px]</value>
   </data>
   <data name="HelpText" xml:space="preserve">
-    <value>Todo</value>
+    <value>&lt;p&gt;
+&lt;b&gt;Engrave&lt;/b&gt;
+To do this, drag an image file into the window, press &lt;i&gt;Connect&lt;/i&gt;, set your engraving preferences and &lt;i&gt;Start&lt;/i&gt;.
+
+&lt;b&gt;Settings&lt;/b&gt;
+&lt;br /&gt;&lt;i&gt;Depth&lt;/i&gt; sets the duration for which the engraver stays at a position.
+Exact duration depends on the device, so it is specified here in percent.
+
+&lt;i&gt;Variable burn intensity&lt;/i&gt;: If active, the burn intensity is determined by the brightness of the pixel (including alpha channel).
+
+&lt;i&gt;Max. Power&lt;/i&gt; limits the burn intensity to a maximum value when &lt;i&gt;Variable burn intensity&lt;/i&gt; is active.
+
+&lt;i&gt;Power&lt;/i&gt; specifies the fixed burn intensity of the pixels to be engraved if &lt;i&gt;Variable burn intensity&lt;/i&gt; is disabled.
+
+&lt;i&gt;Threshold&lt;/i&gt; is the value in percent at which brightness a pixel is engraved if &lt;i&gt;Variable burn intensity&lt;/i&gt; is disabled.
+
+&lt;i&gt;Rasterized mode&lt;/i&gt; engraves the pixels in rows in a grid pattern.
+
+&lt;i&gt;Path mode&lt;/i&gt; starts engraving at any pixel and navigates directly to the next pixel to be engraved from there.
+
+&lt;i&gt;Show halo&lt;/i&gt; is a purely visual setting and has no effect on engraving.
+&lt;br /&gt;
+
+&lt;b&gt;Keyboard shortcuts&lt;/b&gt;
+&lt;br /&gt;&lt;i&gt;[Ctrl] + Left mouse button &lt;/i&gt; moves the view. The &lt;i&gt;Auto center view&lt;/i&gt; setting is reset.
+
+&lt;i&gt;[Ctrl] + Mouse wheel&lt;/i&gt; and &lt;i&gt;[Ctrl] + [+]/[-]&lt;/i&gt; sets the zoom level.
+
+&lt;i&gt;[Ctrl] + [0]&lt;/i&gt; resets the zoom level.
+&lt;/p&gt;</value>
   </data>
   <data name="ImageTitle" xml:space="preserve">
     <value>Image</value>
   </data>
   <data name="IsPowerVariableText" xml:space="preserve">
-    <value>Is power variable</value>
+    <value>Variable burn intensity</value>
   </data>
   <data name="MaximumEngravingPowerText" xml:space="preserve">
     <value>Max. Power [%]</value>
@@ -173,6 +208,9 @@
   </data>
   <data name="ShowHelpText" xml:space="preserve">
     <value>Show help</value>
+  </data>
+  <data name="StatusTitle" xml:space="preserve">
+    <value>Status</value>
   </data>
   <data name="Title" xml:space="preserve">
     <value>Engraver</value>

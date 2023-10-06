@@ -61,11 +61,29 @@ namespace LaserPathEngraver.UI.Win.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Actions.
+        /// </summary>
+        public static string ActionsTitle {
+            get {
+                return ResourceManager.GetString("ActionsTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Auto center view.
         /// </summary>
         public static string AutoCenterViewText {
             get {
                 return ResourceManager.GetString("AutoCenterViewText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Connect.
+        /// </summary>
+        public static string ConnectButtonText {
+            get {
+                return ResourceManager.GetString("ConnectButtonText", resourceCulture);
             }
         }
         
@@ -133,7 +151,17 @@ namespace LaserPathEngraver.UI.Win.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Todo.
+        ///   Looks up a localized string similar to &lt;p&gt;
+        ///&lt;b&gt;Engrave&lt;/b&gt;
+        ///To do this, drag an image file into the window, press &lt;i&gt;Connect&lt;/i&gt;, set your engraving preferences and &lt;i&gt;Start&lt;/i&gt;.
+        ///
+        ///&lt;b&gt;Settings&lt;/b&gt;
+        ///&lt;br /&gt;&lt;i&gt;Depth&lt;/i&gt; sets the duration for which the engraver stays at a position.
+        ///Exact duration depends on the device, so it is specified here in percent.
+        ///
+        ///&lt;i&gt;Variable burn intensity&lt;/i&gt;: If active, the burn intensity is determined by the brightness of the pixel (including alpha channel).
+        ///
+        ///&lt;i&gt;Max. Power&lt;/i&gt; limits the burn intensity to a maximum [rest of string was truncated]&quot;;.
         /// </summary>
         public static string HelpText {
             get {
@@ -151,7 +179,7 @@ namespace LaserPathEngraver.UI.Win.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Is power variable.
+        ///   Looks up a localized string similar to Variable burn intensity.
         /// </summary>
         public static string IsPowerVariableText {
             get {
@@ -228,6 +256,15 @@ namespace LaserPathEngraver.UI.Win.Resources.Localization {
         public static string ShowHelpText {
             get {
                 return ResourceManager.GetString("ShowHelpText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Status.
+        /// </summary>
+        public static string StatusTitle {
+            get {
+                return ResourceManager.GetString("StatusTitle", resourceCulture);
             }
         }
         

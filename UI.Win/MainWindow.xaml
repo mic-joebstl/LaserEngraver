@@ -58,7 +58,7 @@
 				</Border>
 			</Border>
 
-			<ScrollViewer>
+			<ScrollViewer MinWidth="316">
 				<StackPanel Orientation="Vertical"
 				            Opacity="0.8"
 				            ClipToBounds="False"
@@ -461,14 +461,53 @@
 			</ScrollViewer>
 
 		</Grid>
-		<Grid VerticalAlignment="Top" HorizontalAlignment="Right">
-			<Grid.Background>
-				<SolidColorBrush Color="Black" Opacity="0.5" />
-			</Grid.Background>
-			<Label Content="{Binding Space.RenderRate}"
-			       Foreground="White"
-			       FontSize="16"
-			       ContentStringFormat="{x:Static localization:Texts.RenderRateFormatText}" />
+		<Grid VerticalAlignment="Top" HorizontalAlignment="Right"
+		      Margin="15">
+
+			<Border Background="Black">
+				<Border Opacity="0.8"
+				        Margin="-5">
+					<Border.Effect>
+						<BlurEffect Radius="5" />
+					</Border.Effect>
+					<Border.Background>
+						<VisualBrush Visual="{Binding ElementName=_Content}"
+						             Stretch="None"
+						             AlignmentX="Left" AlignmentY="Top"
+						             ViewboxUnits="Absolute"
+						             Viewbox="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=ActionsViewBox}" />
+					</Border.Background>
+				</Border>
+			</Border>
+
+			<ScrollViewer Name="_ActionsViewBox"
+			              MinWidth="316">
+				<StackPanel Orientation="Vertical"
+				            Opacity="0.8"
+				            ClipToBounds="False"
+				            Margin="15,15,15,30">
+
+					<Label FontSize="20"
+					       Foreground="White"
+					       Margin="0,0,0,0"
+					       Content="{x:Static localization:Texts.StatusTitle}" />
+
+					<Label Content="{Binding Space.RenderRate}"
+					       Foreground="White"
+					       FontSize="16"
+					       ContentStringFormat="{x:Static localization:Texts.RenderRateFormatText}" />
+
+					
+					<Label FontSize="20"
+					       Foreground="White"
+					       Margin="0,30,0,0"
+					       Content="{x:Static localization:Texts.ActionsTitle}" />
+
+					<Button Margin="0,12.5,0,0"
+					        Content="{x:Static localization:Texts.ConnectButtonText}" />
+				</StackPanel>
+			</ScrollViewer>
+
 		</Grid>
 		<Grid HorizontalAlignment="Right" VerticalAlignment="Bottom"
 		      Margin="15">
@@ -552,7 +591,7 @@
 					</ScrollViewer.Style>
 					<TextBlock Foreground="White"
 					           Width="300"
-					           Text="{x:Static localization:Texts.HelpText}">
+					           localization:TextBlockHelper.FormattedText="{x:Static localization:Texts.HelpText}">
 					</TextBlock>
 				</ScrollViewer>
 

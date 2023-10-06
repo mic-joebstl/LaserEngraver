@@ -117,8 +117,14 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="ActionsTitle" xml:space="preserve">
+    <value>Aktionen</value>
+  </data>
   <data name="AutoCenterViewText" xml:space="preserve">
     <value>Automatisch zentrieren</value>
+  </data>
+  <data name="ConnectButtonText" xml:space="preserve">
+    <value>Verbinden</value>
   </data>
   <data name="EnableVisualEffectsText" xml:space="preserve">
     <value>Halo anzeigen</value>
@@ -142,9 +148,36 @@
     <value>Höhe [px]</value>
   </data>
   <data name="HelpText" xml:space="preserve">
-    <value>Durch Gedrückthalten der linken Maustaste und der linken Steuerungstaste kann man innerhalb des Canvas navigieren.
+    <value>&lt;p&gt;
+&lt;b&gt;Gravieren&lt;/b&gt;
+Dazu eine Bilddatei in das Fenster ziehen, &lt;i&gt;Verbinden&lt;/i&gt; drücken, Einstellungen vornehmen und &lt;i&gt;Starten&lt;/i&gt;.
 
-Mittels gedrückter Steuerungstaste und gleichzeitigem drehen am Mausrad oder durch gleichzeitigem drücken der Plus- und Minustaste oder durch das Verändern der Werte in der Textbox mit dem Label 'Scale' ist es möglich im Canvas zu zoomen.</value>
+&lt;b&gt;Einstellungen&lt;/b&gt;
+&lt;br /&gt;&lt;i&gt;Brenndauer&lt;/i&gt; stellt die Dauer ein, wie lange der Gravierer an einer Position bleibt.
+Genaue Dauer ist vom Gerät abhängig, daher hier in Prozent anzugeben.
+
+&lt;i&gt;Variable Brennstärke&lt;/i&gt;: Wenn aktiv, wird durch Helligkeit der Pixel (inkl. Alpha-Channel) die Brennstärke ermittelt.
+
+&lt;i&gt;Max. Brennstärke&lt;/i&gt; begrenzt die Brennstärke auf einen maximalen Wert, bei aktiver &lt;i&gt;Variable Brennstärke&lt;/i&gt;.
+
+&lt;i&gt;Brennstärke&lt;/i&gt; gibt die fixe Brennstärke der zu gravierenden Pixel vor, wenn &lt;i&gt;Variable Brennstärke&lt;/i&gt; deaktiviert ist.
+
+&lt;i&gt;Schwellwert&lt;/i&gt; ist der Wert in Prozent, ab welcher Helligkeit ein Pixel graviert wird, wenn &lt;i&gt;Variable Brennstärke&lt;/i&gt; deaktiviert ist.
+
+&lt;i&gt;Modus Raster&lt;/i&gt; graviert die Pixel im Raster zeilenweise.
+
+&lt;i&gt;Modus Pfad&lt;/i&gt; beginnt die Gravur bei einem beliebigen Pixel und navigiert von dort direkt zum nächsten zu gravierenden Pixel.
+
+&lt;i&gt;Halo anzeigen&lt;/i&gt; ist eine rein optische Einstellung und hat auf die Gravur keinen Einfluss.
+&lt;br /&gt;
+
+&lt;b&gt;Tastenkombinationen&lt;/b&gt;
+&lt;br /&gt;&lt;i&gt;[Strg] + Linke Maustaste &lt;/i&gt; verschiebt die Ansicht. Dabei wird die Einstellung &lt;i&gt;Automatisch zentrieren&lt;/i&gt; zurückgesetzt.
+
+&lt;i&gt;[Strg] + Mausrad&lt;/i&gt; und &lt;i&gt;[Strg] + [+]/[-]&lt;/i&gt; stellt die Zoom-Stufe ein.
+
+&lt;i&gt;[Strg] + [0]&lt;/i&gt; setzt die Zoomstufe zurück
+&lt;/p&gt;</value>
   </data>
   <data name="ImageTitle" xml:space="preserve">
     <value>Bild</value>
@@ -175,6 +208,9 @@ Mittels gedrückter Steuerungstaste und gleichzeitigem drehen am Mausrad oder du
   </data>
   <data name="ShowHelpText" xml:space="preserve">
     <value>Hilfe anzeigen</value>
+  </data>
+  <data name="StatusTitle" xml:space="preserve">
+    <value>Status</value>
   </data>
   <data name="Title" xml:space="preserve">
     <value>Gravierer</value>
