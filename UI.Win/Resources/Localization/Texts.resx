@@ -123,6 +123,9 @@
   <data name="AutoCenterViewText" xml:space="preserve">
     <value>Auto center view</value>
   </data>
+  <data name="CancelCommandText" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
   <data name="ConnectButtonText" xml:space="preserve">
     <value>Connect</value>
   </data>

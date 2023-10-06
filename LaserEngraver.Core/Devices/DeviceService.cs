@@ -142,8 +142,12 @@ namespace LaserPathEngraver.Core.Devices
 				device = _device ?? throw new InvalidOperationException("Device not connected");
 			}
 
-
 			await job.ExecuteAsync(device, cancellationToken);
+		}
+
+		public void CancelJob() 
+		{
+			_currentJob?.Cancel();
 		}
 	}
 }

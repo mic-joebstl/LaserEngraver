@@ -75,6 +75,23 @@ namespace LaserPathEngraver.UI.Win
 				canExecute: () => IsEditable
 			);
 
+			var cancelCommand = new RelayCommand(
+				execute: () =>
+				{
+					try
+					{
+						ErrorMessage = null;
+						_deviceDispatcher.CancelJob();
+					}
+					catch (Exception ex)
+					{
+						ErrorMessage = ex.Message;
+					}
+				},
+				canExecute: () => _deviceDispatcher.JobStatus == JobStatus.Running
+			);
+			CancelCommand = cancelCommand;
+
 			_deviceDispatcher.DeviceStatusChanged += (Device sender, DeviceStatusChangedEventArgs args) =>
 			{
 				RaisePropertyChanged(nameof(ConnectCommandText));
@@ -85,6 +102,7 @@ namespace LaserPathEngraver.UI.Win
 			_deviceDispatcher.JobStatusChanged += (Job sender, JobStatusChangedEventArgs args) =>
 			{
 				RaisePropertyChanged(nameof(JobStatusText));
+				cancelCommand.NotifyCanExecuteChanged();
 			};
 
 			_jobElapsedTimer = new DispatcherTimer(DispatcherPriority.Render);
@@ -201,7 +219,9 @@ namespace LaserPathEngraver.UI.Win
 			DeviceDispatcher.JobStatus == JobStatus.Done ? String.Format(Resources.Localization.Texts.JobStatusDoneFormatText, DeviceDispatcher.JobTitle) :
 			null;
 
-		public IAsyncRelayCommand ConnectCommand { get; private set; }
+		public ICommand ConnectCommand { get; private set; }
+
+		public ICommand CancelCommand { get; private set; }
 
 		public Cursor CanvasCursor
 		{

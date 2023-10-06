@@ -123,6 +123,9 @@
   <data name="AutoCenterViewText" xml:space="preserve">
     <value>Automatisch zentrieren</value>
   </data>
+  <data name="CancelCommandText" xml:space="preserve">
+    <value>Abbrechen</value>
+  </data>
   <data name="ConnectButtonText" xml:space="preserve">
     <value>Verbinden</value>
   </data>

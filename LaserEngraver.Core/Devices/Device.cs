@@ -78,6 +78,66 @@ namespace LaserPathEngraver.Core.Devices
 		public abstract Task HomingAsync(CancellationToken cancellationToken);
 		public abstract Task MoveRelativeAsync(Point vector, CancellationToken cancellationToken);
 		public abstract Task MoveAbsoluteAsync(Point position, CancellationToken cancellationToken);
+
+		protected IDeviceStatusIntermediateTransition StatusIntermediateTransition(DeviceStatus sourceStatus, DeviceStatus intermediateStatus)
+		{
+			return new DeviceStatusTransition(this, sourceStatus, intermediateStatus, sourceStatus);
+		}
+
+		protected IDeviceStatusTransition StatusTransition(DeviceStatus sourceStatus, DeviceStatus openStatus, DeviceStatus targetStatus)
+		{
+			return new DeviceStatusTransition(this, sourceStatus, openStatus, targetStatus);
+		}
+
+		protected interface IDeviceStatusIntermediateTransition: IDisposable
+		{
+			void Open();
+		}
+
+		protected interface IDeviceStatusTransition : IDeviceStatusIntermediateTransition
+		{
+			void Commit();
+		}
+
+		private class DeviceStatusTransition : IDeviceStatusTransition
+		{
+			private Device _owner;
+			private DeviceStatus _sourceStatus;
+			private DeviceStatus _openStatus;
+			private DeviceStatus _targetStatus;
+			private bool _commited;
+
+			public DeviceStatusTransition(Device owner, DeviceStatus sourceStatus, DeviceStatus openStatus, DeviceStatus targetStatus)
+			{
+				_owner = owner;
+				_sourceStatus = sourceStatus;
+				_openStatus = openStatus;
+				_targetStatus = targetStatus;
+			}
+
+			public void Dispose()
+			{
+				if (!_commited)
+				{
+					_owner.Status = _sourceStatus;
+				}
+			}
+
+			public void Open()
+			{
+				lock (_owner.SyncRoot)
+				{
+					_owner.DemandState(_sourceStatus);
+					_owner.Status = _openStatus;
+				}
+			}
+
+			public void Commit()
+			{
+				_owner.Status = _targetStatus;
+				_commited = true;
+			}
+		}
 	}
 
 	public enum DeviceStatus

@@ -686,6 +686,10 @@
 					        Command="{Binding ConnectCommand}"
 					        Content="{Binding ConnectCommandText}" />
 
+					<Button Margin="0,12.5,0,0"
+					        Command="{Binding CancelCommand}"
+					        Content="{x:Static localization:Texts.CancelCommandText}" />
+
 					<controls:ContentChangeTextBlock
 						FontSize="16"
 						Foreground="#FCC8C3"
