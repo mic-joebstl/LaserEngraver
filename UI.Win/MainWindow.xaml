@@ -45,7 +45,7 @@
 		<Grid VerticalAlignment="Top" HorizontalAlignment="Left"
 		      Margin="15">
 
-			<Border Background="{Binding Theme.SectionBackground}">
+			<Border Background="{Binding Theme.SectionBackground}" CornerRadius="5">
 				<Border Opacity="0.8"
 				        Margin="-5">
 					<Border.Effect>
@@ -63,7 +63,7 @@
 			<ScrollViewer MinWidth="316">
 				<StackPanel Orientation="Vertical"
 				            Opacity="0.8"
-							HorizontalAlignment="Left"
+				            HorizontalAlignment="Left"
 				            ClipToBounds="False"
 				            Margin="15,15,15,30">
 
@@ -616,7 +616,7 @@
 		<Grid VerticalAlignment="Top" HorizontalAlignment="Right"
 		      Margin="15">
 
-			<Border Background="{Binding Theme.SectionBackground}">
+			<Border Background="{Binding Theme.SectionBackground}" CornerRadius="5">
 				<Border Opacity="0.8"
 				        Margin="-5">
 					<Border.Effect>
@@ -761,7 +761,7 @@
 		<Grid HorizontalAlignment="Right" VerticalAlignment="Bottom"
 		      Margin="15">
 
-			<Border Background="{Binding Theme.SectionBackground}">
+			<Border Background="{Binding Theme.SectionBackground}" CornerRadius="5">
 				<Border Opacity="0.8"
 					    Margin="-5">
 					<Border.Effect>

@@ -19,6 +19,7 @@ using System.Threading;
 using LaserPathEngraver.Core.Jobs;
 using System.Windows.Input;
 using LaserPathEngraver.UI.Win.Configuration;
+using System.Windows.Data;
 
 namespace LaserPathEngraver.UI.Win
 {
@@ -29,7 +30,7 @@ namespace LaserPathEngraver.UI.Win
 		private Space _space;
 		private DeviceDispatcherService _deviceDispatcher;
 		private bool _enableVisualEffects;
-		private Effect? _dropShadowEffect;
+		private DropShadowEffect? _dropShadowEffect;
 		private System.Windows.Point _mouseLastPos;
 		private System.Windows.Point _mouseLastDownPos;
 		private DispatcherTimer _jobElapsedTimer;
@@ -48,162 +49,19 @@ namespace LaserPathEngraver.UI.Win
 			_dropShadowEffect = new DropShadowEffect()
 			{
 				ShadowDepth = 0,
-				Color = Colors.White,
 				BlurRadius = 20,
 				RenderingBias = RenderingBias.Performance
 			};
-
 			_theme = userConfiguration.Value.Theme;
-			_theme.PropertyChanged += (object? sender, PropertyChangedEventArgs e) =>
-			{
-				userConfiguration.Update(target => target.Theme = _theme);
-				RaisePropertyChanged(nameof(Theme));
-			};
-
-			var connectCommand = new AsyncRelayCommand(
-				cancelableExecute: async (CancellationToken cancellationToken) =>
-				{
-					try
-					{
-						ErrorMessage = null;
-						if (_deviceDispatcher.DeviceStatus == DeviceStatus.Disconnected)
-						{
-							await _deviceDispatcher.Connect(cancellationToken);
-							await _deviceDispatcher.ExecuteJob(new HomingJob(), cancellationToken);
-						}
-						else if (_deviceDispatcher.DeviceStatus == DeviceStatus.Ready)
-						{
-							await _deviceDispatcher.Disconnect(cancellationToken);
-						}
-					}
-					catch (Exception ex)
-					{
-						ErrorMessage = ex.Message;
-					}
-				},
-				canExecute: () => IsEditable
-			);
-			ConnectCommand = connectCommand;
-
-			var startCommand = new RelayCommand(
-				execute: () =>
-				{
-					try
-					{
-						ErrorMessage = null;
-
-						if (_deviceDispatcher.IsJobPausable)
-						{
-							_deviceDispatcher.PauseJob();
-						}
-						else if (_deviceDispatcher.JobStatus == JobStatus.Paused)
-						{
-							Dispatcher.CurrentDispatcher.BeginInvoke(async () => await _deviceDispatcher.ContinueJob(CancellationToken.None));
-						}
-						else if (_deviceDispatcher.DeviceStatus == DeviceStatus.Ready && DeviceDispatcher.JobStatus != JobStatus.Running && DeviceDispatcher.JobStatus != JobStatus.Paused)
-						{
-							//TODO
-							//Dispatcher.CurrentDispatcher.BeginInvoke(async () => await _deviceDispatcher.ExecuteJob(new EngravingJob(), CancellationToken.None));
-						}
-					}
-					catch (Exception ex)
-					{
-						ErrorMessage = ex.Message;
-					}
-				},
-				canExecute: () =>
-					_deviceDispatcher.JobStatus == JobStatus.Paused ||
-					_deviceDispatcher.IsJobPausable ||
-					_deviceDispatcher.DeviceStatus == DeviceStatus.Ready &&
-					DeviceDispatcher.JobStatus != JobStatus.Running &&
-					DeviceDispatcher.JobStatus != JobStatus.Paused &&
-					false /* Space.BurnPoints.Any() */
-
-			);
-			StartCommand = startCommand;
-
-			var cancelCommand = new RelayCommand(
-				execute: () =>
-				{
-					try
-					{
-						ErrorMessage = null;
-						_deviceDispatcher.CancelJob();
-					}
-					catch (Exception ex)
-					{
-						ErrorMessage = ex.Message;
-					}
-				},
-				canExecute: () => _deviceDispatcher.JobStatus == JobStatus.Running || _deviceDispatcher.JobStatus == JobStatus.Paused
-			);
-			CancelCommand = cancelCommand;
-
-			var framingCommand = new AsyncRelayCommand(
-				cancelableExecute: async (CancellationToken cancellationToken) =>
-				{
-					try
-					{
-						ErrorMessage = null;
-						var frameF = Space.ImageBoundingRect;
-						var frame = new System.Drawing.Rectangle((int)frameF.X, (int)frameF.Y, (int)frameF.Width, (int)frameF.Height);
-						if (frame.Width > 0 && frame.Height > 0)
-						{
-							var stepDelay = TimeSpan.FromSeconds(0.5);
-							await _deviceDispatcher.ExecuteJob(new FramingJob(frame, stepDelay), cancellationToken);
-						}
-					}
-					catch (Exception ex)
-					{
-						ErrorMessage = ex.Message;
-					}
-				},
-				canExecute: () =>
-				{
-					if (!IsEditable || DeviceDispatcher.DeviceStatus != DeviceStatus.Ready)
-					{
-						return false;
-					}
-					var frame = Space.ImageBoundingRect;
-					return frame.Width > 0 && frame.Height > 0;
-				}
-			);
-			FramingCommand = framingCommand;
-
-			_deviceDispatcher.DeviceStatusChanged += (Device sender, DeviceStatusChangedEventArgs args) =>
-			{
-				RaisePropertyChanged(nameof(ConnectCommandText));
-				RaisePropertyChanged(nameof(StartCommandText));
-				RaisePropertyChanged(nameof(DeviceStatusText));
-				RaisePropertyChanged(nameof(IsEditable));
-				connectCommand.NotifyCanExecuteChanged();
-				startCommand.NotifyCanExecuteChanged();
-				framingCommand.NotifyCanExecuteChanged();
-			};
-
-			_deviceDispatcher.JobStatusChanged += (object sender, JobStatusChangedEventArgs args) =>
-			{
-				RaisePropertyChanged(nameof(JobStatusText));
-				RaisePropertyChanged(nameof(StartCommandText));
-				RaisePropertyChanged(nameof(IsEditable));
-				connectCommand.NotifyCanExecuteChanged();
-				startCommand.NotifyCanExecuteChanged();
-				cancelCommand.NotifyCanExecuteChanged();
-				framingCommand.NotifyCanExecuteChanged();
-			};
-
-			Space.PropertyChanged += (object? sender, PropertyChangedEventArgs e) =>
-			{
-				if (e.PropertyName == nameof(Space.ImageBoundingRect))
-				{
-					framingCommand.NotifyCanExecuteChanged();
-				}
-			};
 
 			_jobElapsedTimer = new DispatcherTimer(DispatcherPriority.Render);
 			_jobElapsedTimer.Interval = TimeSpan.FromSeconds(0.1);
 			_jobElapsedTimer.Tick += (object? sender, EventArgs e) => RaisePropertyChanged(nameof(JobElapsedDuration));
 			_jobElapsedTimer.Start();
+
+			InitializeThemeBindings();
+			InitializeCommands();
+
 		}
 
 		public Theme Theme => _theme;
@@ -311,7 +169,7 @@ namespace LaserPathEngraver.UI.Win
 			}
 		}
 
-		public Effect? DropShadowEffect
+		public DropShadowEffect? DropShadowEffect
 		{
 			get
 			{
@@ -353,13 +211,13 @@ namespace LaserPathEngraver.UI.Win
 			DeviceDispatcher.JobStatus == JobStatus.Done ? String.Format(Resources.Localization.Texts.JobStatusDoneFormatText, DeviceDispatcher.JobTitle) :
 			null;
 
-		public ICommand ConnectCommand { get; private set; }
+		public ICommand? ConnectCommand { get; private set; }
 
-		public ICommand StartCommand { get; private set; }
+		public ICommand? StartCommand { get; private set; }
 
-		public ICommand CancelCommand { get; private set; }
+		public ICommand? CancelCommand { get; private set; }
 
-		public ICommand FramingCommand { get; private set; }
+		public ICommand? FramingCommand { get; private set; }
 
 		public Cursor CanvasCursor
 		{
@@ -560,6 +418,174 @@ namespace LaserPathEngraver.UI.Win
 			}
 			filePath = "";
 			return false;
+		}
+
+		private void InitializeCommands()
+		{
+			var connectCommand = new AsyncRelayCommand(
+				cancelableExecute: async (CancellationToken cancellationToken) =>
+				{
+					try
+					{
+						ErrorMessage = null;
+						if (_deviceDispatcher.DeviceStatus == DeviceStatus.Disconnected)
+						{
+							await _deviceDispatcher.Connect(cancellationToken);
+							await _deviceDispatcher.ExecuteJob(new HomingJob(), cancellationToken);
+						}
+						else if (_deviceDispatcher.DeviceStatus == DeviceStatus.Ready)
+						{
+							await _deviceDispatcher.Disconnect(cancellationToken);
+						}
+					}
+					catch (Exception ex)
+					{
+						ErrorMessage = ex.Message;
+					}
+				},
+				canExecute: () => IsEditable
+			);
+			ConnectCommand = connectCommand;
+
+			var startCommand = new RelayCommand(
+				execute: () =>
+				{
+					try
+					{
+						ErrorMessage = null;
+
+						if (_deviceDispatcher.IsJobPausable)
+						{
+							_deviceDispatcher.PauseJob();
+						}
+						else if (_deviceDispatcher.JobStatus == JobStatus.Paused)
+						{
+							Dispatcher.CurrentDispatcher.BeginInvoke(async () => await _deviceDispatcher.ContinueJob(CancellationToken.None));
+						}
+						else if (_deviceDispatcher.DeviceStatus == DeviceStatus.Ready && DeviceDispatcher.JobStatus != JobStatus.Running && DeviceDispatcher.JobStatus != JobStatus.Paused)
+						{
+							//TODO
+							//Dispatcher.CurrentDispatcher.BeginInvoke(async () => await _deviceDispatcher.ExecuteJob(new EngravingJob(), CancellationToken.None));
+						}
+					}
+					catch (Exception ex)
+					{
+						ErrorMessage = ex.Message;
+					}
+				},
+				canExecute: () =>
+					_deviceDispatcher.JobStatus == JobStatus.Paused ||
+					_deviceDispatcher.IsJobPausable ||
+					_deviceDispatcher.DeviceStatus == DeviceStatus.Ready &&
+					DeviceDispatcher.JobStatus != JobStatus.Running &&
+					DeviceDispatcher.JobStatus != JobStatus.Paused &&
+					false /* Space.BurnPoints.Any() */
+
+			);
+			StartCommand = startCommand;
+
+			var cancelCommand = new RelayCommand(
+				execute: () =>
+				{
+					try
+					{
+						ErrorMessage = null;
+						_deviceDispatcher.CancelJob();
+					}
+					catch (Exception ex)
+					{
+						ErrorMessage = ex.Message;
+					}
+				},
+				canExecute: () => _deviceDispatcher.JobStatus == JobStatus.Running || _deviceDispatcher.JobStatus == JobStatus.Paused
+			);
+			CancelCommand = cancelCommand;
+
+			var framingCommand = new AsyncRelayCommand(
+				cancelableExecute: async (CancellationToken cancellationToken) =>
+				{
+					try
+					{
+						ErrorMessage = null;
+						var frameF = Space.ImageBoundingRect;
+						var frame = new System.Drawing.Rectangle((int)frameF.X, (int)frameF.Y, (int)frameF.Width, (int)frameF.Height);
+						if (frame.Width > 0 && frame.Height > 0)
+						{
+							var stepDelay = TimeSpan.FromSeconds(0.5);
+							await _deviceDispatcher.ExecuteJob(new FramingJob(frame, stepDelay), cancellationToken);
+						}
+					}
+					catch (Exception ex)
+					{
+						ErrorMessage = ex.Message;
+					}
+				},
+				canExecute: () =>
+				{
+					if (!IsEditable || DeviceDispatcher.DeviceStatus != DeviceStatus.Ready)
+					{
+						return false;
+					}
+					var frame = Space.ImageBoundingRect;
+					return frame.Width > 0 && frame.Height > 0;
+				}
+			);
+			FramingCommand = framingCommand;
+
+			_deviceDispatcher.DeviceStatusChanged += (Device sender, DeviceStatusChangedEventArgs args) =>
+			{
+				RaisePropertyChanged(nameof(ConnectCommandText));
+				RaisePropertyChanged(nameof(StartCommandText));
+				RaisePropertyChanged(nameof(DeviceStatusText));
+				RaisePropertyChanged(nameof(IsEditable));
+				connectCommand.NotifyCanExecuteChanged();
+				startCommand.NotifyCanExecuteChanged();
+				framingCommand.NotifyCanExecuteChanged();
+			};
+
+			_deviceDispatcher.JobStatusChanged += (object sender, JobStatusChangedEventArgs args) =>
+			{
+				RaisePropertyChanged(nameof(JobStatusText));
+				RaisePropertyChanged(nameof(StartCommandText));
+				RaisePropertyChanged(nameof(IsEditable));
+				connectCommand.NotifyCanExecuteChanged();
+				startCommand.NotifyCanExecuteChanged();
+				cancelCommand.NotifyCanExecuteChanged();
+				framingCommand.NotifyCanExecuteChanged();
+			};
+
+			Space.PropertyChanged += (object? sender, PropertyChangedEventArgs e) =>
+			{
+				if (e.PropertyName == nameof(Space.ImageBoundingRect))
+				{
+					framingCommand.NotifyCanExecuteChanged();
+				}
+			};
+		}
+
+		private void InitializeThemeBindings()
+		{
+			_theme.PropertyChanged += (object? sender, PropertyChangedEventArgs e) =>
+			{
+				_userConfiguration.Update(target => target.Theme = _theme);
+				RaisePropertyChanged(nameof(Theme));
+			};
+			PropertyChanged += (object? sender, PropertyChangedEventArgs e) =>
+			{
+				if (e.PropertyName == nameof(Theme))
+				{
+					_dropShadowEffect.Color = _theme.Foreground.Color;
+					RaisePropertyChanged(nameof(DropShadowEffect));
+				}
+			};
+
+			foreach (var visual in Space.GetVisuals())
+			{
+				var binding = new Binding();
+				binding.Source = this;
+				binding.Path = new PropertyPath(nameof(Theme) + "." + nameof(_theme.Foreground));
+				visual.Shape.SetBinding(Shape.StrokeProperty, binding);
+			}
 		}
 
 		#region INotifyPropertyChanged

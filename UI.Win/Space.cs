@@ -91,13 +91,11 @@ namespace LaserPathEngraver.UI.Win
 
 			_burnBoundsRectangle = new BurnRectangle();
 			_burnBoundsRectangle.Size = new Size((double)_canvasWidthDot, (double)_canvasHeightDot);
-			_burnBoundsRectangle.Shape.Stroke = System.Windows.Media.Brushes.White;
 			_burnBoundsRectangle.Shape.StrokeThickness = 2;
 			_burnBoundsRectangle.Shape.StrokeDashArray = new DoubleCollection() { 5 };
 			AddVisualToCanvas(_burnBoundsRectangle);
 
 			_burnBitmapRectangle = new BurnRectangle();
-			_burnBitmapRectangle.Shape.Stroke = System.Windows.Media.Brushes.White;
 			_burnBitmapRectangle.Shape.StrokeThickness = 1;
 			_burnBitmapRectangle.Shape.StrokeDashArray = new DoubleCollection() { 2.5 };
 
@@ -509,7 +507,7 @@ namespace LaserPathEngraver.UI.Win
 			return new Point(x, y);
 		}
 
-		private IEnumerable<IVisual> GetVisuals()
+		public IEnumerable<IVisual> GetVisuals()
 		{
 			yield return _burnBoundsRectangle;
 			yield return _burnBitmapRectangle;
