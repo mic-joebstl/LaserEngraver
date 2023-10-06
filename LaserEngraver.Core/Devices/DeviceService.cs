@@ -33,6 +33,8 @@ namespace LaserPathEngraver.Core.Devices
 
 		public JobStatus JobStatus => _currentJob?.Status ?? JobStatus.None;
 
+		public string? JobTitle => _currentJob?.Title;
+
 		public TimeSpan JobElapsedDuration => _currentJob?.ElapsedDuration ?? TimeSpan.Zero;
 
 		public async Task Connect(CancellationToken cancellationToken)

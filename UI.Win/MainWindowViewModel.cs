@@ -192,10 +192,10 @@ namespace LaserPathEngraver.UI.Win
 
 		public string? JobStatusText =>
 			DeviceDispatcher.JobStatus == JobStatus.None ? Resources.Localization.Texts.JobStatusNoneText :
-			DeviceDispatcher.JobStatus == JobStatus.Running ? Resources.Localization.Texts.JobStatusRunningText :
-			DeviceDispatcher.JobStatus == JobStatus.Paused ? Resources.Localization.Texts.JobStatusPausedText :
-			DeviceDispatcher.JobStatus == JobStatus.Cancelled ? Resources.Localization.Texts.JobStatusStoppedText :
-			DeviceDispatcher.JobStatus == JobStatus.Done ? Resources.Localization.Texts.JobStatusDoneText :
+			DeviceDispatcher.JobStatus == JobStatus.Running ? String.Format(Resources.Localization.Texts.JobStatusRunningFormatText, DeviceDispatcher.JobTitle) :
+			DeviceDispatcher.JobStatus == JobStatus.Paused ? String.Format(Resources.Localization.Texts.JobStatusPausedFormatText, DeviceDispatcher.JobTitle) :
+			DeviceDispatcher.JobStatus == JobStatus.Cancelled ? String.Format(Resources.Localization.Texts.JobStatusStoppedFormatText, DeviceDispatcher.JobTitle) :
+			DeviceDispatcher.JobStatus == JobStatus.Done ? String.Format(Resources.Localization.Texts.JobStatusDoneFormatText, DeviceDispatcher.JobTitle) :
 			null;
 
 		public IAsyncRelayCommand ConnectCommand { get; private set; }

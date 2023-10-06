@@ -67,6 +67,8 @@ namespace LaserPathEngraver.Core.Jobs
 
 		public Exception? Exception => _exception;
 
+		public abstract string Title { get; }
+
 		public void Cancel()
 		{
 			_cts.Cancel();
@@ -121,6 +123,8 @@ namespace LaserPathEngraver.Core.Jobs
 	{
 		public HomingJob()
 		{ }
+
+		public override string Title => Resources.Localization.Texts.HomingJobTitle;
 
 		protected override async Task ExecuteCoreAsync(Device device, CancellationToken cancellationToken)
 		{

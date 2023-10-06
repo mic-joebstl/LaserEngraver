@@ -269,11 +269,11 @@ namespace LaserPathEngraver.UI.Win.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Done.
+        ///   Looks up a localized string similar to {0} completed.
         /// </summary>
-        public static string JobStatusDoneText {
+        public static string JobStatusDoneFormatText {
             get {
-                return ResourceManager.GetString("JobStatusDoneText", resourceCulture);
+                return ResourceManager.GetString("JobStatusDoneFormatText", resourceCulture);
             }
         }
         
@@ -287,29 +287,29 @@ namespace LaserPathEngraver.UI.Win.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Paused.
+        ///   Looks up a localized string similar to {0} paused.
         /// </summary>
-        public static string JobStatusPausedText {
+        public static string JobStatusPausedFormatText {
             get {
-                return ResourceManager.GetString("JobStatusPausedText", resourceCulture);
+                return ResourceManager.GetString("JobStatusPausedFormatText", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Executing.
+        ///   Looks up a localized string similar to {0}.
         /// </summary>
-        public static string JobStatusRunningText {
+        public static string JobStatusRunningFormatText {
             get {
-                return ResourceManager.GetString("JobStatusRunningText", resourceCulture);
+                return ResourceManager.GetString("JobStatusRunningFormatText", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Stopped.
+        ///   Looks up a localized string similar to {0} stopped.
         /// </summary>
-        public static string JobStatusStoppedText {
+        public static string JobStatusStoppedFormatText {
             get {
-                return ResourceManager.GetString("JobStatusStoppedText", resourceCulture);
+                return ResourceManager.GetString("JobStatusStoppedFormatText", resourceCulture);
             }
         }
         

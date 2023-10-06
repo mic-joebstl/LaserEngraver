@@ -212,20 +212,20 @@ Exact duration depends on the device, so it is specified here in percent.
   <data name="JobElapsedDurationTitle" xml:space="preserve">
     <value>Job Elapsed Duration</value>
   </data>
-  <data name="JobStatusDoneText" xml:space="preserve">
-    <value>Done</value>
+  <data name="JobStatusDoneFormatText" xml:space="preserve">
+    <value>{0} completed</value>
   </data>
   <data name="JobStatusNoneText" xml:space="preserve">
     <value>No job active</value>
   </data>
-  <data name="JobStatusPausedText" xml:space="preserve">
-    <value>Paused</value>
+  <data name="JobStatusPausedFormatText" xml:space="preserve">
+    <value>{0} paused</value>
   </data>
-  <data name="JobStatusRunningText" xml:space="preserve">
-    <value>Executing</value>
+  <data name="JobStatusRunningFormatText" xml:space="preserve">
+    <value>{0}</value>
   </data>
-  <data name="JobStatusStoppedText" xml:space="preserve">
-    <value>Stopped</value>
+  <data name="JobStatusStoppedFormatText" xml:space="preserve">
+    <value>{0} stopped</value>
   </data>
   <data name="JobStatusTitle" xml:space="preserve">
     <value>Job Status</value>
