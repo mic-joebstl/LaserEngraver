@@ -27,6 +27,7 @@ namespace LaserPathEngraver.UI.Win
 	{
 		private string? _errorMessage;
 		private IWritableOptions<UserConfiguration> _userConfiguration;
+		private IWritableOptions<BurnConfiguration> _burnConfiguration;
 		private Space _space;
 		private DeviceDispatcherService _deviceDispatcher;
 		private bool _enableVisualEffects;
@@ -37,9 +38,10 @@ namespace LaserPathEngraver.UI.Win
 		private Theme _theme;
 		private Theme? _customTheme;
 
-		public MainWindowViewModel(IWritableOptions<UserConfiguration> userConfiguration, Space space, DeviceDispatcherService deviceDispatcher)
+		public MainWindowViewModel(IWritableOptions<UserConfiguration> userConfiguration, IWritableOptions<BurnConfiguration> burnConfiguration, Space space, DeviceDispatcherService deviceDispatcher)
 		{
 			_userConfiguration = userConfiguration;
+			_burnConfiguration = burnConfiguration;
 			_deviceDispatcher = deviceDispatcher;
 			_space = space;
 			_space.Canvas.PreviewMouseDown += OnSpaceMouseDown;
@@ -514,8 +516,19 @@ namespace LaserPathEngraver.UI.Win
 						}
 						else if (_deviceDispatcher.DeviceStatus == DeviceStatus.Ready && DeviceDispatcher.JobStatus != JobStatus.Running && DeviceDispatcher.JobStatus != JobStatus.Paused)
 						{
-							//TODO
-							//Dispatcher.CurrentDispatcher.BeginInvoke(async () => await _deviceDispatcher.ExecuteJob(new EngravingJob(), CancellationToken.None));
+							Dispatcher.CurrentDispatcher.BeginInvoke(async () =>
+							{
+								try
+								{
+									ErrorMessage = null;
+									var job = new EngraveJob(_burnConfiguration.Value, Space.BurnArea.Points);
+									await _deviceDispatcher.ExecuteJob(job, CancellationToken.None);
+								}
+								catch (Exception ex)
+								{
+									ErrorMessage = ex.Message;
+								}
+							});
 						}
 					}
 					catch (Exception ex)
@@ -529,7 +542,7 @@ namespace LaserPathEngraver.UI.Win
 					_deviceDispatcher.DeviceStatus == DeviceStatus.Ready &&
 					DeviceDispatcher.JobStatus != JobStatus.Running &&
 					DeviceDispatcher.JobStatus != JobStatus.Paused &&
-					false /* Space.BurnPoints.Any() */
+					Space.BurnArea.Points.Any()
 
 			);
 			StartCommand = startCommand;
@@ -609,6 +622,13 @@ namespace LaserPathEngraver.UI.Win
 				if (e.PropertyName == nameof(Space.ImageBoundingRect))
 				{
 					framingCommand.NotifyCanExecuteChanged();
+				}
+			};
+			Space.BurnArea.PropertyChanged += (object? sender, PropertyChangedEventArgs e) =>
+			{
+				if (e.PropertyName == nameof(Space.BurnArea.Points))
+				{
+					startCommand.NotifyCanExecuteChanged();
 				}
 			};
 		}

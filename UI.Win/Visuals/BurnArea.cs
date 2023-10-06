@@ -1,4 +1,5 @@
 ﻿using LaserPathEngraver.Core.Configurations;
+using LaserPathEngraver.Core.Jobs;
 using LaserPathEngraver.UI.Win.Configuration;
 using System;
 using System.Collections;
@@ -143,6 +144,18 @@ namespace LaserPathEngraver.UI.Win.Visuals
 
 		public Shape Shape => _rectangle;
 
+		public IEnumerable<IEngravePoint> Points
+		{
+			get
+			{
+				var enumerator = _targets.GetEnumerator();
+				while (enumerator.MoveNext())
+				{
+					yield return enumerator.Current;
+				}
+			}
+		}
+
 		public void RenderImage()
 		{
 			if (!_requiresRenderUpdate && !RequiresTargetUpdate())
@@ -189,7 +202,7 @@ namespace LaserPathEngraver.UI.Win.Visuals
 						{
 							var target = _targets[i];
 							var byteIndex = target.Y * width * bytesPerPixel + target.X * bytesPerPixel;
-							var fillValue = (byte)(0xff * target.FillRatio);
+							var fillValue = target.Intensity;
 							var color = defaultColor ?? theme.GetBurnGradientColor(fillValue);
 
 							imageBuffer[byteIndex + 3] = color.A;
@@ -299,10 +312,9 @@ namespace LaserPathEngraver.UI.Win.Visuals
 						value = maxPower;
 					}
 
-
 					var target = new BurnTarget
 					{
-						FillRatio = value / 0xff,
+						Intensity = (byte)value,
 						X = x,
 						Y = y
 					};
@@ -310,6 +322,7 @@ namespace LaserPathEngraver.UI.Win.Visuals
 				}
 			}
 			_requiresTargetUpdate = false;
+			RaisePropertyChanged(nameof(Points));
 		}
 
 		private void ResizeToBoundingRect()
@@ -390,27 +403,12 @@ namespace LaserPathEngraver.UI.Win.Visuals
 
 		#endregion
 
-		private class BurnTarget
+		private class BurnTarget: IEngravePoint
 		{
-			private byte _fillRatio;
-
-			public BurnTarget()
-			{
-				_fillRatio = 0xff;
-			}
-
 			public int X { get; set; }
 			public int Y { get; set; }
-
-			public double FillRatio
-			{
-				get => _fillRatio / (double)0xff;
-				set
-				{
-					value = value < 0 ? 0 : value > 1 ? 1 : value;
-					_fillRatio = (byte)(value * 0xff);
-				}
-			}
+			public bool IsVisited { get;set; }
+			public byte Intensity { get; set; } = 0xff;
 		}
 
 		private class Resizing : IDisposable

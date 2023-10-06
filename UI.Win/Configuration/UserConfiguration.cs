@@ -27,9 +27,11 @@ namespace LaserPathEngraver.UI.Win.Configuration
 	public class Theme : INotifyPropertyChanged
 	{
 		private SolidColorBrush _foreground;
+		private SolidColorBrush _errorMessgaeForeground;
 		private SolidColorBrush _canvasBackground;
 		private SolidColorBrush _sectionBackground;
 		private SolidColorBrush _burnTargetBackground;
+		private Color _burnVisitedColor;
 		private Color _burnStartColor;
 		private Color _burnEndColor;
 		private ConcurrentDictionary<byte, Color> _burnGradientMap;
@@ -37,9 +39,11 @@ namespace LaserPathEngraver.UI.Win.Configuration
 		public Theme()
 		{
 			_foreground = SystemColors.ControlTextBrush;
+			_errorMessgaeForeground = SystemColors.ControlTextBrush;
 			_canvasBackground = SystemColors.ControlLightLightBrush;
 			_sectionBackground = SystemColors.ControlLightBrush;
 			_burnTargetBackground = SystemColors.ControlLightLightBrush;
+			_burnVisitedColor = Color.FromRgb(0xff, 0xff, 0xff);
 			_burnStartColor = Color.FromRgb(0xff, 0xff, 0xff);
 			_burnEndColor = Color.FromRgb(0x00, 0x00, 0x00);
 			_burnGradientMap = new ConcurrentDictionary<byte, Color>(4, 0xff);
@@ -54,6 +58,19 @@ namespace LaserPathEngraver.UI.Win.Configuration
 				{
 					_foreground = value;
 					OnPropertyChanged(nameof(Foreground));
+				}
+			}
+		}
+
+		public SolidColorBrush ErrorMessageForeground
+		{
+			get => _errorMessgaeForeground;
+			set
+			{
+				if (_errorMessgaeForeground != value)
+				{
+					_errorMessgaeForeground = value;
+					OnPropertyChanged(nameof(ErrorMessageForeground));
 				}
 			}
 		}
@@ -97,6 +114,19 @@ namespace LaserPathEngraver.UI.Win.Configuration
 			}
 		}
 
+		public Color BurnVisitedColor
+		{
+			get => _burnVisitedColor;
+			set
+			{
+				if (_burnVisitedColor != value)
+				{
+					_burnVisitedColor = value;
+					OnPropertyChanged(nameof(BurnVisitedColor));
+				}
+			}
+		}
+
 		public Color BurnStartColor
 		{
 			get => _burnStartColor;
@@ -106,7 +136,7 @@ namespace LaserPathEngraver.UI.Win.Configuration
 				{
 					_burnStartColor = value;
 					_burnGradientMap.Clear();
-					OnPropertyChanged(nameof(_burnStartColor));
+					OnPropertyChanged(nameof(BurnStartColor));
 				}
 			}
 		}
@@ -120,7 +150,7 @@ namespace LaserPathEngraver.UI.Win.Configuration
 				{
 					_burnEndColor = value;
 					_burnGradientMap.Clear();
-					OnPropertyChanged(nameof(_burnEndColor));
+					OnPropertyChanged(nameof(BurnEndColor));
 				}
 			}
 		}
@@ -132,14 +162,16 @@ namespace LaserPathEngraver.UI.Win.Configuration
 			PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 		}
 
-		public static Theme Default => Dark;
+		public static Theme Default => Light;
 
 		public static Theme Light => new()
 		{
 			Foreground = new SolidColorBrush(Color.FromRgb(0x11, 0x11, 0x11)),
+			ErrorMessageForeground = new SolidColorBrush(Color.FromRgb(0x75, 0x00, 0x10)),
 			CanvasBackground = new SolidColorBrush(Color.FromRgb(0xdd, 0xdd, 0xdd)),
 			SectionBackground = new SolidColorBrush(Color.FromRgb(0xbb, 0xbb, 0xbb)),
 			BurnTargetBackground = new SolidColorBrush(Color.FromRgb(0xff, 0xff, 0xff)),
+			BurnVisitedColor = Color.FromArgb(0xff, 0xa3, 0x50, 0x00),
 			BurnStartColor = Color.FromArgb(0x00, 0x00, 0x00, 0x00),
 			BurnEndColor = Color.FromArgb(0xff, 0x00, 0x00, 0x00),
 		};
@@ -147,26 +179,32 @@ namespace LaserPathEngraver.UI.Win.Configuration
 		public static Theme Dark => new()
 		{
 			Foreground = new SolidColorBrush(Color.FromRgb(0xdd, 0xdd, 0xdd)),
+			ErrorMessageForeground = new SolidColorBrush(Color.FromRgb(0xfd, 0xc9, 0xc2)),
 			CanvasBackground = new SolidColorBrush(Color.FromRgb(0x11, 0x11, 0x11)),
 			SectionBackground = new SolidColorBrush(Color.FromRgb(0x00, 0x00, 0x00)),
 			BurnTargetBackground = new SolidColorBrush(Color.FromRgb(0x00, 0x00, 0x00)),
+			BurnVisitedColor = Color.FromArgb(0xff, 0xff, 0xf5, 0xd9),
 			BurnStartColor = Color.FromArgb(0x00, 0xff, 0xff, 0xff),
 			BurnEndColor = Color.FromArgb(0xff, 0xff, 0xff, 0xff),
 		};
 
 		public override bool Equals(object? obj) => obj is Theme theme
 			&& theme.Foreground.Color.Equals(Foreground.Color)
+			&& theme.ErrorMessageForeground.Color.Equals(ErrorMessageForeground.Color)
 			&& theme.CanvasBackground.Color.Equals(CanvasBackground.Color)
 			&& theme.SectionBackground.Color.Equals(SectionBackground.Color)
 			&& theme.BurnTargetBackground.Color.Equals(BurnTargetBackground.Color)
+			&& theme.BurnVisitedColor.Equals(BurnVisitedColor)
 			&& theme.BurnStartColor.Equals(BurnStartColor)
 			&& theme.BurnEndColor.Equals(BurnEndColor);
 
 		public override int GetHashCode() =>
 			Foreground.Color.GetHashCode()
+			^ ErrorMessageForeground.Color.GetHashCode()
 			^ CanvasBackground.Color.GetHashCode()
 			^ SectionBackground.Color.GetHashCode()
 			^ BurnTargetBackground.Color.GetHashCode()
+			^ BurnVisitedColor.GetHashCode()
 			^ BurnStartColor.GetHashCode()
 			^ BurnEndColor.GetHashCode();
 

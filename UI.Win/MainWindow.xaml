@@ -806,7 +806,7 @@
 
 					<controls:ContentChangeTextBlock
 						FontSize="16"
-						Foreground="#FCC8C3"
+						Foreground="{Binding Theme.ErrorMessageForeground}"
 						Padding="0,30,0,0"
 						Opacity="0"
 						MaxHeight="0"

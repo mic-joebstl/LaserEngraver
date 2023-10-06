@@ -61,6 +61,15 @@ namespace LaserPathEngraver.Core.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Engraving.
+        /// </summary>
+        internal static string EngraveJobTitle {
+            get {
+                return ResourceManager.GetString("EngraveJobTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Framing.
         /// </summary>
         internal static string FramingJobTitle {
