@@ -189,6 +189,7 @@ namespace LaserPathEngraver.UI.Win.Visuals
 					{
 						width = _scaledBitmap.Width;
 						height = _scaledBitmap.Height;
+						_size = new Size(width, height);
 
 						var theme = _theme;
 						var defaultColor = theme is null ? Color.FromArgb(0, 0, 0, 0) : (Color?)null;
@@ -203,7 +204,9 @@ namespace LaserPathEngraver.UI.Win.Visuals
 							var target = _targets[i];
 							var byteIndex = target.Y * width * bytesPerPixel + target.X * bytesPerPixel;
 							var fillValue = target.Intensity;
-							var color = defaultColor ?? theme.GetBurnGradientColor(fillValue);
+							var color = target.IsVisited ? 
+								theme.GetBurnVisitedColor(fillValue)
+								: defaultColor ?? theme.GetBurnGradientColor(fillValue);
 
 							imageBuffer[byteIndex + 3] = color.A;
 							imageBuffer[byteIndex + 2] = color.R;
@@ -312,7 +315,7 @@ namespace LaserPathEngraver.UI.Win.Visuals
 						value = maxPower;
 					}
 
-					var target = new BurnTarget
+					var target = new BurnTarget(this)
 					{
 						Intensity = (byte)value,
 						X = x,
@@ -376,7 +379,7 @@ namespace LaserPathEngraver.UI.Win.Visuals
 			_targetUpdateRequestUtcDate = DateTime.UtcNow;
 		}
 
-		private bool RequiresTargetUpdate() 
+		private bool RequiresTargetUpdate()
 		{
 			return _requiresTargetUpdate && DateTime.UtcNow - _targetUpdateRequestUtcDate > _targetUpdateDebounceTime;
 		}
@@ -403,11 +406,30 @@ namespace LaserPathEngraver.UI.Win.Visuals
 
 		#endregion
 
-		private class BurnTarget: IEngravePoint
+		private class BurnTarget : IEngravePoint
 		{
+			private BurnArea _owner;
+			private bool _isVisited;
+
+			public BurnTarget(BurnArea owner)
+			{
+				_owner = owner;
+			}
+
 			public int X { get; set; }
 			public int Y { get; set; }
-			public bool IsVisited { get;set; }
+			public bool IsVisited
+			{
+				get => _isVisited;
+				set
+				{
+					if (_isVisited != value)
+					{
+						_isVisited = value;
+						_owner._requiresRenderUpdate = true;
+					}
+				}
+			}
 			public byte Intensity { get; set; } = 0xff;
 		}
 

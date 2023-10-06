@@ -71,6 +71,7 @@ namespace LaserPathEngraver.Core.Devices
 			{
 				tx.Open();
 
+				var delayMilliseconds = 2;
 				var sw = new Stopwatch();
 				sw.Start();
 				long i = 0;
@@ -87,11 +88,14 @@ namespace LaserPathEngraver.Core.Devices
 						Y = vector.Y != 0 ? vector.Y / Math.Abs(vector.Y) : 0
 					};
 
-					if (++i > sw.ElapsedMilliseconds / 2)
+					var targetTime = i++ * delayMilliseconds;
+					var elapsedTime = sw.ElapsedMilliseconds;
+					var currentDelay = targetTime - elapsedTime;
+					if (currentDelay > 0)
 					{
-						await Task.Delay(TimeSpan.FromMilliseconds(i - sw.ElapsedMilliseconds / 2), cancellationToken);
-
+						await Task.Delay(TimeSpan.FromMilliseconds(currentDelay), cancellationToken);
 					}
+
 					Position = new Point
 					{
 						X = Position.Value.X + unitVector.X,
@@ -100,6 +104,16 @@ namespace LaserPathEngraver.Core.Devices
 				}
 				sw.Stop();
 			}
+		}
+
+		public void MoveAbsoluteImmediate(Point position)
+		{
+			Position = position;
+		}
+
+		public override Task Engrave(byte intensity, byte duration, CancellationToken cancellationToken)
+		{
+			return Task.CompletedTask;
 		}
 	}
 }

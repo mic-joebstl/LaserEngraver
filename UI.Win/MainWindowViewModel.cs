@@ -521,7 +521,18 @@ namespace LaserPathEngraver.UI.Win
 								try
 								{
 									ErrorMessage = null;
-									var job = new EngraveJob(_burnConfiguration.Value, Space.BurnArea.Points);
+									var burnArea = Space.BurnArea;
+									var points = burnArea.Points;
+									foreach (var point in points)
+									{
+										point.IsVisited = false;
+									}
+									var burnAreaPosition = new System.Drawing.Point
+									{
+										X = (int)burnArea.Position.X,
+										Y = (int)burnArea.Position.Y
+									};
+									var job = new EngraveJob(_burnConfiguration.Value, burnAreaPosition, points);
 									await _deviceDispatcher.ExecuteJob(job, CancellationToken.None);
 								}
 								catch (Exception ex)

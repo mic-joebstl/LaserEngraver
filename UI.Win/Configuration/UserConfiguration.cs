@@ -19,7 +19,7 @@ namespace LaserPathEngraver.UI.Win.Configuration
 		public bool AutoCenterView { get; set; } = true;
 		public bool PreserveAspectRatio { get; set; } = true;
 		public Unit Unit { get; set; } = Unit.Cm;
-		public Theme Theme { get; set; } = Theme.Dark;
+		public Theme Theme { get; set; } = Theme.Default;
 		public Theme? CustomTheme { get; set; }
 
 	}
@@ -35,6 +35,7 @@ namespace LaserPathEngraver.UI.Win.Configuration
 		private Color _burnStartColor;
 		private Color _burnEndColor;
 		private ConcurrentDictionary<byte, Color> _burnGradientMap;
+		private ConcurrentDictionary<byte, Color> _burnVisitedMap;
 
 		public Theme()
 		{
@@ -46,7 +47,9 @@ namespace LaserPathEngraver.UI.Win.Configuration
 			_burnVisitedColor = Color.FromRgb(0xff, 0xff, 0xff);
 			_burnStartColor = Color.FromRgb(0xff, 0xff, 0xff);
 			_burnEndColor = Color.FromRgb(0x00, 0x00, 0x00);
+
 			_burnGradientMap = new ConcurrentDictionary<byte, Color>(4, 0xff);
+			_burnVisitedMap = new ConcurrentDictionary<byte, Color>(4, 0xff);
 		}
 
 		public SolidColorBrush Foreground
@@ -122,6 +125,7 @@ namespace LaserPathEngraver.UI.Win.Configuration
 				if (_burnVisitedColor != value)
 				{
 					_burnVisitedColor = value;
+					_burnVisitedMap.Clear();
 					OnPropertyChanged(nameof(BurnVisitedColor));
 				}
 			}
@@ -183,7 +187,7 @@ namespace LaserPathEngraver.UI.Win.Configuration
 			CanvasBackground = new SolidColorBrush(Color.FromRgb(0x11, 0x11, 0x11)),
 			SectionBackground = new SolidColorBrush(Color.FromRgb(0x00, 0x00, 0x00)),
 			BurnTargetBackground = new SolidColorBrush(Color.FromRgb(0x00, 0x00, 0x00)),
-			BurnVisitedColor = Color.FromArgb(0xff, 0xff, 0xf5, 0xd9),
+			BurnVisitedColor = Color.FromArgb(0xff, 0xf9, 0xac, 0x38),
 			BurnStartColor = Color.FromArgb(0x00, 0xff, 0xff, 0xff),
 			BurnEndColor = Color.FromArgb(0xff, 0xff, 0xff, 0xff),
 		};
@@ -210,6 +214,18 @@ namespace LaserPathEngraver.UI.Win.Configuration
 
 		public Color GetBurnGradientColor(byte value)
 			=> _burnGradientMap.GetOrAdd(value, CalculateBurnGradientColor);
+
+		public Color GetBurnVisitedColor(byte intensity)
+			=> _burnVisitedMap.GetOrAdd(intensity, (_) =>
+			{
+				return Color.FromArgb
+				(
+					a: intensity,
+					r: BurnVisitedColor.R,
+					g: BurnVisitedColor.G,
+					b: BurnVisitedColor.B
+				);
+			});
 
 		private Color CalculateBurnGradientColor(byte value)
 		{

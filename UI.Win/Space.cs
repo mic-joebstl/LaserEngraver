@@ -79,7 +79,7 @@ namespace LaserPathEngraver.UI.Win
 			_offsetY = 0;
 			_renderStopwatch = new Stopwatch();
 			_renderCanvasInterval = TimeSpan.FromMilliseconds(8);
-			_renderBitmapInterval = TimeSpan.FromMilliseconds(32);
+			_renderBitmapInterval = TimeSpan.FromMilliseconds(125);
 
 			_renderCanvasTimer = new DispatcherTimer(DispatcherPriority.Render);
 			_renderCanvasTimer.Interval = _renderCanvasInterval;
