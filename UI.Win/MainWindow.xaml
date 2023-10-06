@@ -1,0 +1,343 @@
+﻿<Window x:Class="LaserPathEngraver.UI.Win.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:LaserPathEngraver.UI.Win"
+        xmlns:local.rules="clr-namespace:LaserPathEngraver.UI.Win.Rules"
+        xmlns:localization="clr-namespace:LaserPathEngraver.UI.Win.Resources.Localization"
+        Title="{x:Static localization:Texts.Title}" Height="640" Width="1337"
+        Background="#111"
+        Foreground="White"
+        FontFamily="#Open Sans Light"
+        WindowState="Maximized"
+        KeyDown="ContentControl_KeyDown"
+        KeyUp="ContentControl_KeyUp"
+        Icon="/Resources/Icons/icon.ico"
+        xml:lang="en">
+	<Window.Resources>
+		<ResourceDictionary>
+			<ResourceDictionary.MergedDictionaries>
+				<ResourceDictionary Source="Styles.xaml" />
+			</ResourceDictionary.MergedDictionaries>
+		</ResourceDictionary>
+	</Window.Resources>
+	<Grid>
+
+		<ContentControl Content="{Binding Space.Canvas}"
+		                Name="_Content"
+		                Effect="{Binding DropShadowEffect}"
+		                HorizontalAlignment="Stretch"
+		                VerticalAlignment="Stretch"
+		                HorizontalContentAlignment="Stretch"
+		                VerticalContentAlignment="Stretch"
+		                ClipToBounds="True"
+		                local:SizeObserver.Observe="True"
+		                local:SizeObserver.ObservedWidth="{Binding Space.ObservableWidth, Mode=OneWayToSource}"
+		                local:SizeObserver.ObservedHeight="{Binding Space.ObservableHeight, Mode=OneWayToSource}">
+		</ContentControl>
+		<Grid VerticalAlignment="Top" HorizontalAlignment="Left"
+		      Margin="15">
+
+			<Border Background="Black">
+				<Border Opacity="0.8"
+				        Margin="-5">
+					<Border.Effect>
+						<BlurEffect Radius="5" />
+					</Border.Effect>
+					<Border.Background>
+						<VisualBrush Visual="{Binding ElementName=_Content}"
+						             Stretch="None"
+						             AlignmentX="Left" AlignmentY="Top" 
+						             ViewboxUnits="Absolute" Viewbox="10,10,1024,1024" />
+					</Border.Background>
+				</Border>
+			</Border>
+
+			<ScrollViewer >
+				<StackPanel Orientation="Vertical"
+				            Opacity="0.8"
+				            ClipToBounds="False"
+				            Margin="15">
+
+					<Label FontSize="16"
+					       Foreground="White"
+					       Content="{Binding Path=NumberOfElements}"
+					       ContentStringFormat="Number of Elements: {0}" />
+
+					<Slider Minimum="0"
+					        Maximum="1000"
+					        Width="200"
+					        Value="{Binding NumberOfElements}"
+					        HorizontalAlignment="Left" />
+
+					<Label FontSize="16"
+					       Foreground="White"
+					       Content="{Binding RandomMinimumSize}"
+					       ContentStringFormat="Minimum Random Size: {0:N1}" />
+
+					<Slider Minimum="1"
+					        Maximum="{Binding RandomMaximumSize}"
+					        Width="200"
+					        Value="{Binding RandomMinimumSize}"
+					        HorizontalAlignment="Left" />
+
+					<Label FontSize="16"
+					       Foreground="White"
+					       Content="{Binding RandomMaximumSize}"
+					       ContentStringFormat="Maximum Random Size: {0:N1}" />
+
+					<Slider Minimum="{Binding RandomMinimumSize}"
+					        Maximum="200"
+					        Width="200"
+					        Value="{Binding RandomMaximumSize}"
+					        HorizontalAlignment="Left" />
+
+					<StackPanel Orientation="Horizontal"
+					            Margin="0,7.5,0,7.5">
+						<TextBox Width="120" Height="30">
+							<TextBox.Text>
+								<Binding Path="Space.Scale"
+								         UpdateSourceTrigger="PropertyChanged">
+									<Binding.ValidationRules>
+										<local.rules:DoubleValidationRule Minimum="0" BoundsExclusive="True" />
+									</Binding.ValidationRules>
+								</Binding>
+							</TextBox.Text>
+						</TextBox>
+						<Label Foreground="White"
+						       FontSize="16"
+						       Content="Scale" />
+					</StackPanel>
+
+					<CheckBox Margin="0,12.5,0,0"
+					          IsChecked="{Binding EnableVisualEffects}"
+					          Content="Enable Visual Effects"
+					          FontSize="16" />
+
+					<CheckBox Margin="0,12.5,0,0"
+					          IsChecked="{Binding Space.EnableAutomaticCameraAdjustment}"
+					          Content="Adjust Camera Automatically"
+					          FontSize="16" />
+
+					<CheckBox Margin="0,12.5,0,0"
+					          Name="_EnableAudioVisualisationCheckBox"
+					          IsChecked="{Binding Space.IsAudioVisualisationEnabled}"
+					          Content="Enable Audio Visualisation"
+					          FontSize="16" />
+
+					<StackPanel Orientation="Vertical"
+					        Height="75">
+						<StackPanel.Style>
+							<Style TargetType="{x:Type StackPanel}">
+								<Style.Triggers>
+									<DataTrigger Binding="{Binding Space.IsAudioVisualisationEnabled}" Value="True">
+										<DataTrigger.EnterActions>
+											<BeginStoryboard>
+												<Storyboard>
+													<DoubleAnimation Storyboard.TargetProperty="Height"
+															         To="75"
+															         Duration="0:0:0.2"
+															         AccelerationRatio="0.1"
+															         DecelerationRatio="0.9" />
+												</Storyboard>
+											</BeginStoryboard>
+											<BeginStoryboard>
+												<Storyboard>
+													<DoubleAnimation Storyboard.TargetProperty="Opacity"
+															         To="1"
+															         Duration="0:0:0.4"
+															         BeginTime="0:0:0.15"
+															         AccelerationRatio="0.1"
+															         DecelerationRatio="0.9" />
+												</Storyboard>
+											</BeginStoryboard>
+										</DataTrigger.EnterActions>
+										<DataTrigger.ExitActions>
+											<BeginStoryboard>
+												<Storyboard>
+													<DoubleAnimation Storyboard.TargetProperty="Height"
+															         To="0"
+															         Duration="0:0:0.2"
+															         BeginTime="0:0:0.15"
+															         AccelerationRatio="0.1"
+															         DecelerationRatio="0.9" />
+												</Storyboard>
+											</BeginStoryboard>
+											<BeginStoryboard>
+												<Storyboard>
+													<DoubleAnimation Storyboard.TargetProperty="Opacity"
+															         To="0"
+															         Duration="0:0:0.4"
+															         AccelerationRatio="0.1"
+															         DecelerationRatio="0.9" />
+												</Storyboard>
+											</BeginStoryboard>
+										</DataTrigger.ExitActions>
+									</DataTrigger>
+								</Style.Triggers>
+							</Style>
+						</StackPanel.Style>
+
+						<CheckBox Margin="12.5,12.5,0,0"
+						          IsChecked="{Binding Space.VisualiseCapturedAudio}"
+						          Content="According to Microphone"
+						          FontSize="16" />
+
+						<CheckBox Margin="12.5,12.5,0,0"
+						          IsChecked="{Binding Space.VisualiseRenderedAudio}"
+						          Content="According to Speakers"
+						          FontSize="16" />
+
+					</StackPanel>
+
+					<CheckBox Margin="0,12.5,0,0"
+					          IsChecked="{Binding Space.IsCollisionEnabled}"
+					          Content="Enable Collisions"
+					          FontSize="16" />
+
+					<CheckBox Margin="0,12.5,0,0"
+					          IsChecked="{Binding Space.IsFusionEnabled}"
+					          Content="Enable Fusion"
+					          FontSize="16" />
+
+					<CheckBox Margin="0,12.5,0,0"
+					          IsChecked="{Binding Space.IsGravityEnabled}"
+					          Content="Enable Gravity"
+					          FontSize="16" />
+
+					<Label FontSize="20"
+					       Foreground="White"
+					       Margin="0,45,0,0"
+					       Content="New Element" />
+
+					<StackPanel Orientation="Horizontal"
+					            Margin="0,7.5,0,7.5">
+						<TextBox Width="120" Height="30"
+					             Text="{Binding NewElementMass,
+					                            UpdateSourceTrigger=PropertyChanged,
+					                            StringFormat=N0}" />
+						<Label Foreground="White"
+					           FontSize="16"
+					           Content="Mass  [ kg ]" />
+					</StackPanel>
+
+					<StackPanel Orientation="Horizontal"
+					            Margin="0,7.5,0,0">
+						<TextBox Width="120" Height="30">
+							<TextBox.Text>
+								<Binding Path="NewElementSize"
+										 UpdateSourceTrigger="PropertyChanged"
+										 StringFormat="N1">
+									<Binding.ValidationRules>
+										<local.rules:DoubleValidationRule Minimum="1" />
+									</Binding.ValidationRules>
+								</Binding>
+							</TextBox.Text>
+						</TextBox>
+						<Label Foreground="White"
+						       FontSize="16"
+						       Content="Size" />
+					</StackPanel>
+
+				</StackPanel>
+			</ScrollViewer>
+
+		</Grid>
+		<Grid VerticalAlignment="Top" HorizontalAlignment="Right">
+			<Grid.Background>
+				<SolidColorBrush Color="Black" Opacity="0.5" />
+			</Grid.Background>
+			<Label Content="{Binding Space.CalculationRate}"
+			       Foreground="White"
+			       FontSize="16"
+			       ContentStringFormat="{}{0:N2} Calculations Per Seconds" />
+		</Grid>
+		<Grid HorizontalAlignment="Right" VerticalAlignment="Bottom"
+		      Margin="15">
+
+			<Border Background="Black">
+				<Border Opacity="0.8"
+					    Margin="-5">
+					<Border.Effect>
+						<BlurEffect Radius="5" />
+					</Border.Effect>
+					<Border.Background>
+						<VisualBrush Visual="{Binding ElementName=_Content}"
+						             Stretch="None"
+						             AlignmentX="Left" AlignmentY="Top"
+						             ViewboxUnits="Absolute"
+						             Viewbox="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=TutorialViewBox}" />
+					</Border.Background>
+				</Border>
+			</Border>
+
+			<StackPanel Orientation="Vertical"
+			            Name="_TutorialBox">
+				<ScrollViewer Height="300">
+					<ScrollViewer.Style>
+						<Style TargetType="{x:Type ScrollViewer}">
+							<Style.Triggers>
+								<DataTrigger Binding="{Binding ShowTutorial}" Value="True">
+									<DataTrigger.EnterActions>
+										<BeginStoryboard>
+											<Storyboard>
+												<DoubleAnimation Storyboard.TargetProperty="Height"
+												                 To="300"
+												                 Duration="0:0:0.4"
+												                 AccelerationRatio="0.1"
+												                 DecelerationRatio="0.9" />
+											</Storyboard>
+										</BeginStoryboard>
+										<BeginStoryboard>
+											<Storyboard>
+												<DoubleAnimation Storyboard.TargetProperty="Opacity"
+												                 To="1"
+												                 Duration="0:0:0.4"
+												                 BeginTime="0:0:0.15"
+												                 AccelerationRatio="0.1"
+												                 DecelerationRatio="0.9" />
+											</Storyboard>
+										</BeginStoryboard>
+									</DataTrigger.EnterActions>
+									<DataTrigger.ExitActions>
+										<BeginStoryboard>
+											<Storyboard>
+												<DoubleAnimation Storyboard.TargetProperty="Height"
+												                 To="0"
+												                 Duration="0:0:0.4"
+												                 BeginTime="0:0:0.15"
+												                 AccelerationRatio="0.1"
+												                 DecelerationRatio="0.9" />
+											</Storyboard>
+										</BeginStoryboard>
+										<BeginStoryboard>
+											<Storyboard>
+												<DoubleAnimation Storyboard.TargetProperty="Opacity"
+												                 To="0"
+												                 Duration="0:0:0.4"
+												                 AccelerationRatio="0.1"
+												                 DecelerationRatio="0.9" />
+											</Storyboard>
+										</BeginStoryboard>
+									</DataTrigger.ExitActions>
+								</DataTrigger>
+							</Style.Triggers>
+						</Style>
+					</ScrollViewer.Style>
+					<TextBlock Foreground="White"
+					           Width="300"
+					           TextWrapping="Wrap"
+					           FontSize="16"
+					           Text="{x:Static localization:Texts.TutorialDescription}">
+					</TextBlock>
+				</ScrollViewer>
+
+				<CheckBox Margin="5,5,5,5"
+					      IsChecked="{Binding ShowTutorial}"
+					      Content="Show Tutorial"
+					      FontSize="16" />
+			</StackPanel>
+
+		</Grid>
+	</Grid>
+</Window>
+
