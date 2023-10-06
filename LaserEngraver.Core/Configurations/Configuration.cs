@@ -25,15 +25,6 @@ namespace LaserPathEngraver.Core.Configurations
 		Serial = 2
 	}
 
-	public class UserConfiguration
-	{
-		public CultureInfo Culture { get; set; } = new CultureInfo("en");
-		public bool ShowHelp { get; set; } = false;
-		public bool AutoCenterView { get; set; } = true;
-		public bool PreserveAspectRatio { get; set; } = true;
-		public Unit Unit { get; set; } = Unit.cm;
-	}
-
 	public enum Unit
 	{
 		px = 0,

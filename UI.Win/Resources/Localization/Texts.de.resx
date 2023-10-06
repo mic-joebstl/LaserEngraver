@@ -132,6 +132,9 @@
   <data name="ContinueButtonText" xml:space="preserve">
     <value>Fortsetzen</value>
   </data>
+  <data name="DarkThemeText" xml:space="preserve">
+    <value>Dark</value>
+  </data>
   <data name="DeviceStatusConnectingText" xml:space="preserve">
     <value>Verbindung wird hergestellt</value>
   </data>
@@ -239,6 +242,9 @@ Genaue Dauer ist vom Gerät abhängig, daher hier in Prozent anzugeben.
   <data name="JobStatusTitle" xml:space="preserve">
     <value>Auftragsstatus</value>
   </data>
+  <data name="LightThemeText" xml:space="preserve">
+    <value>Light</value>
+  </data>
   <data name="MaximumEngravingPowerText" xml:space="preserve">
     <value>Max. Brennstärke [%]</value>
   </data>
@@ -271,6 +277,9 @@ Genaue Dauer ist vom Gerät abhängig, daher hier in Prozent anzugeben.
   </data>
   <data name="StatusTitle" xml:space="preserve">
     <value>Status</value>
+  </data>
+  <data name="ThemeText" xml:space="preserve">
+    <value>Erscheinungsbild</value>
   </data>
   <data name="Title" xml:space="preserve">
     <value>Gravierer</value>

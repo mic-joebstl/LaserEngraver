@@ -106,6 +106,15 @@ namespace LaserPathEngraver.UI.Win.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Dark.
+        /// </summary>
+        public static string DarkThemeText {
+            get {
+                return ResourceManager.GetString("DarkThemeText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Connecting.
         /// </summary>
         public static string DeviceStatusConnectingText {
@@ -350,6 +359,15 @@ namespace LaserPathEngraver.UI.Win.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Light.
+        /// </summary>
+        public static string LightThemeText {
+            get {
+                return ResourceManager.GetString("LightThemeText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Max. Power [%].
         /// </summary>
         public static string MaximumEngravingPowerText {
@@ -445,6 +463,15 @@ namespace LaserPathEngraver.UI.Win.Resources.Localization {
         public static string StatusTitle {
             get {
                 return ResourceManager.GetString("StatusTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Theme.
+        /// </summary>
+        public static string ThemeText {
+            get {
+                return ResourceManager.GetString("ThemeText", resourceCulture);
             }
         }
         

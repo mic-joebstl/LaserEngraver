@@ -1,6 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.Input;
 using LaserPathEngraver.Core.Configurations;
 using LaserPathEngraver.Core.Devices;
+using LaserPathEngraver.UI.Win.Configuration;
 using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
@@ -29,6 +30,7 @@ namespace LaserPathEngraver.UI.Win
 		public MainWindow(IWritableOptions<UserConfiguration> userConfiguration, Space space, DeviceDispatcherService deviceDispatcher)
 		{
 			System.Threading.Thread.CurrentThread.CurrentUICulture = userConfiguration.Value.Culture;
+			System.Threading.Thread.CurrentThread.CurrentCulture = userConfiguration.Value.Culture;
 			DataContext = _viewModel = new MainWindowViewModel(userConfiguration, space, deviceDispatcher);
 			InitializeComponent();
 			SizeChanged += (o, e) =>

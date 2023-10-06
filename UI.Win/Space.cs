@@ -1,5 +1,6 @@
 ﻿using LaserPathEngraver.Core.Configurations;
 using LaserPathEngraver.Core.Devices;
+using LaserPathEngraver.UI.Win.Configuration;
 using LaserPathEngraver.UI.Win.Visuals;
 using Microsoft.Extensions.Options;
 using System;

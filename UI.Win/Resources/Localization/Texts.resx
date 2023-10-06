@@ -132,6 +132,9 @@
   <data name="ContinueButtonText" xml:space="preserve">
     <value>Continue</value>
   </data>
+  <data name="DarkThemeText" xml:space="preserve">
+    <value>Dark</value>
+  </data>
   <data name="DeviceStatusConnectingText" xml:space="preserve">
     <value>Connecting</value>
   </data>
@@ -239,6 +242,9 @@ Exact duration depends on the device, so it is specified here in percent.
   <data name="JobStatusTitle" xml:space="preserve">
     <value>Job Status</value>
   </data>
+  <data name="LightThemeText" xml:space="preserve">
+    <value>Light</value>
+  </data>
   <data name="MaximumEngravingPowerText" xml:space="preserve">
     <value>Max. Power [%]</value>
   </data>
@@ -271,6 +277,9 @@ Exact duration depends on the device, so it is specified here in percent.
   </data>
   <data name="StatusTitle" xml:space="preserve">
     <value>Status</value>
+  </data>
+  <data name="ThemeText" xml:space="preserve">
+    <value>Theme</value>
   </data>
   <data name="Title" xml:space="preserve">
     <value>Engraver</value>

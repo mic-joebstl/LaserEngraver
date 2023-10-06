@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using LaserPathEngraver.Core.Configurations;
 using LaserPathEngraver.Core.Devices;
+using LaserPathEngraver.UI.Win.Configuration;
 
 namespace LaserPathEngraver.UI.Win
 {

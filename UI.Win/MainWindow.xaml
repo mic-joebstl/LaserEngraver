@@ -7,14 +7,13 @@
         xmlns:rules="clr-namespace:LaserPathEngraver.UI.Win.Rules"
         xmlns:localization="clr-namespace:LaserPathEngraver.UI.Win.Resources.Localization"
         Title="{x:Static localization:Texts.Title}" Height="640" Width="1337"
-        Background="#111"
-        Foreground="White"
+        Background="{Binding Theme.CanvasBackground}"
+        Foreground="{Binding Theme.Foreground}"
         FontFamily="#Open Sans Light"
         WindowState="Maximized"
         KeyDown="ContentControl_KeyDown"
         KeyUp="ContentControl_KeyUp"
-        Icon="/Resources/Icons/icon.ico"
-        xml:lang="en">
+        Icon="/Resources/Icons/icon.ico">
 	<Window.Resources>
 		<ResourceDictionary>
 			<ResourceDictionary.MergedDictionaries>
@@ -46,7 +45,7 @@
 		<Grid VerticalAlignment="Top" HorizontalAlignment="Left"
 		      Margin="15">
 
-			<Border Background="Black">
+			<Border Background="{Binding Theme.SectionBackground}">
 				<Border Opacity="0.8"
 				        Margin="-5">
 					<Border.Effect>
@@ -64,11 +63,11 @@
 			<ScrollViewer MinWidth="316">
 				<StackPanel Orientation="Vertical"
 				            Opacity="0.8"
+							HorizontalAlignment="Left"
 				            ClipToBounds="False"
 				            Margin="15,15,15,30">
 
 					<Label FontSize="20"
-					       Foreground="White"
 					       Margin="0,0,0,0"
 					       Padding="0,5,5,5"
 					       Content="{x:Static localization:Texts.EngravingTitle}" />
@@ -87,8 +86,7 @@
 								</Binding>
 							</TextBox.Text>
 						</TextBox>
-						<Label Foreground="White"
-						       FontSize="16"
+						<Label FontSize="16"
 						       Content="{x:Static localization:Texts.EngravingDurationText}"
 						       IsEnabled="{Binding IsEditable, Mode=OneWay}" />
 					</StackPanel>
@@ -115,12 +113,12 @@
 								</Binding>
 							</TextBox.Text>
 						</TextBox>
-						<Label Foreground="White"
-						       FontSize="16"
+						<Label FontSize="16"
 						       Content="{x:Static localization:Texts.MaximumEngravingPowerText}"
 						       IsEnabled="{Binding IsEditable, Mode=OneWay}">
 							<Label.Style>
 								<Style TargetType="{x:Type Label}">
+									<Setter Property="Foreground" Value="{Binding RelativeSource={RelativeSource AncestorType={x:Type Window}}, Path=Foreground}" />
 									<Style.Triggers>
 										<DataTrigger Binding="{Binding Space.IsPowerVarible}" Value="True">
 											<DataTrigger.Setters>
@@ -190,12 +188,12 @@
 								</Style>
 							</Label.Style>
 						</Label>
-						<Label Foreground="White"
-						       FontSize="16"
+						<Label FontSize="16"
 						       Content="{x:Static localization:Texts.EngravingPowerText}"
 						       IsEnabled="{Binding IsEditable, Mode=OneWay}">
 							<Label.Style>
 								<Style TargetType="{x:Type Label}">
+									<Setter Property="Foreground" Value="{Binding RelativeSource={RelativeSource AncestorType={x:Type Window}}, Path=Foreground}" />
 									<Style.Triggers>
 										<DataTrigger Binding="{Binding Space.IsPowerVarible}" Value="True">
 											<DataTrigger.Setters>
@@ -348,8 +346,7 @@
 									</Binding>
 								</TextBox.Text>
 							</TextBox>
-							<Label Foreground="White"
-							       FontSize="16"
+							<Label FontSize="16"
 							       Content="{x:Static localization:Texts.FixedEngravingPowerThresholdText}"
 							       IsEnabled="{Binding IsEditable, Mode=OneWay}" />
 						</StackPanel>
@@ -368,25 +365,29 @@
 					          Content="{x:Static localization:Texts.IsPowerVariableText}"
 					          IsEnabled="{Binding IsEditable, Mode=OneWay}" />
 
-					<StackPanel Orientation="Vertical">
-						<Label FontSize="16"
-						       Foreground="White"
-						       Margin="0,12.5,0,0"
-						       Content="{x:Static localization:Texts.PlottingModeTitle}"
-						       IsEnabled="{Binding IsEditable, Mode=OneWay}" />
-						<CheckBox Margin="12.5,5,0,0"
+					<Label FontSize="16"
+					       Margin="0,12.5,0,0"
+					       Padding="0,5,5,5"
+					       Content="{x:Static localization:Texts.PlottingModeTitle}"
+					       IsEnabled="{Binding IsEditable, Mode=OneWay}" />
+					<Grid HorizontalAlignment="Stretch">
+						<Grid.ColumnDefinitions>
+							<ColumnDefinition Width="1*" />
+							<ColumnDefinition Width="1*" />
+						</Grid.ColumnDefinitions>
+
+						<CheckBox Grid.Column="0"
 						          IsChecked="{Binding Space.IsPlottingModeRasterizedEnabled}"
 						          Content="{x:Static localization:Texts.PlottingModeRasterizedText}"
 						          IsEnabled="{Binding IsEditable, Mode=OneWay}" />
-						<CheckBox Margin="12.5,12.5,0,0"
+						<CheckBox Grid.Column="1"
 						          IsChecked="{Binding Space.IsPlottingModePathEnabled}"
 						          Content="{x:Static localization:Texts.PlottingModePathText}"
 						          IsEnabled="{Binding IsEditable, Mode=OneWay}" />
-					</StackPanel>
-					
+					</Grid>
+
 
 					<Label FontSize="20"
-					       Foreground="White"
 					       Margin="0,30,0,0"
 					       Padding="0,5,5,5"
 					       Content="{x:Static localization:Texts.ViewTitle}" />
@@ -404,8 +405,7 @@
 								</Binding>
 							</TextBox.Text>
 						</TextBox>
-						<Label Foreground="White"
-						       FontSize="16"
+						<Label FontSize="16"
 						       Content="{x:Static localization:Texts.ScaleText}" />
 					</StackPanel>
 
@@ -423,21 +423,47 @@
 					          IsChecked="{Binding Space.AutoCenterView}"
 					          Content="{x:Static localization:Texts.AutoCenterViewText}" />
 
-					<StackPanel Orientation="Horizontal">
-						<Label FontSize="16"
-						       Foreground="White"
-						       Margin="0,12.5,25,0"
-						       Content="{x:Static localization:Texts.UnitText}" />
-						<CheckBox Margin="0,12.5,25,0"
+					<Label FontSize="16"
+					       Margin="0,12.5,0,0"
+					       Padding="0,5,5,5"
+					       Content="{x:Static localization:Texts.ThemeText}" />
+					<Grid HorizontalAlignment="Stretch">
+						<Grid.ColumnDefinitions>
+							<ColumnDefinition Width="1*" />
+							<ColumnDefinition Width="1*" />
+						</Grid.ColumnDefinitions>
+
+						<CheckBox Grid.Column="0"
+						          Margin="0"
+						          IsChecked="{Binding ShowDarkTheme}"
+						          Content="{x:Static localization:Texts.DarkThemeText}" />
+						<CheckBox Grid.Column="1"
+						          Margin="0"
+						          IsChecked="{Binding ShowLightTheme}"
+						          Content="{x:Static localization:Texts.LightThemeText}" />
+					</Grid>
+
+					<Label FontSize="16"
+					       Margin="0,12.5,0,0"
+					       Padding="0,5,5,5"
+					       Content="{x:Static localization:Texts.UnitText}" />
+					<Grid HorizontalAlignment="Stretch">
+						<Grid.ColumnDefinitions>
+							<ColumnDefinition Width="1*" />
+							<ColumnDefinition Width="1*" />
+						</Grid.ColumnDefinitions>
+
+						<CheckBox Grid.Column="0"
+						          Margin="0"
 						          IsChecked="{Binding ShowUnitCm}"
 						          Content="{x:Static localization:Texts.UnitCmText}" />
-						<CheckBox Margin="0,12.5,0,0"
+						<CheckBox Grid.Column="1"
+						          Margin="0"
 						          IsChecked="{Binding ShowUnitPx}"
 						          Content="{x:Static localization:Texts.UnitPxText}" />
-					</StackPanel>
+					</Grid>
 
 					<Label FontSize="20"
-					       Foreground="White"
 					       Margin="0,30,0,0"
 					       Padding="0,5,5,5"
 					       Content="{x:Static localization:Texts.ImageTitle}" />
@@ -471,8 +497,7 @@
 								</Binding>
 							</TextBox.Text>
 						</TextBox>
-						<Label Foreground="White"
-						       FontSize="16"
+						<Label FontSize="16"
 						       Content="{x:Static localization:Texts.WidthPxText}"
 						       IsEnabled="{Binding IsEditable, Mode=OneWay}" />
 					</StackPanel>
@@ -506,8 +531,7 @@
 								</Binding>
 							</TextBox.Text>
 						</TextBox>
-						<Label Foreground="White"
-						       FontSize="16"
+						<Label FontSize="16"
 						       Content="{x:Static localization:Texts.WidthCmText}"
 						       IsEnabled="{Binding IsEditable, Mode=OneWay}" />
 					</StackPanel>
@@ -541,8 +565,7 @@
 								</Binding>
 							</TextBox.Text>
 						</TextBox>
-						<Label Foreground="White"
-						       FontSize="16"
+						<Label FontSize="16"
 						       Content="{x:Static localization:Texts.HeightPxText}"
 						       IsEnabled="{Binding IsEditable, Mode=OneWay}" />
 					</StackPanel>
@@ -576,8 +599,7 @@
 								</Binding>
 							</TextBox.Text>
 						</TextBox>
-						<Label Foreground="White"
-						       FontSize="16"
+						<Label FontSize="16"
 						       Content="{x:Static localization:Texts.HeightCmText}"
 						       IsEnabled="{Binding IsEditable, Mode=OneWay}" />
 					</StackPanel>
@@ -594,7 +616,7 @@
 		<Grid VerticalAlignment="Top" HorizontalAlignment="Right"
 		      Margin="15">
 
-			<Border Background="Black">
+			<Border Background="{Binding Theme.SectionBackground}">
 				<Border Opacity="0.8"
 				        Margin="-5">
 					<Border.Effect>
@@ -618,19 +640,16 @@
 				            Margin="15,15,15,30">
 
 					<Label FontSize="20"
-					       Foreground="White"
 					       Margin="0,0,0,0"
 					       Padding="0,5,5,5"
 					       Content="{x:Static localization:Texts.StatusTitle}" />
 
 					<StackPanel Orientation="Vertical" Margin="0,5,5,5">
 						<Label Content="{x:Static localization:Texts.UpdateRateTitle}"
-						       Foreground="White"
 						       FontSize="14"
 						       Padding="0" />
 						<Label Content="{Binding Space.RenderRate}"
 						       ContentStringFormat="{x:Static localization:Texts.RenderRateFormatText}"
-						       Foreground="White"
 						       FontSize="16"
 						       FontWeight="Bold"
 						       Padding="0"
@@ -639,11 +658,9 @@
 
 					<StackPanel Orientation="Vertical" Margin="0,5,5,5">
 						<Label Content="{x:Static localization:Texts.DeviceStatusTitle}"
-						       Foreground="White"
 						       FontSize="14"
 						       Padding="0" />
 						<Label Content="{Binding DeviceStatusText}"
-						       Foreground="White"
 						       FontSize="16"
 						       FontWeight="Bold"
 						       Padding="0" />
@@ -651,11 +668,9 @@
 
 					<StackPanel Orientation="Vertical" Margin="0,5,5,5">
 						<Label Content="{x:Static localization:Texts.JobStatusTitle}"
-						       Foreground="White"
 						       FontSize="14"
 						       Padding="0" />
 						<Label Content="{Binding JobStatusText}"
-						       Foreground="White"
 						       FontSize="16"
 						       FontWeight="Bold"
 						       Padding="0" />
@@ -663,12 +678,10 @@
 
 					<StackPanel Orientation="Vertical" Margin="0,5,5,5">
 						<Label Content="{x:Static localization:Texts.JobElapsedDurationTitle}"
-						       Foreground="White"
 						       FontSize="14"
 						       Padding="0" />
 						<Label Content="{Binding JobElapsedDuration}"
 						       ContentStringFormat="{x:Static localization:Texts.JobElapsedDurationFormatText}"
-						       Foreground="White"
 						       FontSize="16"
 						       FontWeight="Bold"
 						       Padding="0"
@@ -677,7 +690,6 @@
 
 
 					<Label FontSize="20"
-					       Foreground="White"
 					       Margin="0,30,0,0"
 					       Padding="0,5,5,5"
 					       Content="{x:Static localization:Texts.ActionsTitle}" />
@@ -749,7 +761,7 @@
 		<Grid HorizontalAlignment="Right" VerticalAlignment="Bottom"
 		      Margin="15">
 
-			<Border Background="Black">
+			<Border Background="{Binding Theme.SectionBackground}">
 				<Border Opacity="0.8"
 					    Margin="-5">
 					<Border.Effect>
@@ -826,8 +838,7 @@
 							</Style.Triggers>
 						</Style>
 					</ScrollViewer.Style>
-					<TextBlock Foreground="White"
-					           Width="300"
+					<TextBlock Width="300"
 					           localization:TextBlockHelper.FormattedText="{x:Static localization:Texts.HelpText}">
 					</TextBlock>
 				</ScrollViewer>

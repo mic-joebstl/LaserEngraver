@@ -18,6 +18,7 @@ using CommunityToolkit.Mvvm.Input;
 using System.Threading;
 using LaserPathEngraver.Core.Jobs;
 using System.Windows.Input;
+using LaserPathEngraver.UI.Win.Configuration;
 
 namespace LaserPathEngraver.UI.Win
 {
@@ -32,6 +33,7 @@ namespace LaserPathEngraver.UI.Win
 		private System.Windows.Point _mouseLastPos;
 		private System.Windows.Point _mouseLastDownPos;
 		private DispatcherTimer _jobElapsedTimer;
+		private Theme _theme;
 
 		public MainWindowViewModel(IWritableOptions<UserConfiguration> userConfiguration, Space space, DeviceDispatcherService deviceDispatcher)
 		{
@@ -49,6 +51,13 @@ namespace LaserPathEngraver.UI.Win
 				Color = Colors.White,
 				BlurRadius = 20,
 				RenderingBias = RenderingBias.Performance
+			};
+
+			_theme = userConfiguration.Value.Theme;
+			_theme.PropertyChanged += (object? sender, PropertyChangedEventArgs e) =>
+			{
+				userConfiguration.Update(target => target.Theme = _theme);
+				RaisePropertyChanged(nameof(Theme));
 			};
 
 			var connectCommand = new AsyncRelayCommand(
@@ -197,6 +206,8 @@ namespace LaserPathEngraver.UI.Win
 			_jobElapsedTimer.Start();
 		}
 
+		public Theme Theme => _theme;
+
 		public string? ErrorMessage
 		{
 			get => _errorMessage;
@@ -265,6 +276,38 @@ namespace LaserPathEngraver.UI.Win
 				_userConfiguration.Update(config => config.Unit = value ? Unit.px : Unit.cm);
 				RaisePropertyChanged(nameof(ShowUnitCm));
 				RaisePropertyChanged(nameof(ShowUnitPx));
+			}
+		}
+
+		public bool ShowDarkTheme
+		{
+			get
+			{
+				return _userConfiguration.Value?.Theme.Equals(Theme.Dark) ?? false;
+			}
+			set
+			{
+				_theme = Theme.Dark;
+				_userConfiguration.Update(config => config.Theme = _theme);
+				RaisePropertyChanged(nameof(Theme));
+				RaisePropertyChanged(nameof(ShowDarkTheme));
+				RaisePropertyChanged(nameof(ShowLightTheme));
+			}
+		}
+
+		public bool ShowLightTheme
+		{
+			get
+			{
+				return _userConfiguration.Value?.Theme.Equals(Theme.Light) ?? false;
+			}
+			set
+			{
+				_theme = Theme.Light;
+				_userConfiguration.Update(config => config.Theme = _theme);
+				RaisePropertyChanged(nameof(Theme));
+				RaisePropertyChanged(nameof(ShowDarkTheme));
+				RaisePropertyChanged(nameof(ShowLightTheme));
 			}
 		}
 
