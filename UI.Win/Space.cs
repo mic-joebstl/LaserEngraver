@@ -36,9 +36,10 @@ namespace LaserPathEngraver.UI.Win
 		private long _renderStopwatchIterations;
 		private TimeSpan _renderStopwatchDuration;
 		private double _renderRate;
-		private TimeSpan _renderInterval;
+		private TimeSpan _renderCanvasInterval;
 		private TimeSpan _renderBitmapInterval;
-		private DispatcherTimer _dispatcherTimer;
+		private DispatcherTimer _renderCanvasTimer;
+		private DispatcherTimer _renderBitmapTimer;
 		private decimal _canvasWidthDot;
 		private decimal _canvasHeightDot;
 		private decimal _resolutionDpi;
@@ -71,13 +72,18 @@ namespace LaserPathEngraver.UI.Win
 			_offsetX = 0;
 			_offsetY = 0;
 			_renderStopwatch = new Stopwatch();
-			_renderInterval = TimeSpan.FromMilliseconds(8);
-			_renderBitmapInterval = TimeSpan.FromMilliseconds(64);
+			_renderCanvasInterval = TimeSpan.FromMilliseconds(8);
+			_renderBitmapInterval = TimeSpan.FromMilliseconds(32);
 			
-			_dispatcherTimer = new DispatcherTimer(DispatcherPriority.Background);
-			_dispatcherTimer.Interval = _renderInterval;
-			_dispatcherTimer.Tick += OnRender;
-			_dispatcherTimer.Start();
+			_renderCanvasTimer = new DispatcherTimer(DispatcherPriority.Render);
+			_renderCanvasTimer.Interval = _renderCanvasInterval;
+			_renderCanvasTimer.Tick += OnRenderCanvasTimer;
+			_renderCanvasTimer.Start();
+
+			_renderBitmapTimer = new DispatcherTimer(DispatcherPriority.Render);
+			_renderBitmapTimer.Interval = _renderBitmapInterval;
+			_renderBitmapTimer.Tick += OnRenderBitmapTimer;
+			_renderBitmapTimer.Start();
 
 			_burnBoundsRectangle = new BurnRectangle();
 			_burnBoundsRectangle.Size = new Size((double)_canvasWidthDot, (double)_canvasHeightDot);
@@ -270,7 +276,7 @@ namespace LaserPathEngraver.UI.Win
 				if (_offsetX != value)
 				{
 					_offsetX = value;
-					Render();
+					UpdateVisuals();
 					RaisePropertyChanged(nameof(OffsetX));
 				}
 			}
@@ -287,7 +293,7 @@ namespace LaserPathEngraver.UI.Win
 				if (_offsetY != value)
 				{
 					_offsetY = value;
-					Render();
+					UpdateVisuals();
 					RaisePropertyChanged(nameof(OffsetY));
 				}
 			}
@@ -367,11 +373,9 @@ namespace LaserPathEngraver.UI.Win
 			}
 		}
 
-		private void Render()
+		private void OnRenderCanvasTimer(object? sender, EventArgs e)
 		{
 			#region RenderInterval
-
-			var updateBitmap = false;
 
 			if (!_renderStopwatch.IsRunning)
 			{
@@ -379,10 +383,8 @@ namespace LaserPathEngraver.UI.Win
 			}
 			else
 			{
-				var elapsed = _renderStopwatch.Elapsed;
-				updateBitmap = elapsed >= _renderBitmapInterval;
 				_renderStopwatchIterations++;
-				_renderStopwatchDuration += elapsed;
+				_renderStopwatchDuration += _renderStopwatch.Elapsed;
 				_renderStopwatch.Restart();
 
 				if (_renderStopwatchDuration >= TimeSpan.FromSeconds(0.5))
@@ -406,23 +408,40 @@ namespace LaserPathEngraver.UI.Win
 				{
 					foreach (var visual in visuals)
 					{
-						offsetX += visual.Position.X + visual.Size.Width / 2;
-						offsetY += visual.Position.Y + visual.Size.Height / 2;
+						offsetX -= visual.Position.X + visual.Size.Width / 2;
+						offsetY -= visual.Position.Y + visual.Size.Height / 2;
 					}
 					offsetX /= visuals.Length;
 					offsetY /= visuals.Length;
 
-					_offsetX += (-offsetX - _offsetX) * _renderInterval.TotalSeconds;
-					_offsetY += (-offsetY - _offsetY) * _renderInterval.TotalSeconds;
+					var deltaX = offsetX - _offsetX;
+					var deltaY = offsetY - _offsetY;
+
+					if (deltaX != 0 || deltaY != 0)
+					{
+						var moveFactor = 1 / _renderRate * 3;
+						moveFactor = moveFactor > 1 ? 1 : moveFactor;
+
+						var moveX = deltaX * moveFactor;
+						var moveY = deltaY * moveFactor;
+
+						var minValue = 0.1 / _scale;
+
+						moveX = moveX > minValue || moveX < -minValue ? moveX : deltaX;
+						moveY = moveY > minValue || moveY < -minValue ? moveY : deltaY;
+
+						_offsetX += moveX;
+						_offsetY += moveY;
+					}
 				}
 			}
 
-			UpdateVisuals(updateBitmap: updateBitmap);
+			UpdateVisuals(updatePositions: true, updateBitmap: false);
 		}
 
-		private void OnRender(object? sender, EventArgs e)
+		private void OnRenderBitmapTimer(object? sender, EventArgs e)
 		{
-			Render();
+			UpdateVisuals(updatePositions: false, updateBitmap: true);
 		}
 
 		#endregion
