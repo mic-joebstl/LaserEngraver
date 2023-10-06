@@ -20,12 +20,14 @@ namespace LaserPathEngraver.UI.Win
 	{
 		#region Fields
 
+		private IWritableOptions<DeviceConfiguration> _deviceConfiguration;
+		private IWritableOptions<UserConfiguration> _userConfiguration;
 		private Canvas _canvas;
-		private DateTime _renderDateTime;
 		private BurnArea _burnableArea;
 		private double _scale;
 		private double _offsetX;
 		private double _offsetY;
+		private bool _autoCenterView;
 		Stopwatch _renderStopwatch;
 		private long _renderStopwatchIterations;
 		private TimeSpan _renderStopwatchDuration;
@@ -40,11 +42,15 @@ namespace LaserPathEngraver.UI.Win
 
 		#region Initialization
 
-		public Space(IOptions<DeviceConfiguration> deviceConfiguration)
+		public Space(IWritableOptions<DeviceConfiguration> deviceConfiguration, IWritableOptions<UserConfiguration> userConfiguration)
 		{
+			_userConfiguration = userConfiguration;
+			_deviceConfiguration = deviceConfiguration;
 			_canvasHeightDot = deviceConfiguration.Value.HeightDots;
 			_canvasWidthDot = deviceConfiguration.Value.WidthDots;
 			_resolutionDpi = deviceConfiguration.Value.DPI;
+			_autoCenterView = userConfiguration.Value.AutoCenterView;
+			
 			_canvas = new Canvas();
 			_canvas.Width = 0;
 			_canvas.Height = 0;
@@ -52,13 +58,14 @@ namespace LaserPathEngraver.UI.Win
 			_canvas.VerticalAlignment = VerticalAlignment.Top;
 			_canvas.Cursor = System.Windows.Input.Cursors.Hand;
 			_canvas.Background = System.Windows.Media.Brushes.Transparent;
-			_renderDateTime = DateTime.Now;
+			
 			_renderRate = 0;
 			_scale = 1;
 			_offsetX = 0;
 			_offsetY = 0;
 			_renderStopwatch = new Stopwatch();
 			_renderInterval = TimeSpan.FromMilliseconds(8);
+			
 			_dispatcherTimer = new DispatcherTimer(DispatcherPriority.Background);
 			_dispatcherTimer.Interval = _renderInterval;
 			_dispatcherTimer.Tick += OnRender;
@@ -107,6 +114,17 @@ namespace LaserPathEngraver.UI.Win
 			{
 				Canvas.Height = value;
 				RaisePropertyChanged(nameof(ObservableHeight));
+			}
+		}
+
+		public bool AutoCenterView
+		{
+			get => _autoCenterView;
+			set
+			{
+				_userConfiguration.Update(config => config.AutoCenterView = value);
+				_autoCenterView = value;
+				RaisePropertyChanged(nameof(AutoCenterView));
 			}
 		}
 
@@ -305,6 +323,27 @@ namespace LaserPathEngraver.UI.Win
 			}
 
 			#endregion
+
+			if (AutoCenterView)
+			{
+				double offsetX = 0;
+				double offsetY = 0;
+
+				var visuals = GetVisuals().ToArray();
+				if (visuals.Length > 0)
+				{
+					foreach (var visual in visuals)
+					{
+						offsetX += visual.Position.X + visual.Size.Width / 2;
+						offsetY += visual.Position.Y + visual.Size.Height / 2;
+					}
+					offsetX /= visuals.Length;
+					offsetY /= visuals.Length;
+
+					_offsetX += (-offsetX - _offsetX) * _renderInterval.TotalSeconds;
+					_offsetY += (-offsetY - _offsetY) * _renderInterval.TotalSeconds;
+				}
+			}
 
 			UpdateVisuals();
 		}

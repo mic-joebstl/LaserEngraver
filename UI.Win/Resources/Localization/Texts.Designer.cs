@@ -61,6 +61,15 @@ namespace LaserPathEngraver.UI.Win.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Auto center view.
+        /// </summary>
+        public static string AutoCenterViewText {
+            get {
+                return ResourceManager.GetString("AutoCenterViewText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to {0:N2} Updates/s.
         /// </summary>
         public static string RenderRateFormatText {

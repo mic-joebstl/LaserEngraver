@@ -114,8 +114,8 @@
 					          FontSize="16" />
 
 					<CheckBox Margin="0,12.5,0,0"
-					          IsChecked="{Binding Space.EnableAutomaticCameraAdjustment}"
-					          Content="Adjust Camera Automatically"
+					          IsChecked="{Binding Space.AutoCenterView}"
+					          Content="{x:Static localization:Texts.AutoCenterViewText}"
 					          FontSize="16" />
 
 					<CheckBox Margin="0,12.5,0,0"

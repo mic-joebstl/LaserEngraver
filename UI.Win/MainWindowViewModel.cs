@@ -121,13 +121,11 @@ namespace LaserPathEngraver.UI.Win
 
 		private void OnSpaceMouseMove(object? sender, System.Windows.Input.MouseEventArgs e)
 		{
-
 			if (e.LeftButton == System.Windows.Input.MouseButtonState.Pressed)
 			{
-				if (System.Windows.Input.Keyboard.IsKeyDown(System.Windows.Input.Key.LeftCtrl) &&
-					System.Windows.Input.Keyboard.IsKeyUp(System.Windows.Input.Key.LeftShift))
+				if (System.Windows.Input.Keyboard.IsKeyDown(System.Windows.Input.Key.LeftCtrl))
 				{
-					//_space.EnableAutomaticCameraAdjustment = false;
+					_space.AutoCenterView = false;
 					Vector delta = e.GetPosition(_space.Canvas) - _mouseLastPos;
 					_space.OffsetX += delta.X / _space.Scale;
 					_space.OffsetY += delta.Y / _space.Scale;
@@ -156,8 +154,7 @@ namespace LaserPathEngraver.UI.Win
 
 		public void OnSpaceKeyDown(object? sender, System.Windows.Input.KeyEventArgs e)
 		{
-			if (System.Windows.Input.Keyboard.IsKeyDown(System.Windows.Input.Key.LeftCtrl) &&
-				System.Windows.Input.Keyboard.IsKeyUp(System.Windows.Input.Key.LeftShift))
+			if (System.Windows.Input.Keyboard.IsKeyDown(System.Windows.Input.Key.LeftCtrl))
 			{
 				_space.Canvas.Cursor = System.Windows.Input.Cursors.ScrollAll;
 
@@ -179,8 +176,7 @@ namespace LaserPathEngraver.UI.Win
 
 		public void OnSpaceKeyUp(object sender, System.Windows.Input.KeyEventArgs e)
 		{
-			if (System.Windows.Input.Keyboard.IsKeyUp(System.Windows.Input.Key.LeftCtrl) ||
-				System.Windows.Input.Keyboard.IsKeyDown(System.Windows.Input.Key.LeftShift))
+			if (System.Windows.Input.Keyboard.IsKeyUp(System.Windows.Input.Key.LeftCtrl))
 			{
 				_space.Canvas.Cursor = System.Windows.Input.Cursors.Hand;
 			}

@@ -98,7 +98,6 @@
 		</Setter>
 	</Style>
 
-
 	<Style x:Key="SliderRepeatButtonStyle" TargetType="{x:Type RepeatButton}">
 		<Setter Property="OverridesDefaultStyle" Value="true" />
 		<Setter Property="IsTabStop" Value="false" />
@@ -114,6 +113,7 @@
 
 	<Style x:Key="CustomThumbForSlider" TargetType="{x:Type Thumb}">
 		<Setter Property="OverridesDefaultStyle" Value="True" />
+		<Setter Property="Cursor" Value="Hand" />
 		<Setter Property="Template">
 			<Setter.Value>
 				<ControlTemplate TargetType="{x:Type Thumb}">
@@ -189,8 +189,8 @@
 		</Setter>
 	</Style>
 
-
 	<Style x:Key="{x:Type CheckBox}" TargetType="{x:Type CheckBox}">
+		<Setter Property="Cursor" Value="Hand" />
 		<Setter Property="OverridesDefaultStyle" Value="True" />
 		<Setter Property="MinWidth" Value="18" />
 		<Setter Property="MinHeight" Value="18" />
