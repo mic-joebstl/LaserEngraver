@@ -75,6 +75,7 @@ namespace LaserPathEngraver.Core.Devices
 
 		public abstract Task ConnectAsync(CancellationToken cancellationToken);
 		public abstract Task DisconnectAsync(CancellationToken cancellationToken);
+		public abstract Task HomingAsync(CancellationToken cancellationToken);
 	}
 
 	public enum DeviceStatus

@@ -16,7 +16,6 @@ namespace LaserPathEngraver.Core.Configurations
 		public int? BaudRate { get; set; }
 		public TimeSpan ConnectionTimeout { get; set; } = TimeSpan.FromSeconds(9);
 		public TimeSpan ExecuionTimeout { get; set; } = TimeSpan.FromSeconds(3);
-
 	}
 
 	public enum DeviceType

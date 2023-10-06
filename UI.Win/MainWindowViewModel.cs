@@ -29,6 +29,7 @@ namespace LaserPathEngraver.UI.Win
 		private bool _enableVisualEffects;
 		private Effect? _dropShadowEffect;
 		private System.Windows.Point _mouseLastPos;
+		private DispatcherTimer _jobElapsedTimer;
 
 		public MainWindowViewModel(IWritableOptions<UserConfiguration> userConfiguration, Space space, DeviceDispatcherService deviceDispatcher)
 		{
@@ -57,6 +58,7 @@ namespace LaserPathEngraver.UI.Win
 						if(_deviceDispatcher.DeviceStatus == DeviceStatus.Disconnected)
 						{
 							await _deviceDispatcher.Connect(cancellationToken);
+							await _deviceDispatcher.ExecuteJob(new HomingJob(), cancellationToken);
 						}
 						else if(_deviceDispatcher.DeviceStatus == DeviceStatus.Ready)
 						{
@@ -81,6 +83,11 @@ namespace LaserPathEngraver.UI.Win
 			{
 				RaisePropertyChanged(nameof(JobStatusText));
 			};
+
+			_jobElapsedTimer = new DispatcherTimer(DispatcherPriority.Render);
+			_jobElapsedTimer.Interval = TimeSpan.FromSeconds(0.1);
+			_jobElapsedTimer.Tick += (object? sender, EventArgs e) => RaisePropertyChanged(nameof(JobElapsedDuration));
+			_jobElapsedTimer.Start();
 		}
 
 		public string? ErrorMessage
@@ -94,6 +101,8 @@ namespace LaserPathEngraver.UI.Win
 		}
 
 		public DeviceDispatcherService DeviceDispatcher => _deviceDispatcher;
+
+		public TimeSpan JobElapsedDuration => DeviceDispatcher.JobElapsedDuration;
 
 		public Space Space => _space;
 
@@ -185,7 +194,7 @@ namespace LaserPathEngraver.UI.Win
 			DeviceDispatcher.JobStatus == JobStatus.None ? Resources.Localization.Texts.JobStatusNoneText :
 			DeviceDispatcher.JobStatus == JobStatus.Running ? Resources.Localization.Texts.JobStatusRunningText :
 			DeviceDispatcher.JobStatus == JobStatus.Paused ? Resources.Localization.Texts.JobStatusPausedText :
-			DeviceDispatcher.JobStatus == JobStatus.Stopped ? Resources.Localization.Texts.JobStatusStoppedText :
+			DeviceDispatcher.JobStatus == JobStatus.Cancelled ? Resources.Localization.Texts.JobStatusStoppedText :
 			DeviceDispatcher.JobStatus == JobStatus.Done ? Resources.Localization.Texts.JobStatusDoneText :
 			null;
 

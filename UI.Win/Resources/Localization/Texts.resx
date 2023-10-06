@@ -206,6 +206,12 @@ Exact duration depends on the device, so it is specified here in percent.
   <data name="IsPowerVariableText" xml:space="preserve">
     <value>Variable burn intensity</value>
   </data>
+  <data name="JobElapsedDurationFormatText" xml:space="preserve">
+    <value>{0:%h}h {0:%m}m {0:%s}s</value>
+  </data>
+  <data name="JobElapsedDurationTitle" xml:space="preserve">
+    <value>Job Elapsed Duration</value>
+  </data>
   <data name="JobStatusDoneText" xml:space="preserve">
     <value>Done</value>
   </data>

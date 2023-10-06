@@ -29,5 +29,17 @@ namespace LaserPathEngraver.Core.Devices
 			await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken);
 			Status = DeviceStatus.Disconnected;
 		}
+
+		public override async Task HomingAsync(CancellationToken cancellationToken)
+		{
+			lock (SyncRoot)
+			{
+				DemandState(DeviceStatus.Ready);
+				Status = DeviceStatus.Executing;
+			}
+			await Task.Delay(TimeSpan.FromSeconds(5), cancellationToken);
+			Position = new System.Drawing.Point(0, 0);
+			Status = DeviceStatus.Ready;
+		}
 	}
 }

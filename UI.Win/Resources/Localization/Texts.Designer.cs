@@ -251,6 +251,24 @@ namespace LaserPathEngraver.UI.Win.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to {0:%h}h {0:%m}m {0:%s}s.
+        /// </summary>
+        public static string JobElapsedDurationFormatText {
+            get {
+                return ResourceManager.GetString("JobElapsedDurationFormatText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Job Elapsed Duration.
+        /// </summary>
+        public static string JobElapsedDurationTitle {
+            get {
+                return ResourceManager.GetString("JobElapsedDurationTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Done.
         /// </summary>
         public static string JobStatusDoneText {

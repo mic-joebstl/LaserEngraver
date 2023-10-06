@@ -33,6 +33,8 @@ namespace LaserPathEngraver.Core.Devices
 
 		public JobStatus JobStatus => _currentJob?.Status ?? JobStatus.None;
 
+		public TimeSpan JobElapsedDuration => _currentJob?.ElapsedDuration ?? TimeSpan.Zero;
+
 		public async Task Connect(CancellationToken cancellationToken)
 		{
 			if (_device == null)
@@ -68,6 +70,11 @@ namespace LaserPathEngraver.Core.Devices
 			DeviceStatusChanged?.Invoke(sender, args);
 		}
 
+		private void OnJobStatusChanged(Job sender, JobStatusChangedEventArgs jobStatusChangedEventArgs)
+		{
+			JobStatusChanged?.Invoke(sender, jobStatusChangedEventArgs);
+		}
+
 		public async Task Disconnect(CancellationToken cancellationToken)
 		{
 			Device? device = null;
@@ -96,6 +103,32 @@ namespace LaserPathEngraver.Core.Devices
 					PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(DeviceStatus)));
 				}
 			}
+		}
+
+		public async Task ExecuteJob(Job job, CancellationToken cancellationToken)
+		{
+			Device device;
+			lock (_syncRoot)
+			{
+				if (_currentJob != null)
+				{
+					if (_currentJob.Status == JobStatus.Running)
+					{
+						_currentJob.Cancel();
+					}
+					else
+					{
+						_currentJob.Dispose();
+					}
+					_currentJob.StatusChanged -= OnJobStatusChanged;
+				}
+				_currentJob = job;
+				_currentJob.StatusChanged += OnJobStatusChanged;
+				device = _device ?? throw new InvalidOperationException("Device not connected");
+			}
+
+
+			await job.ExecuteAsync(device, cancellationToken);
 		}
 	}
 }

@@ -206,6 +206,12 @@ Genaue Dauer ist vom Gerät abhängig, daher hier in Prozent anzugeben.
   <data name="IsPowerVariableText" xml:space="preserve">
     <value>Variable Brennstärke</value>
   </data>
+  <data name="JobElapsedDurationFormatText" xml:space="preserve">
+    <value>{0:%h}h {0:%m}m {0:%s}s</value>
+  </data>
+  <data name="JobElapsedDurationTitle" xml:space="preserve">
+    <value>Auftragsausführungsdauer</value>
+  </data>
   <data name="JobStatusDoneText" xml:space="preserve">
     <value>Erledigt</value>
   </data>
