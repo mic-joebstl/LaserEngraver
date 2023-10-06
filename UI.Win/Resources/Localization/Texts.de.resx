@@ -123,6 +123,18 @@
   <data name="EnableVisualEffectsText" xml:space="preserve">
     <value>Halo anzeigen</value>
   </data>
+  <data name="EngravingDurationText" xml:space="preserve">
+    <value>Brenndauer [%]</value>
+  </data>
+  <data name="EngravingPowerText" xml:space="preserve">
+    <value>Brennstärke [%]</value>
+  </data>
+  <data name="EngravingTitle" xml:space="preserve">
+    <value>Gravur</value>
+  </data>
+  <data name="FixedEngravingPowerThresholdText" xml:space="preserve">
+    <value>Schwellwert [%]</value>
+  </data>
   <data name="HeightCmText" xml:space="preserve">
     <value>Höhe [cm]</value>
   </data>
@@ -136,6 +148,21 @@ Mittels gedrückter Steuerungstaste und gleichzeitigem drehen am Mausrad oder du
   </data>
   <data name="ImageTitle" xml:space="preserve">
     <value>Bild</value>
+  </data>
+  <data name="IsPowerVariableText" xml:space="preserve">
+    <value>Variable Brennstärke</value>
+  </data>
+  <data name="MaximumEngravingPowerText" xml:space="preserve">
+    <value>Max. Brennstärke [%]</value>
+  </data>
+  <data name="PlottingModePathText" xml:space="preserve">
+    <value>Pfad</value>
+  </data>
+  <data name="PlottingModeRasterizedText" xml:space="preserve">
+    <value>Raster</value>
+  </data>
+  <data name="PlottingModeTitle" xml:space="preserve">
+    <value>Modus</value>
   </data>
   <data name="PreserveAspectRatioText" xml:space="preserve">
     <value>Seitenverhältnis beibehalten</value>

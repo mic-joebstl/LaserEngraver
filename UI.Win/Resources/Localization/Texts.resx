@@ -123,6 +123,18 @@
   <data name="EnableVisualEffectsText" xml:space="preserve">
     <value>Show halo</value>
   </data>
+  <data name="EngravingDurationText" xml:space="preserve">
+    <value>Depth [%]</value>
+  </data>
+  <data name="EngravingPowerText" xml:space="preserve">
+    <value>Power [%]</value>
+  </data>
+  <data name="EngravingTitle" xml:space="preserve">
+    <value>Engraving</value>
+  </data>
+  <data name="FixedEngravingPowerThresholdText" xml:space="preserve">
+    <value>Threshold [%]</value>
+  </data>
   <data name="HeightCmText" xml:space="preserve">
     <value>Height [cm]</value>
   </data>
@@ -134,6 +146,21 @@
   </data>
   <data name="ImageTitle" xml:space="preserve">
     <value>Image</value>
+  </data>
+  <data name="IsPowerVariableText" xml:space="preserve">
+    <value>Is power variable</value>
+  </data>
+  <data name="MaximumEngravingPowerText" xml:space="preserve">
+    <value>Max. Power [%]</value>
+  </data>
+  <data name="PlottingModePathText" xml:space="preserve">
+    <value>Path</value>
+  </data>
+  <data name="PlottingModeRasterizedText" xml:space="preserve">
+    <value>Rasterized</value>
+  </data>
+  <data name="PlottingModeTitle" xml:space="preserve">
+    <value>Mode</value>
   </data>
   <data name="PreserveAspectRatioText" xml:space="preserve">
     <value>Preserve aspect ratio</value>

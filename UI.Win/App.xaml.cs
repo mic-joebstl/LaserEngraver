@@ -35,11 +35,12 @@ namespace LaserPathEngraver.UI.Win
 		private IServiceCollection ConfigureServices(IServiceCollection services)
 		{
 			var basePath = Directory.GetCurrentDirectory();
-			
+
 			return services
 				.AddSingleton(Configuration)
 				.ConfigureWritableJson<DeviceConfiguration>(Configuration.GetSection(nameof(DeviceConfiguration)), basePath)
 				.ConfigureWritableJson<UserConfiguration>(Configuration.GetSection(nameof(UserConfiguration)), basePath)
+				.ConfigureWritableJson<BurnConfiguration>(Configuration.GetSection(nameof(BurnConfiguration)), basePath)
 				.AddSingleton<MainWindow>()
 				.AddSingleton<Space>();
 		}

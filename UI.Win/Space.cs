@@ -22,6 +22,7 @@ namespace LaserPathEngraver.UI.Win
 
 		private IWritableOptions<DeviceConfiguration> _deviceConfiguration;
 		private IWritableOptions<UserConfiguration> _userConfiguration;
+		private IWritableOptions<BurnConfiguration> _burnConfiguration;
 
 		private Canvas _canvas;
 		private BurnRectangle _burnBoundsRectangle;
@@ -49,10 +50,11 @@ namespace LaserPathEngraver.UI.Win
 
 		#region Initialization
 
-		public Space(IWritableOptions<DeviceConfiguration> deviceConfiguration, IWritableOptions<UserConfiguration> userConfiguration)
+		public Space(IWritableOptions<DeviceConfiguration> deviceConfiguration, IWritableOptions<UserConfiguration> userConfiguration, IWritableOptions<BurnConfiguration> burnConfiguration)
 		{
 			_userConfiguration = userConfiguration;
 			_deviceConfiguration = deviceConfiguration;
+			_burnConfiguration = burnConfiguration;
 			_canvasHeightDot = deviceConfiguration.Value.HeightDots;
 			_canvasWidthDot = deviceConfiguration.Value.WidthDots;
 			_resolutionDpi = deviceConfiguration.Value.DPI;
@@ -359,6 +361,86 @@ namespace LaserPathEngraver.UI.Win
 					UpdateVisuals();
 					RaisePropertyChanged(nameof(OffsetY));
 				}
+			}
+		}
+
+		public bool IsPowerVarible
+		{
+			get
+			{
+				return _burnConfiguration.Value.IntensityMode == BurnIntensityMode.Variable;
+			}
+			set
+			{
+				_burnConfiguration.Update(config => config.IntensityMode = value ? BurnIntensityMode.Variable : BurnIntensityMode.Fixed);
+				RaisePropertyChanged(nameof(IsPowerVarible));
+			}
+		}
+
+		public byte EngravingPower
+		{
+			get
+			{
+				return _burnConfiguration.Value.Intensity;
+			}
+			set
+			{
+				_burnConfiguration.Update(config => config.Intensity = value);
+				RaisePropertyChanged(nameof(EngravingPower));
+			}
+		}
+
+		public byte EngravingDuration
+		{
+			get
+			{
+				return _burnConfiguration.Value.Duration;
+			}
+			set
+			{
+				_burnConfiguration.Update(config => config.Duration = value);
+				RaisePropertyChanged(nameof(EngravingDuration));
+			}
+		}
+
+		public byte FixedPowerThreshold
+		{
+			get
+			{
+				return _burnConfiguration.Value.FixedIntensityThreshold;
+			}
+			set
+			{
+				_burnConfiguration.Update(config => config.FixedIntensityThreshold = value);
+				RaisePropertyChanged(nameof(FixedPowerThreshold));
+			}
+		}
+
+		public bool IsPlottingModeRasterizedEnabled
+		{
+			get
+			{
+				return _burnConfiguration.Value.PlottingMode == BurnPlottingMode.Rasterized;
+			}
+			set
+			{
+				_burnConfiguration.Update(config => config.PlottingMode = value ? BurnPlottingMode.Rasterized : BurnPlottingMode.NearestNeighbor);
+				RaisePropertyChanged(nameof(IsPlottingModeRasterizedEnabled));
+				RaisePropertyChanged(nameof(IsPlottingModePathEnabled));
+			}
+		}
+
+		public bool IsPlottingModePathEnabled
+		{
+			get
+			{
+				return _burnConfiguration.Value.PlottingMode == BurnPlottingMode.NearestNeighbor;
+			}
+			set
+			{
+				_burnConfiguration.Update(config => config.PlottingMode = value ? BurnPlottingMode.NearestNeighbor : BurnPlottingMode.Rasterized);
+				RaisePropertyChanged(nameof(IsPlottingModeRasterizedEnabled));
+				RaisePropertyChanged(nameof(IsPlottingModePathEnabled));
 			}
 		}
 

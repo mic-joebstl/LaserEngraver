@@ -79,6 +79,42 @@ namespace LaserPathEngraver.UI.Win.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Depth [%].
+        /// </summary>
+        public static string EngravingDurationText {
+            get {
+                return ResourceManager.GetString("EngravingDurationText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Power [%].
+        /// </summary>
+        public static string EngravingPowerText {
+            get {
+                return ResourceManager.GetString("EngravingPowerText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Engraving.
+        /// </summary>
+        public static string EngravingTitle {
+            get {
+                return ResourceManager.GetString("EngravingTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Threshold [%].
+        /// </summary>
+        public static string FixedEngravingPowerThresholdText {
+            get {
+                return ResourceManager.GetString("FixedEngravingPowerThresholdText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Height [cm].
         /// </summary>
         public static string HeightCmText {
@@ -111,6 +147,51 @@ namespace LaserPathEngraver.UI.Win.Resources.Localization {
         public static string ImageTitle {
             get {
                 return ResourceManager.GetString("ImageTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Is power variable.
+        /// </summary>
+        public static string IsPowerVariableText {
+            get {
+                return ResourceManager.GetString("IsPowerVariableText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Max. Power [%].
+        /// </summary>
+        public static string MaximumEngravingPowerText {
+            get {
+                return ResourceManager.GetString("MaximumEngravingPowerText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Path.
+        /// </summary>
+        public static string PlottingModePathText {
+            get {
+                return ResourceManager.GetString("PlottingModePathText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Rasterized.
+        /// </summary>
+        public static string PlottingModeRasterizedText {
+            get {
+                return ResourceManager.GetString("PlottingModeRasterizedText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Mode.
+        /// </summary>
+        public static string PlottingModeTitle {
+            get {
+                return ResourceManager.GetString("PlottingModeTitle", resourceCulture);
             }
         }
         

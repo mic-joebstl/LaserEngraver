@@ -20,6 +20,7 @@
 				<ResourceDictionary Source="Styles.xaml" />
 			</ResourceDictionary.MergedDictionaries>
 			<local.converters:LogScaleConverter x:Key="LogScaleConverter" />
+			<local.converters:ByteScaleConverter x:Key="ByteScaleConverter" MinValue="0" MaxValue="100" />
 		</ResourceDictionary>
 	</Window.Resources>
 	<Grid>
@@ -61,55 +62,220 @@
 				<StackPanel Orientation="Vertical"
 				            Opacity="0.8"
 				            ClipToBounds="False"
-				            Margin="15,30">
-
-					<Label FontSize="16"
-					       Foreground="White"
-					       Content="{Binding Path=NumberOfElements}"
-					       ContentStringFormat="Number of Elements: {0}" />
-
-					<Slider Minimum="0"
-					        Maximum="1000"
-					        Width="200"
-					        Value="{Binding NumberOfElements}"
-					        HorizontalAlignment="Left" />
-
-					<Label FontSize="16"
-					       Foreground="White"
-					       Content="{Binding RandomMinimumSize}"
-					       ContentStringFormat="Minimum Random Size: {0:N1}" />
-
-					<Slider Minimum="1"
-					        Maximum="{Binding RandomMaximumSize}"
-					        Width="200"
-					        Value="{Binding RandomMinimumSize}"
-					        HorizontalAlignment="Left" />
-
-					<Label FontSize="16"
-					       Foreground="White"
-					       Content="{Binding RandomMaximumSize}"
-					       ContentStringFormat="Maximum Random Size: {0:N1}" />
-
-					<Slider Minimum="{Binding RandomMinimumSize}"
-					        Maximum="200"
-					        Width="200"
-					        Value="{Binding RandomMaximumSize}"
-					        HorizontalAlignment="Left" />
+				            Margin="15,15,15,30">
 
 					<Label FontSize="20"
 					       Foreground="White"
-					       Margin="0,45,0,0"
+					       Margin="0,0,0,0"
+					       Content="{x:Static localization:Texts.EngravingTitle}" />
+
+					<StackPanel Orientation="Horizontal"
+					            Margin="0,7.5,0,7.5">
+						<TextBox Width="70" Height="30">
+							<TextBox.Text>
+								<Binding Path="Space.EngravingDuration"
+								         UpdateSourceTrigger="LostFocus"
+								         StringFormat="N0"
+								         Converter="{StaticResource ByteScaleConverter}">
+									<Binding.ValidationRules>
+										<local.rules:DoubleValidationRule Minimum="1" Maximum="100" />
+									</Binding.ValidationRules>
+								</Binding>
+							</TextBox.Text>
+						</TextBox>
+						<Label Foreground="White"
+						       FontSize="16"
+						       Content="{x:Static localization:Texts.EngravingDurationText}" />
+					</StackPanel>
+
+					<Slider Minimum="0"
+					        Maximum="100"
+					        Width="200"
+					        TickFrequency="1"
+					        Value="{Binding Path=Space.EngravingDuration, Converter={StaticResource ByteScaleConverter}}"
+					        HorizontalAlignment="Left" />
+
+					<StackPanel Orientation="Horizontal"
+					            Margin="0,7.5,0,7.5">
+						<TextBox Width="70" Height="30">
+							<TextBox.Text>
+								<Binding Path="Space.EngravingPower"
+								         UpdateSourceTrigger="LostFocus"
+								         StringFormat="N0"
+								         Converter="{StaticResource ByteScaleConverter}">
+									<Binding.ValidationRules>
+										<local.rules:DoubleValidationRule Minimum="1" Maximum="100" />
+									</Binding.ValidationRules>
+								</Binding>
+							</TextBox.Text>
+						</TextBox>
+						<Label Foreground="White"
+						       FontSize="16"
+						       Content="{x:Static localization:Texts.MaximumEngravingPowerText}">
+							<Label.Style>
+								<Style TargetType="{x:Type Label}">
+									<Style.Triggers>
+										<DataTrigger Binding="{Binding Space.IsPowerVarible}" Value="True">
+											<DataTrigger.Setters>
+												<Setter Property="Visibility" Value="Visible" />
+											</DataTrigger.Setters>
+										</DataTrigger>
+										<DataTrigger Binding="{Binding Space.IsPowerVarible}" Value="False">
+											<DataTrigger.Setters>
+												<Setter Property="Visibility" Value="Collapsed" />
+											</DataTrigger.Setters>
+										</DataTrigger>
+									</Style.Triggers>
+								</Style>
+							</Label.Style>
+						</Label>
+						<Label Foreground="White"
+						       FontSize="16"
+						       Content="{x:Static localization:Texts.EngravingPowerText}">
+							<Label.Style>
+								<Style TargetType="{x:Type Label}">
+									<Style.Triggers>
+										<DataTrigger Binding="{Binding Space.IsPowerVarible}" Value="True">
+											<DataTrigger.Setters>
+												<Setter Property="Visibility" Value="Collapsed" />
+											</DataTrigger.Setters>
+										</DataTrigger>
+										<DataTrigger Binding="{Binding Space.IsPowerVarible}" Value="False">
+											<DataTrigger.Setters>
+												<Setter Property="Visibility" Value="Visible" />
+											</DataTrigger.Setters>
+										</DataTrigger>
+									</Style.Triggers>
+								</Style>
+							</Label.Style>
+						</Label>
+					</StackPanel>
+
+					<Slider Minimum="0"
+					        Maximum="100"
+					        Width="200"
+					        TickFrequency="1"
+					        Value="{Binding Path=Space.EngravingPower, Converter={StaticResource ByteScaleConverter}}"
+					        HorizontalAlignment="Left" />
+
+					<StackPanel Orientation="Vertical">
+						<StackPanel.Style>
+							<Style TargetType="{x:Type StackPanel}">
+								<Style.Triggers>
+									<DataTrigger Binding="{Binding Space.IsPowerVarible}" Value="False">
+										<DataTrigger.EnterActions>
+											<BeginStoryboard>
+												<Storyboard>
+													<DoubleAnimation Storyboard.TargetProperty="Height"
+													                 To="60"
+													                 Duration="0:0:0.2"
+													                 AccelerationRatio="0.1"
+													                 DecelerationRatio="0.9"/>
+												</Storyboard>
+											</BeginStoryboard>
+											<BeginStoryboard>
+												<Storyboard>
+													<DoubleAnimation Storyboard.TargetProperty="Opacity"
+													                 To="1"
+													                 Duration="0:0:0.4"
+													                 BeginTime="0:0:0.15"
+													                 AccelerationRatio="0.1"
+													                 DecelerationRatio="0.9"/>
+												</Storyboard>
+											</BeginStoryboard>
+										</DataTrigger.EnterActions>
+										<DataTrigger.ExitActions>
+											<BeginStoryboard>
+												<Storyboard>
+													<DoubleAnimation Storyboard.TargetProperty="Height"
+													                 To="0"
+													                 Duration="0:0:0.2"
+													                 BeginTime="0:0:0.15"
+													                 AccelerationRatio="0.1"
+													                 DecelerationRatio="0.9"/>
+												</Storyboard>
+											</BeginStoryboard>
+											<BeginStoryboard>
+												<Storyboard>
+													<DoubleAnimation Storyboard.TargetProperty="Opacity"
+													                 To="0"
+													                 Duration="0:0:0.4"
+													                 AccelerationRatio="0.1"
+													                 DecelerationRatio="0.9"/>
+												</Storyboard>
+											</BeginStoryboard>
+										</DataTrigger.ExitActions>
+									</DataTrigger>
+									<DataTrigger Binding="{Binding Space.IsPowerVarible, Mode=OneTime}" Value="False">
+										<Setter Property="Height" Value="60" />
+										<Setter Property="Opacity" Value="1" />
+									</DataTrigger>
+									<DataTrigger Binding="{Binding Space.IsPowerVarible, Mode=OneTime}" Value="True">
+										<Setter Property="Height" Value="0" />
+										<Setter Property="Opacity" Value="0" />
+									</DataTrigger>
+								</Style.Triggers>
+							</Style>
+						</StackPanel.Style>
+						<StackPanel Orientation="Horizontal"
+						            Margin="0,7.5,0,7.5">
+							<TextBox Width="70" Height="30">
+								<TextBox.Text>
+									<Binding Path="Space.FixedPowerThreshold"
+									         UpdateSourceTrigger="LostFocus"
+									         StringFormat="N0"
+									         Converter="{StaticResource ByteScaleConverter}">
+										<Binding.ValidationRules>
+											<local.rules:DoubleValidationRule Minimum="1" Maximum="100" />
+										</Binding.ValidationRules>
+									</Binding>
+								</TextBox.Text>
+							</TextBox>
+							<Label Foreground="White"
+							       FontSize="16"
+							       Content="{x:Static localization:Texts.FixedEngravingPowerThresholdText}" />
+						</StackPanel>
+
+						<Slider Minimum="0"
+						        Maximum="100"
+						        Width="200"
+						        TickFrequency="1"
+						        Value="{Binding Path=Space.FixedPowerThreshold, Converter={StaticResource ByteScaleConverter}}"
+						        HorizontalAlignment="Left" />
+					</StackPanel>
+
+					<CheckBox Margin="0,12.5,0,0"
+					          IsChecked="{Binding Space.IsPowerVarible}"
+					          Content="{x:Static localization:Texts.IsPowerVariableText}" />
+
+					<StackPanel Orientation="Vertical">
+						<Label FontSize="16"
+						       Foreground="White"
+						       Margin="-5,12.5,0,0"
+						       Content="{x:Static localization:Texts.PlottingModeTitle}" />
+						<CheckBox Margin="12.5,5,0,0"
+						          IsChecked="{Binding Space.IsPlottingModeRasterizedEnabled}"
+						          Content="{x:Static localization:Texts.PlottingModeRasterizedText}" />
+						<CheckBox Margin="12.5,12.5,0,0"
+						          IsChecked="{Binding Space.IsPlottingModePathEnabled}"
+						          Content="{x:Static localization:Texts.PlottingModePathText}" />
+					</StackPanel>
+					
+
+					<Label FontSize="20"
+					       Foreground="White"
+					       Margin="0,30,0,0"
 					       Content="{x:Static localization:Texts.ViewTitle}" />
 					
 					<StackPanel Orientation="Horizontal"
 					            Margin="0,7.5,0,7.5">
-						<TextBox Width="120" Height="30">
+						<TextBox Width="70" Height="30">
 							<TextBox.Text>
 								<Binding Path="Space.ScalePercent"
 								         UpdateSourceTrigger="PropertyChanged"
 								         StringFormat="N2">
 									<Binding.ValidationRules>
-										<local.rules:DoubleValidationRule Minimum="1" Maximum="1000" BoundsExclusive="True" />
+										<local.rules:DoubleValidationRule Minimum="1" Maximum="1000" />
 									</Binding.ValidationRules>
 								</Binding>
 							</TextBox.Text>
@@ -148,7 +314,7 @@
 
 					<Label FontSize="20"
 					       Foreground="White"
-					       Margin="0,45,0,0"
+					       Margin="0,30,0,0"
 					       Content="{x:Static localization:Texts.ImageTitle}" />
 
 					<StackPanel Orientation="Horizontal"
@@ -169,7 +335,7 @@
 								</Style.Triggers>
 							</Style>
 						</StackPanel.Style>
-						<TextBox Width="120" Height="30">
+						<TextBox Width="70" Height="30">
 							<TextBox.Text>
 								<Binding Path="Space.ImageWidthDot"
 								         UpdateSourceTrigger="PropertyChanged"
@@ -203,7 +369,7 @@
 								</Style.Triggers>
 							</Style>
 						</StackPanel.Style>
-						<TextBox Width="120" Height="30">
+						<TextBox Width="70" Height="30">
 							<TextBox.Text>
 								<Binding Path="Space.ImageWidthCm"
 								         UpdateSourceTrigger="PropertyChanged"
@@ -237,7 +403,7 @@
 								</Style.Triggers>
 							</Style>
 						</StackPanel.Style>
-						<TextBox Width="120" Height="30">
+						<TextBox Width="70" Height="30">
 							<TextBox.Text>
 								<Binding Path="Space.ImageHeightDot"
 								         UpdateSourceTrigger="PropertyChanged"
@@ -271,7 +437,7 @@
 								</Style.Triggers>
 							</Style>
 						</StackPanel.Style>
-						<TextBox Width="120" Height="30">
+						<TextBox Width="70" Height="30">
 							<TextBox.Text>
 								<Binding Path="Space.ImageHeightCm"
 								         UpdateSourceTrigger="PropertyChanged"

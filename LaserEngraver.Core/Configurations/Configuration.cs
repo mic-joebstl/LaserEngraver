@@ -24,4 +24,26 @@ namespace LaserPathEngraver.Core.Configurations
 		px = 0,
 		cm = 1
 	}
+
+	public class BurnConfiguration
+	{
+		public byte Intensity { get; set; } = 0xff;
+		public byte Duration { get; set; } = 0xff;
+		public byte FixedIntensityThreshold { get; set; } = 0xff;
+		public BurnPlottingMode PlottingMode { get; set; } = BurnPlottingMode.NearestNeighbor;
+		public BurnIntensityMode IntensityMode { get; set; } = BurnIntensityMode.Variable;
+
+	}
+
+	public enum BurnIntensityMode
+	{
+		Fixed,
+		Variable
+	}
+
+	public enum BurnPlottingMode
+	{
+		Rasterized,
+		NearestNeighbor
+	}
 }
