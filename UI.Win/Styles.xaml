@@ -99,6 +99,17 @@
 		</Setter>
 	</Style>
 
+	<Style x:Key="{x:Type TextBlock}" TargetType="{x:Type TextBlock}">
+		<Setter Property="FontSize" Value="16" />
+		<Setter Property="Padding" Value="5" />
+		<Setter Property="TextWrapping" Value="Wrap" />
+		<Setter Property="OverridesDefaultStyle" Value="True" />
+		<Setter Property="SnapsToDevicePixels" Value="True" />
+		<Setter Property="FocusVisualStyle" Value="{x:Null}" />
+		<Setter Property="Background" Value="Transparent" />
+		<Setter Property="Foreground" Value="White" />
+	</Style>
+
 	<Style x:Key="SliderRepeatButtonStyle" TargetType="{x:Type RepeatButton}">
 		<Setter Property="OverridesDefaultStyle" Value="true" />
 		<Setter Property="IsTabStop" Value="false" />
@@ -191,6 +202,7 @@
 	</Style>
 
 	<Style x:Key="{x:Type CheckBox}" TargetType="{x:Type CheckBox}">
+		<Setter Property="FontSize" Value="16" />
 		<Setter Property="Cursor" Value="Hand" />
 		<Setter Property="OverridesDefaultStyle" Value="True" />
 		<Setter Property="MinWidth" Value="18" />

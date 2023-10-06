@@ -70,11 +70,29 @@ namespace LaserPathEngraver.UI.Win.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Show halo.
+        /// </summary>
+        public static string EnableVisualEffectsText {
+            get {
+                return ResourceManager.GetString("EnableVisualEffectsText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Height [px].
         /// </summary>
         public static string HeightPxText {
             get {
                 return ResourceManager.GetString("HeightPxText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Todo.
+        /// </summary>
+        public static string HelpText {
+            get {
+                return ResourceManager.GetString("HelpText", resourceCulture);
             }
         }
         
@@ -88,6 +106,15 @@ namespace LaserPathEngraver.UI.Win.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Preserve aspect ratio.
+        /// </summary>
+        public static string PreserveAspectRatioText {
+            get {
+                return ResourceManager.GetString("PreserveAspectRatioText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to {0:N2} Updates/s.
         /// </summary>
         public static string RenderRateFormatText {
@@ -97,20 +124,29 @@ namespace LaserPathEngraver.UI.Win.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Zoom [%].
+        /// </summary>
+        public static string ScaleText {
+            get {
+                return ResourceManager.GetString("ScaleText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Show help.
+        /// </summary>
+        public static string ShowHelpText {
+            get {
+                return ResourceManager.GetString("ShowHelpText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Engraver.
         /// </summary>
         public static string Title {
             get {
                 return ResourceManager.GetString("Title", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Todo.
-        /// </summary>
-        public static string TutorialDescription {
-            get {
-                return ResourceManager.GetString("TutorialDescription", resourceCulture);
             }
         }
         

@@ -13,6 +13,8 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Media.Media3D;
+using System.Windows.Media.Media3D.Converters;
 using System.Windows.Shapes;
 
 namespace LaserPathEngraver.UI.Win.Visuals
@@ -28,11 +30,14 @@ namespace LaserPathEngraver.UI.Win.Visuals
 		private List<BurnTarget> _targets;
 		private Point _position;
 		private Size _size;
+		private System.Drawing.RectangleF? _boundingRect;
 		private bool _requiresRenderUpdate;
+		private bool _resizing = false;
 
 		public BurnArea()
 		{
 			_rectangle = new Rectangle();
+			_rectangle.DataContext = this;
 			_targets = new List<BurnTarget>();
 			_renderSync = new SemaphoreSlim(1, 1);
 			_requiresRenderUpdate = true;
@@ -46,6 +51,9 @@ namespace LaserPathEngraver.UI.Win.Visuals
 				if (_position != value)
 				{
 					_position = value;
+					if (_resizing)
+						return;
+					ResizeToBoundingRect();
 					RaisePropertyChanged(nameof(Position));
 				}
 			}
@@ -60,9 +68,26 @@ namespace LaserPathEngraver.UI.Win.Visuals
 				{
 					_size = value;
 					_requiresRenderUpdate = true;
+					if (_resizing)
+						return;
+					ResizeToBoundingRect();
 					RaisePropertyChanged(nameof(Size));
 				}
 			}
+		}
+
+		public System.Drawing.RectangleF? BoundingRect
+		{
+			get => _boundingRect;
+			set
+			{
+				if (_boundingRect != value)
+				{
+					_boundingRect = value;
+					RaisePropertyChanged(nameof(BoundingRect));
+				}
+			}
+
 		}
 
 		public Shape Shape => _rectangle;
@@ -136,21 +161,26 @@ namespace LaserPathEngraver.UI.Win.Visuals
 			}
 		}
 
-		public void LoadBitmap(string filePath, Size maxSize)
+		public void LoadBitmap(string filePath)
 		{
 			_requiresRenderUpdate = true;
 			_originalBitmap = new System.Drawing.Bitmap(filePath);
-			var ratio = (double)_originalBitmap.Width / _originalBitmap.Height;
-			var height = _originalBitmap.Height > maxSize.Height ? maxSize.Height : _originalBitmap.Height;
-			var width = height * ratio;
-			width = width > maxSize.Width ? maxSize.Width : width;
-			height = width / ratio;
-			Size = new Size(width, height);
-			Position = new Point
+			Size = new Size
 			{
-				X = (maxSize.Width - width) / 2,
-				Y = (maxSize.Height - height) / 2
+				Width = _originalBitmap.Width,
+				Height = _originalBitmap.Height
 			};
+
+			var boundingRectObj = BoundingRect;
+			if (boundingRectObj.HasValue)
+			{
+				var boundingRect = boundingRectObj.Value;
+				Position = new Point
+				{
+					X = (boundingRect.Width - Size.Width) / 2,
+					Y = (boundingRect.Height - Size.Height) / 2
+				};
+			}
 
 			ScaleBitmap();
 		}
@@ -164,8 +194,8 @@ namespace LaserPathEngraver.UI.Win.Visuals
 				return;
 			}
 
-			var width = (float)Size.Width;
-			var height = (float)Size.Height;
+			var width = Size.Width < 1 ? 1 : (float)Size.Width;
+			var height = Size.Height < 1 ? 1 : (float)Size.Height;
 			var brush = new System.Drawing.SolidBrush(System.Drawing.Color.Black);
 			var scaledBitmap = new System.Drawing.Bitmap((int)width, (int)height);
 			var graph = System.Drawing.Graphics.FromImage(scaledBitmap);
@@ -194,6 +224,51 @@ namespace LaserPathEngraver.UI.Win.Visuals
 					};
 					_targets.Add(target);
 				}
+			}
+		}
+
+		private void ResizeToBoundingRect()
+		{
+			if (_resizing)
+				return;
+
+			using (new Resizing(this))
+			{
+				var boundingRectObj = BoundingRect;
+				if (boundingRectObj is null)
+					return;
+				var boundingRect = boundingRectObj.Value;
+
+				var position = Position;
+				var size = Size;
+				var ratio = size.Height != 0 ? size.Width / size.Height : 1;
+				ratio = ratio > 0 ? ratio : 1;
+
+				size.Height = size.Height > boundingRect.Height ? boundingRect.Height : size.Height;
+				size.Width = size.Height * ratio;
+				size.Width = size.Width > boundingRect.Width ? boundingRect.Width : size.Width;
+				size.Height = size.Width / ratio;
+
+				if (position.X + size.Width > boundingRect.Width)
+				{
+					position.X = boundingRect.Width - size.Width;
+				}
+				if (position.X < boundingRect.X)
+				{
+					position.X = 0;
+				}
+
+				if (position.Y + size.Height > boundingRect.Height)
+				{
+					position.Y = boundingRect.Height - size.Height;
+				}
+				if (position.Y < boundingRect.Y)
+				{
+					position.Y = 0;
+				}
+
+				Position = position;
+				Size = size;
 			}
 		}
 
@@ -226,6 +301,36 @@ namespace LaserPathEngraver.UI.Win.Visuals
 					value = value < 0 ? 0 : value > 1 ? 1 : value;
 					_fillRatio = (byte)(value * 0xff);
 				}
+			}
+		}
+
+		private class Resizing : IDisposable
+		{
+			private BurnArea _owner;
+			private Size _originalSize;
+			private Point _originalPosition;
+			public Resizing(BurnArea owner)
+			{
+				_owner = owner;
+				_owner._resizing = true;
+				_owner._renderSync.Wait();
+				_originalPosition = owner.Position;
+				_originalSize = owner.Size;
+			}
+
+			public void Dispose()
+			{
+				if ((int)_owner.Size.Width != (int)_originalSize.Width || (int)_owner.Size.Height != (int)_originalSize.Height)
+				{
+					_owner.RaisePropertyChanged(nameof(_owner.Size));
+				}
+				if ((int)_owner.Position.X != (int)_originalPosition.X || (int)_owner.Position.Y != (int)_originalPosition.Y)
+				{
+					_owner.RaisePropertyChanged(nameof(_owner.Position));
+				}
+
+				_owner._resizing = false;
+				_owner._renderSync.Release();
 			}
 		}
 	}

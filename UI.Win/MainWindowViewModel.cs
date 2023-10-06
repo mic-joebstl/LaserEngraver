@@ -12,6 +12,7 @@ using System.Windows.Threading;
 using LaserPathEngraver.Core.Configurations;
 using Microsoft.Extensions.Options;
 using System.Linq;
+using LaserPathEngraver.UI.Win.Visuals;
 
 namespace LaserPathEngraver.UI.Win
 {
@@ -23,8 +24,6 @@ namespace LaserPathEngraver.UI.Win
 		private Space _space;
 		private bool _enableVisualEffects;
 		private Effect? _dropShadowEffect;
-		private System.Windows.Point _mouseDown;
-		private System.Windows.Point _mouseUp;
 		private System.Windows.Point _mouseLastPos;
 
 		#endregion
@@ -75,16 +74,16 @@ namespace LaserPathEngraver.UI.Win
 			}
 		}
 
-		public bool ShowTutorial
+		public bool ShowHelp
 		{
 			get
 			{
-				return _userConfiguration.Value.ShowTutorial;
+				return _userConfiguration.Value.ShowHelp;
 			}
 			set
 			{
-				_userConfiguration.Update(config => config.ShowTutorial = value);
-				RaisePropertyChanged(nameof(ShowTutorial));
+				_userConfiguration.Update(config => config.ShowHelp = value);
+				RaisePropertyChanged(nameof(ShowHelp));
 			}
 		}
 
@@ -116,7 +115,11 @@ namespace LaserPathEngraver.UI.Win
 				{
 					e.MouseDevice.Capture(_space.Canvas);
 				}
-				_mouseDown = e.GetPosition(_space.Canvas);
+				else if(e.Source is FrameworkElement element && element.DataContext is BurnArea burnArea)
+				{
+					e.MouseDevice.Capture(element);
+				}
+				_mouseLastPos = e.GetPosition(_space.Canvas);
 			}
 		}
 
@@ -124,25 +127,33 @@ namespace LaserPathEngraver.UI.Win
 		{
 			if (e.LeftButton == System.Windows.Input.MouseButtonState.Pressed)
 			{
-				if (System.Windows.Input.Keyboard.IsKeyDown(System.Windows.Input.Key.LeftCtrl))
+				var captured = e.MouseDevice.Captured;
+				if(captured != null) 
 				{
-					_space.AutoCenterView = false;
 					Vector delta = e.GetPosition(_space.Canvas) - _mouseLastPos;
-					_space.OffsetX += delta.X / _space.Scale;
-					_space.OffsetY += delta.Y / _space.Scale;
-				}
 
-				_mouseUp = e.GetPosition(_space.Canvas);
+					if (System.Windows.Input.Keyboard.IsKeyDown(System.Windows.Input.Key.LeftCtrl))
+					{
+						_space.AutoCenterView = false;
+						_space.OffsetX += delta.X / _space.Scale;
+						_space.OffsetY += delta.Y / _space.Scale;
+					}
+					else if(captured is FrameworkElement element && element.DataContext is BurnArea burnArea)
+					{
+						burnArea.Position = new System.Windows.Point
+						{
+							X = burnArea.Position.X + delta.X / _space.Scale,
+							Y = burnArea.Position.Y + delta.Y / _space.Scale
+						};
+					}
+				}
 			}
 			_mouseLastPos = e.GetPosition(_space.Canvas);
 		}
 
 		private void OnSpaceMouseUp(object? sender, System.Windows.Input.MouseButtonEventArgs e)
 		{
-			if (e.MouseDevice.Captured == _space.Canvas)
-			{
-				e.MouseDevice.Capture(null);
-			}
+			e.MouseDevice.Capture(null);
 		}
 
 		private void OnSpaceMouseWheel(object? sender, System.Windows.Input.MouseWheelEventArgs e)
