@@ -22,6 +22,7 @@ namespace LaserPathEngraver.UI.Win
 	{
 		private string? _errorMessage;
 		private IWritableOptions<UserConfiguration> _userConfiguration;
+		private IWritableOptions<DeviceConfiguration> _deviceConfiguration;
 		private IWritableOptions<BurnConfiguration> _burnConfiguration;
 		private Space _space;
 		private Dispatcher _windowDispatcher;
@@ -35,9 +36,10 @@ namespace LaserPathEngraver.UI.Win
 		private Theme? _customTheme;
 		private DeviceStatus? _debouncedStatus;
 
-		public MainWindowViewModel(IWritableOptions<UserConfiguration> userConfiguration, IWritableOptions<BurnConfiguration> burnConfiguration, Space space, DeviceDispatcherService deviceDispatcher, Dispatcher windowDispatcher)
+		public MainWindowViewModel(IWritableOptions<UserConfiguration> userConfiguration, IWritableOptions<DeviceConfiguration> deviceConfiguration, IWritableOptions<BurnConfiguration> burnConfiguration, Space space, DeviceDispatcherService deviceDispatcher, Dispatcher windowDispatcher)
 		{
 			_userConfiguration = userConfiguration;
+			_deviceConfiguration = deviceConfiguration;
 			_burnConfiguration = burnConfiguration;
 			_deviceDispatcher = deviceDispatcher;
 			_windowDispatcher = windowDispatcher;
@@ -530,7 +532,7 @@ namespace LaserPathEngraver.UI.Win
 										X = (int)burnArea.Position.X,
 										Y = (int)burnArea.Position.Y
 									};
-									var job = new EngraveJob(_burnConfiguration.Value, burnAreaPosition, points);
+									var job = new EngraveJob(_deviceConfiguration.Value, _burnConfiguration.Value, burnAreaPosition, points);
 									await _deviceDispatcher.ExecuteJob(job, CancellationToken.None);
 								}
 								catch (Exception ex)

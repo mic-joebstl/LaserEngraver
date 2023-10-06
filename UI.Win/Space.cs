@@ -488,11 +488,11 @@ namespace LaserPathEngraver.UI.Win
 		{
 			get
 			{
-				return _burnConfiguration.Value.Intensity;
+				return _burnConfiguration.Value.Power;
 			}
 			set
 			{
-				_burnConfiguration.Update(config => config.Intensity = value);
+				_burnConfiguration.Update(config => config.Power = value);
 				_burnArea.EngravingPower = EngravingPower;
 				RaisePropertyChanged(nameof(EngravingPower));
 			}

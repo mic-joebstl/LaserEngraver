@@ -113,12 +113,12 @@ namespace LaserPathEngraver.Core.Devices
 			Position = position;
 		}
 
-		public override Task Engrave(byte intensity, byte duration, CancellationToken cancellationToken)
+		public override Task Engrave(ushort powerMilliwatt, byte duration, CancellationToken cancellationToken)
 		{
 			return Task.CompletedTask;
 		}
 
-		public override async Task Engrave(byte intensity, byte duration, int length, CancellationToken cancellationToken)
+		public override async Task Engrave(ushort powerMilliwatt, byte duration, Point startingPoint, int length, CancellationToken cancellationToken)
 		{
 			using (var tx = StatusIntermediateTransition(DeviceStatus.Ready, DeviceStatus.Executing))
 			{
@@ -127,7 +127,7 @@ namespace LaserPathEngraver.Core.Devices
 				var position = Position;
 				if (position.HasValue)
 				{
-					Position = new Point(position.Value.X + length - 1, position.Value.Y);
+					Position = startingPoint;
 				}
 			}
 		}

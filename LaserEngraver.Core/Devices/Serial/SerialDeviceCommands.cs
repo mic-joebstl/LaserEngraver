@@ -15,6 +15,7 @@ namespace LaserPathEngraver.Core.Devices.Serial
 		Reset = 0x06,
 		Connect = 0x0A,
 		Engrave = 0x09,
+		InitEngrave = 0x14,
 		Stop = 0x16,
 		HomeTopLeft = 0x17,
 		Pause = 0x18,
@@ -22,6 +23,13 @@ namespace LaserPathEngraver.Core.Devices.Serial
 		HomeCenter = 0x1A,
 		Discrete = 0x1B,
 		NonDiscrete = 0x1C,
+	}
+
+	public enum EngraveDirection : byte
+	{
+		Default = RightToLeft,
+		RightToLeft = 0,
+		LeftToRight = 1,
 	}
 
 	public abstract class EngraverCommand
@@ -87,17 +95,31 @@ namespace LaserPathEngraver.Core.Devices.Serial
 		}
 	}
 
+	public class InitEngraveCommand : MoveCommand
+	{
+		public InitEngraveCommand() { }
+
+		public InitEngraveCommand(short x, short y)
+			: base(x, y)
+		{
+			X = x;
+			Y = y;
+		}
+
+		public override EngraverCommandType Type => EngraverCommandType.InitEngrave;
+	}
+
 	public class EngraveCommand : EngraverCommand
 	{
 		public override EngraverCommandType Type => EngraverCommandType.Engrave;
 
-		public EngraveCommand(byte power, byte duration)
+		public EngraveCommand(ushort powerMilliwatt, byte duration)
 		{
-			Power = power;
+			PowerMilliwatt = powerMilliwatt;
 			Duration = duration;
 		}
 
-		public byte Power { get; set; }
+		public ushort PowerMilliwatt { get; set; }
 		public byte Duration { get; set; }
 		public byte[]? Data { get; set; }
 
@@ -105,14 +127,16 @@ namespace LaserPathEngraver.Core.Devices.Serial
 		{
 			using (var ms = new System.IO.MemoryStream())
 			{
+				var data = Data ?? new byte[0];
+
 				ms.WriteByte(0);
 				ms.WriteByte(Duration);
-				ms.WriteByte(Power);
-				ms.WriteByte(0);
+				ms.WriteByte((byte)(PowerMilliwatt >> 8));
+				ms.WriteByte((byte)PowerMilliwatt);
 
-				ms.WriteByte(0);    //Byte 1 Delta Y
-				ms.WriteByte(0);    //Byte 2 Delta Y
-				ms.Write(Data ?? new byte[0], 0, Data?.Length ?? 0);
+				ms.WriteByte(0);
+				ms.WriteByte((byte)EngraveDirection.Default);
+				ms.Write(data, 0, data.Length);
 
 				return ms.ToArray();
 			}

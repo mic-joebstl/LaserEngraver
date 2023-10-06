@@ -13,6 +13,7 @@ namespace LaserPathEngraver.Core.Configurations
 		//= DeviceType.Mock;
 		= DeviceType.Serial;
 #endif
+		public short MaximumPowerMilliwatts { get; set; } = 1000;
 		public TimeSpan ConnectionTimeout { get; set; } = TimeSpan.FromSeconds(15);
 		public string? PortName { get; set; }
 		public int? BaudRate { get; set; } = 115200;
@@ -34,7 +35,7 @@ namespace LaserPathEngraver.Core.Configurations
 
 	public class BurnConfiguration
 	{
-		public byte Intensity { get; set; } = 0xff;
+		public byte Power { get; set; } = 0xff;
 		public byte Duration { get; set; } = 0xff;
 		public byte FixedIntensityThreshold { get; set; } = 0x7f;
 		public BurnPlottingMode PlottingMode { get; set; } = BurnPlottingMode.RasterOptimized;

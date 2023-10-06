@@ -81,8 +81,8 @@ namespace LaserPathEngraver.Core.Devices.Serial
 
 				try
 				{
-					await WriteCommand(new SimpleEngraverCommand(EngraverCommandType.Reset), cancellationToken);
 					await WriteCommand(new SimpleEngraverCommand(EngraverCommandType.Stop), cancellationToken);
+					await WriteCommand(new SimpleEngraverCommand(EngraverCommandType.Reset), cancellationToken);
 
 					_serialPort?.Close();
 					_serialPort?.Dispose();
@@ -147,52 +147,27 @@ namespace LaserPathEngraver.Core.Devices.Serial
 			{
 				tx.Open();
 
-				while (Position != null && (Position.Value.X != position.X || Position.Value.Y != position.Y))
+				if (Position != null && (Position.Value.X != position.X || Position.Value.Y != position.Y))
 				{
-					var vector = new PointF
-					{
-						X = position.X - Position.Value.X,
-						Y = position.Y - Position.Value.Y
-					};
-					var vectorAbs = new PointF
-					{
-						X = Math.Abs(vector.X),
-						Y = Math.Abs(vector.Y)
-					};
-
-					var x = (short)(
-						vectorAbs.X >= 100 ? vector.X / vectorAbs.X * 100 :
-						vectorAbs.X >= 10 ? vector.X / vectorAbs.X * 10 :
-						vector.X != 0 ? vector.X / Math.Abs(vector.X) : 0
-					);
-					var y = (short)(
-						vectorAbs.Y >= 100 ? vector.Y / vectorAbs.Y * 100 :
-						vectorAbs.Y >= 10 ? vector.Y / vectorAbs.Y * 10 :
-						vector.Y != 0 ? vector.Y / Math.Abs(vector.Y) : 0
-					);
-
 					if (_requiresReset)
 					{
 						await WriteCommand(new SimpleEngraverCommand(EngraverCommandType.Reset), cancellationToken);
 						_requiresReset = false;
 					}
-					await WriteCommand(new MoveCommand(x, y), cancellationToken);
 
-					Position = new Point
-					{
-						X = Position.Value.X + x,
-						Y = Position.Value.Y + y,
-					};
+					await WriteCommand(new MoveCommand((short)(position.X - Position.Value.X), (short)(position.Y - Position.Value.Y)), cancellationToken);
+
+					Position = position;
 				}
 			}
 		}
-		public override async Task Engrave(byte intensity, byte duration, CancellationToken cancellationToken)
+		public override async Task Engrave(ushort powerMilliwatt, byte duration, CancellationToken cancellationToken)
 		{
 			using (var tx = StatusIntermediateTransition(DeviceStatus.Ready, DeviceStatus.Executing))
 			{
 				tx.Open();
 
-				var command = new EngraveCommand(intensity, duration)
+				var command = new EngraveCommand(powerMilliwatt, duration)
 				{
 					Data = new byte[] { 128 }
 				};
@@ -201,7 +176,7 @@ namespace LaserPathEngraver.Core.Devices.Serial
 				_requiresReset = true;
 			}
 		}
-		public override async Task Engrave(byte intensity, byte duration, int length, CancellationToken cancellationToken)
+		public override async Task Engrave(ushort powerMilliwatt, byte duration, Point startingPoint, int length, CancellationToken cancellationToken)
 		{
 			if (length < 1)
 			{
@@ -217,20 +192,18 @@ namespace LaserPathEngraver.Core.Devices.Serial
 				for (int ib = 0, il = 0; ib < bufferLength; ib++)
 				{
 					byte b = 0;
-					for (byte i = 7; i >= 0 && il < length; i--, il++)
+					for (int i = 7; i >= 0 && il < length; i--, il++)
 					{
 						b += (byte)(1 << i);
 					}
 					buffer[ib] = b;
 				}
 
-				var command = new EngraveCommand(intensity, duration)
+				await WriteCommand(new SimpleEngraverCommand(EngraverCommandType.Reset), cancellationToken);
+				await WriteCommand(new EngraveCommand(powerMilliwatt, duration)
 				{
 					Data = buffer
-				};
-
-				await WriteCommand(new SimpleEngraverCommand(EngraverCommandType.Reset), cancellationToken);
-				await WriteCommand(command, cancellationToken);
+				}, cancellationToken);
 				_requiresReset = true;
 			}
 		}
@@ -245,6 +218,18 @@ namespace LaserPathEngraver.Core.Devices.Serial
 
 				var request = command.Build();
 				com.Write(request, 0, request.Length);
+
+				try
+				{
+					await _commandSync?.WaitAsync(cancellationToken);
+				}
+				finally
+				{
+					if (_commandSync?.CurrentCount == 0)
+					{
+						_commandSync.Release();
+					}
+				}
 			}
 			catch (Exception)
 			{
@@ -273,6 +258,7 @@ namespace LaserPathEngraver.Core.Devices.Serial
 
 	public enum EngraverResponse : byte
 	{
+		EngravingActive = 0x8,
 		Completed = 0x9
 	}
 

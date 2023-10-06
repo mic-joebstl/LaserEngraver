@@ -24,14 +24,16 @@ namespace LaserPathEngraver.Core.Jobs
 	{
 		private bool _signalPause;
 		private Point _pointTranslation;
-		private BurnConfiguration _configuration;
+		private DeviceConfiguration _deviceConfiguration;
+		private BurnConfiguration _burnConfiguration;
 		private IEnumerable<IEngravePoint> _source;
 		private IEngravePoint? _currentPoint;
 
-		public EngraveJob(BurnConfiguration configuration, Point pointTranslation, IEnumerable<IEngravePoint> source)
+		public EngraveJob(DeviceConfiguration deviceConfiguration, BurnConfiguration burnConfiguration, Point pointTranslation, IEnumerable<IEngravePoint> source)
 		{
 			_pointTranslation = pointTranslation;
-			_configuration = configuration;
+			_deviceConfiguration = deviceConfiguration;
+			_burnConfiguration = burnConfiguration;
 			_source = source;
 		}
 
@@ -45,14 +47,40 @@ namespace LaserPathEngraver.Core.Jobs
 		private IEnumerable<IEngravePoint> GetSortedPoints()
 		{
 			var relevantPoints = _source.Where(x => !x.IsVisited && x.Intensity > 0);
-			if (_configuration.PlottingMode == BurnPlottingMode.Raster)
+			if (_burnConfiguration.PlottingMode == BurnPlottingMode.Raster)
 			{
 				var points = relevantPoints
 					.OrderBy(x => x.Y)
 					.ThenBy(x => x.Y % 2 == 0 ? x.X : x.X * -1);
-				foreach(var point in points)
+
+				int? currentX = null;
+				int? currentY = null;
+				var pointGroup = new List<IEngravePoint>();
+				foreach (var point in points)
 				{
-					yield return point;
+					if (currentY != point.Y || currentX is null || point.Y % 2 == 0 ? currentX + 1 != point.X : currentX - 1 != point.X)
+					{
+						if (pointGroup.Count > 0)
+						{
+							foreach(var groupPoint in pointGroup.OrderBy(p => p.X))
+							{
+								yield return groupPoint;
+							}
+						}
+						pointGroup.Clear();
+					}
+
+					currentX = point.X;
+					currentY = point.Y;
+
+					pointGroup.Add(point);
+				}
+				if (pointGroup.Count > 0)
+				{
+					foreach (var groupPoint in pointGroup.OrderBy(p => p.X))
+					{
+						yield return groupPoint;
+					}
 				}
 			}
 			else
@@ -152,7 +180,7 @@ namespace LaserPathEngraver.Core.Jobs
 		protected override async Task ExecuteCoreAsync(Device device, CancellationToken cancellationToken)
 		{
 			_signalPause = false;
-			var duration = _configuration.Duration;
+			var duration = _burnConfiguration.Duration;
 
 #if DEBUG
 			var delayMilliseconds = 5d;
@@ -165,12 +193,15 @@ namespace LaserPathEngraver.Core.Jobs
 			foreach (var pointGroup in GetPointGroups())
 			{
 				var startingPoint = pointGroup[0];
-				var intensity = startingPoint.Intensity;
+
+				var intensityFactor = startingPoint.Intensity / 255d;
+				var powerMilliwatt = (ushort)(_deviceConfiguration.MaximumPowerMilliwatts * intensityFactor);
+
 				var imageStartingPoint = new Point { X = startingPoint.X, Y = startingPoint.Y };
 				imageStartingPoint.Offset(_pointTranslation);
 
 				await device.MoveAbsoluteAsync(imageStartingPoint, cancellationToken);
-				await device.Engrave(intensity, duration, pointGroup.Length, cancellationToken);
+				await device.Engrave(powerMilliwatt, duration, imageStartingPoint, pointGroup.Length, cancellationToken);
 
 				foreach (var point in pointGroup)
 				{

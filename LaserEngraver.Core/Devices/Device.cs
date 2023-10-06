@@ -79,8 +79,8 @@ namespace LaserPathEngraver.Core.Devices
 		public abstract Task HomingAsync(CancellationToken cancellationToken);
 		public abstract Task MoveRelativeAsync(Point vector, CancellationToken cancellationToken);
 		public abstract Task MoveAbsoluteAsync(Point position, CancellationToken cancellationToken);
-		public abstract Task Engrave(byte intensity, byte duration, CancellationToken cancellationToken);
-		public abstract Task Engrave(byte intensity, byte duration, int length, CancellationToken cancellationToken);
+		public abstract Task Engrave(ushort powerMilliwatt, byte duration, CancellationToken cancellationToken);
+		public abstract Task Engrave(ushort powerMilliwatt, byte duration, Point startingPoint, int length, CancellationToken cancellationToken);
 
 		protected IDeviceStatusIntermediateTransition StatusIntermediateTransition(DeviceStatus sourceStatus, DeviceStatus intermediateStatus)
 		{

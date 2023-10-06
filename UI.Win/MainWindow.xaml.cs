@@ -28,11 +28,11 @@ namespace LaserPathEngraver.UI.Win
 	{
 		private MainWindowViewModel _viewModel;
 
-		public MainWindow(IWritableOptions<UserConfiguration> userConfiguration, IWritableOptions<BurnConfiguration> burnConfiguration, Space space, DeviceDispatcherService deviceDispatcher)
+		public MainWindow(IWritableOptions<UserConfiguration> userConfiguration, IWritableOptions<DeviceConfiguration> deviceConfiguration, IWritableOptions<BurnConfiguration> burnConfiguration, Space space, DeviceDispatcherService deviceDispatcher)
 		{
 			System.Threading.Thread.CurrentThread.CurrentUICulture = userConfiguration.Value.Culture;
 			System.Threading.Thread.CurrentThread.CurrentCulture = userConfiguration.Value.Culture;
-			DataContext = _viewModel = new MainWindowViewModel(userConfiguration, burnConfiguration, space, deviceDispatcher, Dispatcher);
+			DataContext = _viewModel = new MainWindowViewModel(userConfiguration, deviceConfiguration, burnConfiguration, space, deviceDispatcher, Dispatcher);
 			InitializeComponent();
 			SizeChanged += (o, e) =>
 			{
