@@ -114,7 +114,6 @@ namespace LaserPathEngraver.UI.Win
 			_burnTarget = new BurnTarget();
 			_burnTarget.Size = new Size(8, 8);
 			_burnTarget.Shape.Opacity = 0;
-			_burnTarget.Shape.Fill = new SolidColorBrush(Color.FromRgb(236, 0, 22));
 			deviceDispatcher.DevicePositionChanged += (Device sender, DevicePositionChangedEventArgs args) =>
 			{
 				if (args.Position != null)

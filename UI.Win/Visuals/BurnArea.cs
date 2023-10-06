@@ -1,4 +1,5 @@
 ﻿using LaserPathEngraver.Core.Configurations;
+using LaserPathEngraver.UI.Win.Configuration;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -368,6 +369,13 @@ namespace LaserPathEngraver.UI.Win.Visuals
 
 		private void RaisePropertyChanged(string propertyName)
 			=> PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+
+		#endregion
+
+		#region IVisual Methods
+
+		public void ApplyTheme(Theme theme)
+		{ }
 
 		#endregion
 

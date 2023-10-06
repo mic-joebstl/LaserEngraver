@@ -570,22 +570,27 @@ namespace LaserPathEngraver.UI.Win
 				_userConfiguration.Update(target => target.Theme = _theme);
 				RaisePropertyChanged(nameof(Theme));
 			};
+
+			void OnThemeChanged()
+			{
+				_dropShadowEffect.Color = _theme.Foreground.Color;
+				RaisePropertyChanged(nameof(DropShadowEffect));
+
+				foreach (var visual in Space.GetVisuals())
+				{
+					visual.ApplyTheme(_theme);
+				}
+			}
+
 			PropertyChanged += (object? sender, PropertyChangedEventArgs e) =>
 			{
 				if (e.PropertyName == nameof(Theme))
 				{
-					_dropShadowEffect.Color = _theme.Foreground.Color;
-					RaisePropertyChanged(nameof(DropShadowEffect));
+					OnThemeChanged();
 				}
 			};
 
-			foreach (var visual in Space.GetVisuals())
-			{
-				var binding = new Binding();
-				binding.Source = this;
-				binding.Path = new PropertyPath(nameof(Theme) + "." + nameof(_theme.Foreground));
-				visual.Shape.SetBinding(Shape.StrokeProperty, binding);
-			}
+			OnThemeChanged();
 		}
 
 		#region INotifyPropertyChanged

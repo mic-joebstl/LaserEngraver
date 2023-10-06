@@ -1,4 +1,5 @@
-﻿using System;
+﻿using LaserPathEngraver.UI.Win.Configuration;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -13,5 +14,7 @@ namespace LaserPathEngraver.UI.Win.Visuals
 		Point Position { get; set; }
 		Size Size { get; set; }
 		Shape Shape { get; }
+
+		void ApplyTheme(Theme theme);
 	}
 }

@@ -27,12 +27,14 @@ namespace LaserPathEngraver.UI.Win.Configuration
 		private SolidColorBrush _foreground;
 		private SolidColorBrush _canvasBackground;
 		private SolidColorBrush _sectionBackground;
+		private SolidColorBrush _burnTargetBackground;
 
 		public Theme()
 		{
 			_foreground = SystemColors.ControlTextBrush;
 			_canvasBackground = SystemColors.ControlLightLightBrush;
 			_sectionBackground = SystemColors.ControlLightBrush;
+			_burnTargetBackground = SystemColors.ControlLightLightBrush;
 		}
 
 		public SolidColorBrush Foreground
@@ -74,6 +76,19 @@ namespace LaserPathEngraver.UI.Win.Configuration
 			}
 		}
 
+		public SolidColorBrush BurnTargetBackground
+		{
+			get => _burnTargetBackground;
+			set
+			{
+				if (_burnTargetBackground != value)
+				{
+					_burnTargetBackground = value;
+					OnPropertyChanged(nameof(BurnTargetBackground));
+				}
+			}
+		}
+
 		public event PropertyChangedEventHandler? PropertyChanged;
 
 		protected virtual void OnPropertyChanged(string propertyName)
@@ -88,19 +103,21 @@ namespace LaserPathEngraver.UI.Win.Configuration
 			Foreground = new SolidColorBrush(Color.FromRgb(0x11, 0x11, 0x11)),
 			CanvasBackground = new SolidColorBrush(Color.FromRgb(0xdd, 0xdd, 0xdd)),
 			SectionBackground = new SolidColorBrush(Color.FromRgb(0xbb, 0xbb, 0xbb)),
+			BurnTargetBackground = new SolidColorBrush(Color.FromRgb(0xff, 0xff, 0xff)),
 		};
 
 		public static Theme Dark => new()
 		{
-			Foreground = new SolidColorBrush(Color.FromRgb(0xff, 0xff, 0xff)),
+			Foreground = new SolidColorBrush(Color.FromRgb(0xdd, 0xdd, 0xdd)),
 			CanvasBackground = new SolidColorBrush(Color.FromRgb(0x11, 0x11, 0x11)),
 			SectionBackground = new SolidColorBrush(Color.FromRgb(0x00, 0x00, 0x00)),
+			BurnTargetBackground = new SolidColorBrush(Color.FromRgb(0x00, 0x00, 0x00)),
 		};
 
 		public override bool Equals(object? obj) => obj is Theme theme
-				&& theme.Foreground.Color.Equals(Foreground.Color)
-				&& theme.CanvasBackground.Color.Equals(CanvasBackground.Color)
-				&& theme.SectionBackground.Color.Equals(SectionBackground.Color);
+			&& theme.Foreground.Color.Equals(Foreground.Color)
+			&& theme.CanvasBackground.Color.Equals(CanvasBackground.Color)
+			&& theme.SectionBackground.Color.Equals(SectionBackground.Color);
 
 		public override int GetHashCode() =>
 			Foreground.Color.GetHashCode()

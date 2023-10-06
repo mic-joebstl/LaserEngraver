@@ -1,9 +1,11 @@
-﻿using System;
+﻿using LaserPathEngraver.UI.Win.Configuration;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Media.Effects;
 using System.Windows.Shapes;
 
 namespace LaserPathEngraver.UI.Win.Visuals
@@ -44,5 +46,22 @@ namespace LaserPathEngraver.UI.Win.Visuals
 		}
 
 		public Shape Shape => _circle;
+
+		#region IVisual Methods
+
+		public void ApplyTheme(Theme theme)
+		{
+			Shape.Stroke = theme.BurnTargetBackground;
+			Shape.Fill = theme.Foreground;
+			Shape.Effect = new DropShadowEffect()
+			{
+				Color = theme.BurnTargetBackground.Color,
+				ShadowDepth = 0,
+				BlurRadius = 20,
+				RenderingBias = RenderingBias.Performance
+			};
+		}
+
+		#endregion
 	}
 }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using LaserPathEngraver.UI.Win.Configuration;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -44,5 +45,15 @@ namespace LaserPathEngraver.UI.Win.Visuals
 		}
 
 		public Shape Shape => _rectangle;
+
+
+		#region IVisual Methods
+
+		public void ApplyTheme(Theme theme)
+		{
+			Shape.Stroke = theme.Foreground;
+		}
+
+		#endregion
 	}
 }
