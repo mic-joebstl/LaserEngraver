@@ -24,7 +24,7 @@ namespace LaserPathEngraver.UI.Win
 	{
 		private MainWindowViewModel _viewModel;
 
-		public MainWindow(IOptions<UserConfiguration> userConfiguration, Space space)
+		public MainWindow(IWritableOptions<UserConfiguration> userConfiguration, Space space)
 		{
 			System.Threading.Thread.CurrentThread.CurrentUICulture = userConfiguration.Value.Culture;
 			InitializeComponent();

@@ -18,9 +18,9 @@ namespace LaserPathEngraver.UI.Win
 	{
 		#region Fields
 
+		private IWritableOptions<UserConfiguration> _userConfiguration;
 		private Space _space;
 		private bool _enableVisualEffects;
-		private bool _showTutorial;
 		private Effect? _dropShadowEffect;
 		private System.Windows.Point _mouseDown;
 		private System.Windows.Point _mouseUp;
@@ -30,8 +30,9 @@ namespace LaserPathEngraver.UI.Win
 
 		#region Initialization
 
-		public MainWindowViewModel(IOptions<UserConfiguration> userConfiguration, Space space)
+		public MainWindowViewModel(IWritableOptions<UserConfiguration> userConfiguration, Space space)
 		{
+			_userConfiguration = userConfiguration;
 			_space = space;
 			_space.Canvas.PreviewMouseDown += OnSpaceMouseDown;
 			_space.Canvas.PreviewMouseUp += OnSpaceMouseUp;
@@ -45,8 +46,6 @@ namespace LaserPathEngraver.UI.Win
 				BlurRadius = 20,
 				RenderingBias = RenderingBias.Performance
 			};
-
-			ShowTutorial = userConfiguration.Value.ShowTutorial;
 		}
 
 		#endregion
@@ -79,11 +78,11 @@ namespace LaserPathEngraver.UI.Win
 		{
 			get
 			{
-				return _showTutorial;
+				return _userConfiguration.Value.ShowTutorial;
 			}
 			set
 			{
-				_showTutorial = value;
+				_userConfiguration.Update(config => config.ShowTutorial = value);
 				RaisePropertyChanged(nameof(ShowTutorial));
 			}
 		}

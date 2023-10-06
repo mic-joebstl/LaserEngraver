@@ -12,7 +12,7 @@ namespace LaserPathEngraver.Core.Configurations
 
 	public class UserConfiguration
 	{
-		public CultureInfo Culture { get; set; } = CultureInfo.InvariantCulture;
+		public CultureInfo Culture { get; set; } = new CultureInfo("en");
 		public bool ShowTutorial { get; set; }
 	}
 }

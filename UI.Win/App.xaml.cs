@@ -25,8 +25,9 @@ namespace LaserPathEngraver.UI.Win
 		{
 			Configuration = new ConfigurationBuilder()
 				.SetBasePath(Directory.GetCurrentDirectory())
-				.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+				.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
 				.Build();
+			
 			
 			ServiceProvider = ConfigureServices(new ServiceCollection())
 				.BuildServiceProvider();
@@ -34,9 +35,12 @@ namespace LaserPathEngraver.UI.Win
 
 		private IServiceCollection ConfigureServices(IServiceCollection services)
 		{
+			var basePath = Directory.GetCurrentDirectory();
+			
 			return services
-				.Configure<DeviceConfiguration>(Configuration.GetSection(nameof(DeviceConfiguration)))
-				.Configure<UserConfiguration>(Configuration.GetSection(nameof(UserConfiguration)))
+				.AddSingleton(Configuration)
+				.ConfigureWritableJson<DeviceConfiguration>(Configuration.GetSection(nameof(DeviceConfiguration)), basePath)
+				.ConfigureWritableJson<UserConfiguration>(Configuration.GetSection(nameof(UserConfiguration)), basePath)
 				.AddSingleton<MainWindow>()
 				.AddSingleton<Space>();
 		}
