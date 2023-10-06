@@ -397,7 +397,8 @@
 						<CheckBox Grid.Column="1"
 						          IsChecked="{Binding Space.IsPlottingModeRasterOptimizedEnabled}"
 						          Content="{x:Static localization:Texts.PlottingModeRasterOptimizedText}"
-						          IsEnabled="{Binding IsEditable, Mode=OneWay}" />
+						          IsEnabled="{Binding IsEditable, Mode=OneWay}"
+						          Margin="15,0,0,0" />
 					</Grid>
 
 
@@ -857,7 +858,7 @@
 
 			<Border Background="{Binding Theme.SectionBackground}" CornerRadius="5">
 				<Border Opacity="0.8"
-					    Margin="-5">
+				        Margin="-5">
 					<Border.Effect>
 						<BlurEffect Radius="5" />
 					</Border.Effect>
@@ -882,7 +883,7 @@
 										<BeginStoryboard>
 											<Storyboard>
 												<DoubleAnimation Storyboard.TargetProperty="Height"
-												                 To="300"
+												                 To="250"
 												                 Duration="0:0:0.4"
 												                 AccelerationRatio="0.1"
 												                 DecelerationRatio="0.9" />
@@ -922,7 +923,7 @@
 									</DataTrigger.ExitActions>
 								</DataTrigger>
 								<DataTrigger Binding="{Binding ShowHelp, Mode=OneTime}" Value="True">
-									<Setter Property="Height" Value="300" />
+									<Setter Property="Height" Value="250" />
 									<Setter Property="Opacity" Value="1" />
 								</DataTrigger>
 								<DataTrigger Binding="{Binding ShowHelp, Mode=OneTime}" Value="False">

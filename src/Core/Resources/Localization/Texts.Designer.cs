@@ -107,7 +107,7 @@ namespace LaserEngraver.Core.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Kein Gerät gefunden.
+        ///   Looks up a localized string similar to No device found.
         /// </summary>
         internal static string NoDeviceFoundException {
             get {

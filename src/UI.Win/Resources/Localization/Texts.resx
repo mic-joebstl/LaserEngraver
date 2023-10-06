@@ -203,9 +203,9 @@ Exact duration depends on the device, so it is specified here in percent.
 
 &lt;i&gt;Threshold&lt;/i&gt; is the value in percent at which brightness a pixel is engraved if &lt;i&gt;Variable burn intensity&lt;/i&gt; is disabled.
 
-&lt;i&gt;Rasterized mode&lt;/i&gt; engraves the pixels in rows in a grid pattern.
+&lt;i&gt;Rasterized&lt;/i&gt; engraves the pixels in rows in a grid pattern.
 
-&lt;i&gt;Path mode&lt;/i&gt; starts engraving at any pixel and navigates directly to the next pixel to be engraved from there.
+&lt;i&gt;Raster optimized&lt;/i&gt; starts engraving at any pixel and navigates directly to the next pixel to be engraved from there.
 
 &lt;i&gt;Show halo&lt;/i&gt; is a purely visual setting and has no effect on engraving.
 &lt;br /&gt;

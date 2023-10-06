@@ -134,7 +134,7 @@
     <value>Positioning</value>
   </data>
   <data name="NoDeviceFoundException" xml:space="preserve">
-    <value>Kein Gerät gefunden</value>
+    <value>No device found</value>
   </data>
   <data name="UnexpectedDeviceDisconnectedExceptionMessage" xml:space="preserve">
     <value>Device disconnected unexpectedly</value>
