@@ -11,6 +11,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 using System.Windows.Threading;
 
 namespace LaserPathEngraver.UI.Win
@@ -22,14 +23,14 @@ namespace LaserPathEngraver.UI.Win
 		private Canvas _canvas;
 		private DateTime _renderDateTime;
 		private BurnArea _burnableArea;
-		private DateTime _renderCalculationsPerSecondDateTime;
-		private List<double> _renderIntervalHistory;
 		private double _scale;
 		private double _offsetX;
 		private double _offsetY;
-		private double _calculationRate;
-		private TimeSpan _realRenderInterval;
-		private TimeSpan _previousRealRenderInterval;
+		Stopwatch _renderStopwatch;
+		private long _renderStopwatchIterations;
+		private TimeSpan _renderStopwatchDuration;
+		private double _renderRate;
+		private TimeSpan _renderInterval;
 		private DispatcherTimer _dispatcherTimer;
 		private decimal _canvasWidthDot;
 		private decimal _canvasHeightDot;
@@ -52,20 +53,23 @@ namespace LaserPathEngraver.UI.Win
 			_canvas.Cursor = System.Windows.Input.Cursors.Hand;
 			_canvas.Background = System.Windows.Media.Brushes.Transparent;
 			_renderDateTime = DateTime.Now;
-			_renderCalculationsPerSecondDateTime = DateTime.Now;
-			_renderIntervalHistory = new List<double>();
-			_calculationRate = 0;
+			_renderRate = 0;
 			_scale = 1;
 			_offsetX = 0;
 			_offsetY = 0;
-			_realRenderInterval = TimeSpan.FromMilliseconds(1);
-			_previousRealRenderInterval = TimeSpan.FromMilliseconds(1);
+			_renderStopwatch = new Stopwatch();
+			_renderInterval = TimeSpan.FromMilliseconds(8);
 			_dispatcherTimer = new DispatcherTimer(DispatcherPriority.Background);
-			_dispatcherTimer.Interval = _realRenderInterval;
+			_dispatcherTimer.Interval = _renderInterval;
 			_dispatcherTimer.Tick += OnRender;
 			_dispatcherTimer.Start();
 
-			AddVisualToCanvas(_burnableArea = new BurnArea());
+			_burnableArea = new BurnArea();
+			_burnableArea.Size = new Size((double)_canvasWidthDot, (double)_canvasHeightDot);
+			_burnableArea.Shape.Stroke = System.Windows.Media.Brushes.White;
+			_burnableArea.Shape.StrokeThickness = 2;
+			_burnableArea.Shape.StrokeDashArray = new DoubleCollection() { 5 };
+			AddVisualToCanvas(_burnableArea);
 		}
 
 		#endregion
@@ -114,7 +118,7 @@ namespace LaserPathEngraver.UI.Win
 			}
 			set
 			{
-				if(_canvasWidthDot != value)
+				if (_canvasWidthDot != value)
 				{
 					_canvasWidthDot = value;
 					RaisePropertyChanged(nameof(CanvasWidthDot));
@@ -154,11 +158,11 @@ namespace LaserPathEngraver.UI.Win
 			}
 		}
 
-		public double CalculationRate
+		public double RenderRate
 		{
 			get
 			{
-				return _calculationRate;
+				return _renderRate > 999 ? 999 : _renderRate;
 			}
 		}
 
@@ -175,14 +179,7 @@ namespace LaserPathEngraver.UI.Win
 				{
 					_scale = value;
 
-					ScaleBodies();
-					/*
-					foreach (var body in _Bodies)
-					{
-						System.Windows.Controls.Canvas.SetTop(body.Visual, SpacePositionToScreenPosition(body.Position).Y);
-						System.Windows.Controls.Canvas.SetLeft(body.Visual, SpacePositionToScreenPosition(body.Position).X);
-					}
-					*/
+					UpdateVisuals();
 					RaisePropertyChanged(nameof(Scale));
 				}
 			}
@@ -199,6 +196,7 @@ namespace LaserPathEngraver.UI.Win
 				if (_offsetX != value)
 				{
 					_offsetX = value;
+					Render();
 					RaisePropertyChanged(nameof(OffsetX));
 				}
 			}
@@ -215,6 +213,7 @@ namespace LaserPathEngraver.UI.Win
 				if (_offsetY != value)
 				{
 					_offsetY = value;
+					Render();
 					RaisePropertyChanged(nameof(OffsetY));
 				}
 			}
@@ -233,226 +232,86 @@ namespace LaserPathEngraver.UI.Win
 
 		#region Methods
 
-		public Point ScreenPositionToSpacePosition(Point position)
+		private Point ScreenPositionToSpacePosition(Point position)
 		{
-			//double x = (position.X - _Canvas.ActualWidth / 2 - _OffsetX) / _Scale;
-			//double y = (position.Y - _Canvas.ActualHeight / 2 - _OffsetY) / _Scale;
 			double x = (position.X - _canvas.ActualWidth / 2) / _scale - _offsetX;
 			double y = (position.Y - _canvas.ActualHeight / 2) / _scale - _offsetY;
 			return new Point(x, y);
 		}
 
-		public Point SpacePositionToScreenPosition(Point position)
+		private Point SpacePositionToScreenPosition(Point position)
 		{
 			double x = (position.X + _offsetX) * _scale + _canvas.ActualWidth / 2;
 			double y = (position.Y + _offsetY) * _scale + _canvas.ActualHeight / 2;
 			return new Point(x, y);
 		}
 
-		private void OnBodyPositionChanged(object sender, EventArgs e)
+		private IEnumerable<IVisual> GetVisuals()
 		{
-			/*
-			var body = sender as IBody;
-			if (body != null)
-			{
-				_canvas.Dispatcher.BeginInvoke((Action)(() =>
-				{
-					System.Windows.Controls.Canvas.SetTop(body.Visual, SpacePositionToScreenPosition(body.Position).Y);
-					System.Windows.Controls.Canvas.SetLeft(body.Visual, SpacePositionToScreenPosition(body.Position).X);
-				}), DispatcherPriority.Render);
-			}
-			*/
+			yield return _burnableArea;
 		}
 
-		private void ScaleBodies()
+		private void UpdateVisuals()
 		{
-			/*
-			foreach (var body in _Bodies)
+			foreach (var visual in GetVisuals())
 			{
-				if (body is Ball)
-					ScaleBody(body);
-				else
-					throw new NotImplementedException();
+				UpdateVisual(visual);
 			}
-			*/
 		}
 
-		/*
-		private void ScaleBody(IBody body)
+		private void UpdateVisual(IVisual visual)
 		{
-			if (body is Ball)
-			{
-				foreach (var b in _Bodies)
-				{
-					if (b == body)
-					{
-						b.Visual.Width = (b as Ball).Radius * 2 * _scale + 0.5;
-						b.Visual.Height = (b as Ball).Radius * 2 * _scale + 0.5;
-						break;
-					}
-				}
-			}
-			else
-				throw new NotImplementedException();
+			var shape = visual.Shape;
+			shape.Width = visual.Size.Width * _scale;
+			shape.Height = visual.Size.Height * _scale;
 
+			var position = SpacePositionToScreenPosition(visual.Position);
+			Canvas.SetTop(shape, position.Y);
+			Canvas.SetLeft(shape, position.X);
 		}
-		*/
 
 		private void AddVisualToCanvas(IVisual visual)
 		{
-			var shape = visual?.Shape;
-			if (shape is null)
-				throw new ArgumentNullException(nameof(visual), "Required property " + nameof(visual.Shape) + " not set");
-
+			var shape = visual.Shape;
 			if (!Canvas.Children.Contains(shape))
 			{
 				Canvas.Children.Add(shape);
-				var position = visual.Position;
-				System.Windows.Controls.Canvas.SetTop(shape, SpacePositionToScreenPosition(position).Y);
-				System.Windows.Controls.Canvas.SetLeft(shape, SpacePositionToScreenPosition(position).X);
+				UpdateVisual(visual);
 			}
 		}
 
-		private void OnRender(object? sender, EventArgs e)
+		private void Render()
 		{
 			#region RenderInterval
 
-			_previousRealRenderInterval = _realRenderInterval;
-			_realRenderInterval = DateTime.Now - _renderDateTime;
-			_renderDateTime = DateTime.Now;
-			_renderIntervalHistory.Add(_realRenderInterval.TotalMilliseconds);
-
-			if ((DateTime.Now - _renderCalculationsPerSecondDateTime).TotalMilliseconds >= 1000)
+			if (!_renderStopwatch.IsRunning)
 			{
-				double sumOfCalculationsPerSecond = 0;
-				foreach (double d in _renderIntervalHistory)
+				_renderStopwatch.Start();
+			}
+			else
+			{
+				_renderInterval = _renderStopwatch.Elapsed;
+				_renderStopwatchIterations++;
+				_renderStopwatchDuration += _renderInterval;
+				_renderStopwatch.Restart();
+
+				if (_renderStopwatchDuration >= TimeSpan.FromSeconds(0.5))
 				{
-					sumOfCalculationsPerSecond += 1000 / d;
+					_renderRate = _renderStopwatchIterations / _renderStopwatchDuration.TotalSeconds;
+					_renderStopwatchDuration = TimeSpan.Zero;
+					_renderStopwatchIterations = 0;
+					RaisePropertyChanged(nameof(RenderRate));
 				}
-				_calculationRate = sumOfCalculationsPerSecond / _renderIntervalHistory.Count;
-				_renderIntervalHistory.Clear();
-				RaisePropertyChanged(nameof(CalculationRate));
-				_renderCalculationsPerSecondDateTime = DateTime.Now;
 			}
 
 			#endregion
 
-			/*
-			double offsetX = 0;
-			double offsetY = 0;
+			UpdateVisuals();
+		}
 
-			double maxMass = 0;
-
-			if (_EnableAutomaticCameraAdjustment && _Bodies.Count > 0)
-			{
-				maxMass = _Bodies.Max(b => b.Mass);
-			}
-			for (int i = 0; i < _Bodies.Count; i++)
-			{
-				_Bodies[i].Position = _Bodies[i].Position + _Bodies[i].Velocity * _realRenderInterval.TotalSeconds;
-				_Bodies[i].GravitationalForce = new Vector(0, 0);
-
-				//DetectCollisions();
-
-				if (_EnableAutomaticCameraAdjustment)
-				{
-					offsetX += _Bodies[i].Position.X * (_Bodies[i].Mass / maxMass);
-					offsetY += _Bodies[i].Position.Y * (_Bodies[i].Mass / maxMass);
-				}
-
-				if (_Bodies[i] is Ball)
-				{
-					if (_IsAudioVisualisationEnabled && (_VisualiseCapturedAudio || _VisualiseRenderedAudio))
-					{
-						double newRadius = 0;
-
-						if (_VisualiseCapturedAudio && _VisualiseRenderedAudio)
-							newRadius = (_Bodies[i] as Ball).DesiredRadius + (_Bodies[i] as Ball).DesiredRadius * (_AudioPeak.MasterPeaks[i % _AudioPeak.MasterPeaks.Count()]) * 5;
-						else if (_VisualiseCapturedAudio)
-							newRadius = (_Bodies[i] as Ball).DesiredRadius + (_Bodies[i] as Ball).DesiredRadius * (_AudioPeak.CapturingMasterPeaks[i % _AudioPeak.CapturingMasterPeaks.Count()]) * 5;
-						else if (_VisualiseRenderedAudio)
-							newRadius = (_Bodies[i] as Ball).DesiredRadius + (_Bodies[i] as Ball).DesiredRadius * (_AudioPeak.RenderingMasterPeaks[i % _AudioPeak.RenderingMasterPeaks.Count()]) * 3;
-
-						double deltaRadius = newRadius - (_Bodies[i] as Ball).Radius;
-						(_Bodies[i] as Ball).Radius = newRadius;
-						_Bodies[i].Position = new Point(_Bodies[i].Position.X - deltaRadius, _Bodies[i].Position.Y - deltaRadius);
-						_Bodies[i].Visual.Width = (_Bodies[i] as Ball).Radius * 2 * _scale + 0.5;
-						_Bodies[i].Visual.Height = (_Bodies[i] as Ball).Radius * 2 * _scale + 0.5;
-					}
-				}
-				else
-				{
-					throw new NotSupportedException();
-				}
-			}
-
-			if (_EnableAutomaticCameraAdjustment && _Bodies.Count != 0)
-			{
-				offsetX /= _Bodies.Count;
-				OffsetX += (-offsetX - OffsetX) * _realRenderInterval.TotalSeconds;
-				offsetY /= _Bodies.Count;
-				OffsetY += (-offsetY - OffsetY) * _realRenderInterval.TotalSeconds;
-			}
-
-			//Sets the forces of the bodies
-			//for (int i = 0; i < _BodyPairList.Count; i++)
-			Parallel.For(0, _BodyPairList.Count, (i) =>
-			{
-				bool fused = false;
-				if (_IsCollisionEnabled)
-				{
-					if (_IsEnclosedArea)
-					{
-
-					}
-
-					//DetectCollisions();
-
-					if (Intersect(_BodyPairList[i].A, _BodyPairList[i].B) && !_BodyPairList[i].HaveContact)
-					{
-						_BodyPairList[i].HaveContact = true;
-
-						SetVelocityAfterCollision(_BodyPairList[i].A, _BodyPairList[i].B);
-					}
-					else if (_BodyPairList[i].HaveContact)
-					{
-						if (Intersect(_BodyPairList[i].A, _BodyPairList[i].B))
-						{
-							AvoidOverlap(_BodyPairList[i].A, _BodyPairList[i].B);
-							//AccumulateFriction(_BodyPairList[i].A, _BodyPairList[i].B, 1d, 0.3d);
-						}
-						else
-						{
-							_BodyPairList[i].HaveContact = false;
-						}
-					}
-				}
-				else if (_resolutionDpi)
-				{
-					if (Intersect(_BodyPairList[i].A, _BodyPairList[i].B))
-					{
-						_canvas.Dispatcher.BeginInvoke((Action<IBody, IBody>)((a, b) =>
-						{
-							if (Contains(a) && Contains(b))
-							{
-								Remove(a);
-								Remove(b);
-								Add(Fuse(a, b));
-							}
-						}), DispatcherPriority.Background, _BodyPairList[i].A, _BodyPairList[i].B);
-
-						fused = true;
-					}
-				}
-
-				if (_canvasHeightDot &&
-					!fused &&
-					!_BodyPairList[i].HaveContact)
-				{
-					SetGravitationForce(_BodyPairList[i].A, _BodyPairList[i].B);
-				}
-			});
-			*/
+		private void OnRender(object? sender, EventArgs e)
+		{
+			Render();
 		}
 
 		#endregion

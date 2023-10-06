@@ -28,7 +28,6 @@ namespace LaserPathEngraver.UI.Win
 				.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
 				.Build();
 			
-			
 			ServiceProvider = ConfigureServices(new ServiceCollection())
 				.BuildServiceProvider();
 		}

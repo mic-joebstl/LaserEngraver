@@ -61,6 +61,15 @@ namespace LaserPathEngraver.UI.Win.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to {0:N2} Updates/s.
+        /// </summary>
+        public static string RenderRateFormatText {
+            get {
+                return ResourceManager.GetString("RenderRateFormatText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Engraver.
         /// </summary>
         public static string Title {

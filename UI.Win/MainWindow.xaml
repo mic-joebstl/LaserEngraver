@@ -246,10 +246,10 @@
 			<Grid.Background>
 				<SolidColorBrush Color="Black" Opacity="0.5" />
 			</Grid.Background>
-			<Label Content="{Binding Space.CalculationRate}"
+			<Label Content="{Binding Space.RenderRate}"
 			       Foreground="White"
 			       FontSize="16"
-			       ContentStringFormat="{}{0:N2} Calculations Per Seconds" />
+			       ContentStringFormat="{x:Static localization:Texts.RenderRateFormatText}" />
 		</Grid>
 		<Grid HorizontalAlignment="Right" VerticalAlignment="Bottom"
 		      Margin="15">
