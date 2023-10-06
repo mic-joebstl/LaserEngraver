@@ -61,6 +61,15 @@ namespace LaserPathEngraver.Core.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Framing.
+        /// </summary>
+        internal static string FramingJobTitle {
+            get {
+                return ResourceManager.GetString("FramingJobTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Homing.
         /// </summary>
         internal static string HomingJobTitle {

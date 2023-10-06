@@ -51,7 +51,7 @@ namespace LaserPathEngraver.UI.Win
 				RenderingBias = RenderingBias.Performance
 			};
 
-			ConnectCommand = new AsyncRelayCommand(
+			var connectCommand = new AsyncRelayCommand(
 				cancelableExecute: async (CancellationToken cancellationToken) =>
 				{
 					try
@@ -74,6 +74,7 @@ namespace LaserPathEngraver.UI.Win
 				},
 				canExecute: () => IsEditable
 			);
+			ConnectCommand = connectCommand;
 
 			var cancelCommand = new RelayCommand(
 				execute: () =>
@@ -92,17 +93,61 @@ namespace LaserPathEngraver.UI.Win
 			);
 			CancelCommand = cancelCommand;
 
+			var framingCommand = new AsyncRelayCommand(
+				cancelableExecute: async (CancellationToken cancellationToken) =>
+				{
+					try
+					{
+						ErrorMessage = null;
+						var frameF = Space.ImageBoundingRect;
+						var frame = new System.Drawing.Rectangle((int)frameF.X, (int)frameF.Y, (int)frameF.Width, (int)frameF.Height);
+						if (frame.Width > 0 && frame.Height > 0)
+						{
+							var stepDelay = TimeSpan.FromSeconds(0.5);
+							await _deviceDispatcher.ExecuteJob(new FramingJob(frame, stepDelay), cancellationToken);
+						}
+					}
+					catch (Exception ex)
+					{
+						ErrorMessage = ex.Message;
+					}
+				},
+				canExecute: () =>
+				{
+					if (!IsEditable)
+					{
+						return false;
+					}
+					var frame = Space.ImageBoundingRect;
+					return frame.Width > 0 && frame.Height > 0;
+				}
+			);
+			FramingCommand = framingCommand;
+
 			_deviceDispatcher.DeviceStatusChanged += (Device sender, DeviceStatusChangedEventArgs args) =>
 			{
 				RaisePropertyChanged(nameof(ConnectCommandText));
 				RaisePropertyChanged(nameof(DeviceStatusText));
 				RaisePropertyChanged(nameof(IsEditable));
+				connectCommand.NotifyCanExecuteChanged();
+				framingCommand.NotifyCanExecuteChanged();
 			};
 
 			_deviceDispatcher.JobStatusChanged += (object sender, JobStatusChangedEventArgs args) =>
 			{
 				RaisePropertyChanged(nameof(JobStatusText));
+				RaisePropertyChanged(nameof(IsEditable));
+				connectCommand.NotifyCanExecuteChanged();
 				cancelCommand.NotifyCanExecuteChanged();
+				framingCommand.NotifyCanExecuteChanged();
+			};
+
+			Space.PropertyChanged += (object? sender, PropertyChangedEventArgs e) =>
+			{
+				if (e.PropertyName == nameof(Space.ImageBoundingRect))
+				{
+					framingCommand.NotifyCanExecuteChanged();
+				}
 			};
 
 			_jobElapsedTimer = new DispatcherTimer(DispatcherPriority.Render);
@@ -223,6 +268,8 @@ namespace LaserPathEngraver.UI.Win
 
 		public ICommand CancelCommand { get; private set; }
 
+		public ICommand FramingCommand { get; private set; }
+
 		public Cursor CanvasCursor
 		{
 			get
@@ -246,7 +293,13 @@ namespace LaserPathEngraver.UI.Win
 			}
 		}
 
-		public bool IsEditable => DeviceDispatcher.DeviceStatus == DeviceStatus.Disconnected || DeviceDispatcher.DeviceStatus == DeviceStatus.Ready;
+		public bool IsEditable =>
+			(
+				DeviceDispatcher.DeviceStatus == DeviceStatus.Disconnected ||
+				DeviceDispatcher.DeviceStatus == DeviceStatus.Ready
+			)
+			&& DeviceDispatcher.JobStatus != JobStatus.Running
+			&& DeviceDispatcher.JobStatus != JobStatus.Paused;
 
 		private void OnSpaceMouseDown(object? sender, System.Windows.Input.MouseButtonEventArgs e)
 		{
@@ -309,13 +362,13 @@ namespace LaserPathEngraver.UI.Win
 					Y = spacePosition.Y < boundingRect.Top ? boundingRect.Top : spacePosition.Y > boundingRect.Bottom ? boundingRect.Bottom : spacePosition.Y,
 				};
 
-				Dispatcher.CurrentDispatcher.BeginInvoke(async () => 
+				Dispatcher.CurrentDispatcher.BeginInvoke(async () =>
 				{
 					if (DeviceDispatcher.DeviceStatus == DeviceStatus.Ready)
 					{
 						try
 						{
-							
+
 
 							await _deviceDispatcher.ExecuteJob(
 								new MoveAbsoluteJob(new System.Drawing.Point { X = (int)spacePosition.X, Y = (int)spacePosition.Y }),

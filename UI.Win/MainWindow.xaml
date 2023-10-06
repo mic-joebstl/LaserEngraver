@@ -685,6 +685,10 @@
 					<Button Margin="0,12.5,0,0"
 					        Command="{Binding ConnectCommand}"
 					        Content="{Binding ConnectCommandText}" />
+					
+					<Button Margin="0,12.5,0,0"
+					        Command="{Binding FramingCommand}"
+					        Content="{x:Static localization:Texts.FramingCommandText}" />
 
 					<Button Margin="0,12.5,0,0"
 					        Command="{Binding CancelCommand}"

@@ -205,6 +205,15 @@ namespace LaserPathEngraver.UI.Win.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Framing.
+        /// </summary>
+        public static string FramingCommandText {
+            get {
+                return ResourceManager.GetString("FramingCommandText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Height [cm].
         /// </summary>
         public static string HeightCmText {

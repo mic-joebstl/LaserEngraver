@@ -219,6 +219,8 @@ namespace LaserPathEngraver.UI.Win
 
 		public System.Drawing.RectangleF CanvasBoundingRect => new System.Drawing.RectangleF(0, 0, (float)CanvasWidthDot, (float)CanvasHeightDot);
 
+		public System.Drawing.RectangleF ImageBoundingRect => new System.Drawing.RectangleF((float)_burnArea.Position.X, (float)_burnArea.Position.Y, (float)ImageWidthDot, (float)ImageHeightDot);
+
 		public double ImageWidthDot
 		{
 			get
@@ -241,6 +243,7 @@ namespace LaserPathEngraver.UI.Win
 						RaisePropertyChanged(nameof(ImageWidthCm));
 						RaisePropertyChanged(nameof(ImageHeightDot));
 						RaisePropertyChanged(nameof(ImageHeightCm));
+						RaisePropertyChanged(nameof(ImageBoundingRect));
 					}
 					else
 					{
@@ -274,12 +277,14 @@ namespace LaserPathEngraver.UI.Win
 						RaisePropertyChanged(nameof(ImageWidthCm));
 						RaisePropertyChanged(nameof(ImageHeightDot));
 						RaisePropertyChanged(nameof(ImageHeightCm));
+						RaisePropertyChanged(nameof(ImageBoundingRect));
 					}
 					else
 					{
 						_burnArea.Size = new Size(_burnArea.Size.Width, value);
 						RaisePropertyChanged(nameof(ImageHeightDot));
 						RaisePropertyChanged(nameof(ImageHeightCm));
+						RaisePropertyChanged(nameof(ImageBoundingRect));
 					}
 				}
 			}
@@ -645,6 +650,7 @@ namespace LaserPathEngraver.UI.Win
 			if (e.PropertyName == nameof(BurnArea.Position))
 			{
 				_burnBitmapRectangle.Position = _burnArea.Position;
+				RaisePropertyChanged(nameof(ImageBoundingRect));
 			}
 			if (e.PropertyName == nameof(BurnArea.Size))
 			{
@@ -652,6 +658,7 @@ namespace LaserPathEngraver.UI.Win
 				RaisePropertyChanged(nameof(ImageWidthDot));
 				RaisePropertyChanged(nameof(ImageHeightCm));
 				RaisePropertyChanged(nameof(ImageWidthCm));
+				RaisePropertyChanged(nameof(ImageBoundingRect));
 				_burnBitmapRectangle.Size = _burnArea.Size;
 			}
 		}

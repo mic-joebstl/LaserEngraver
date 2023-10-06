@@ -165,6 +165,9 @@
   <data name="FixedEngravingPowerThresholdText" xml:space="preserve">
     <value>Threshold [%]</value>
   </data>
+  <data name="FramingCommandText" xml:space="preserve">
+    <value>Framing</value>
+  </data>
   <data name="HeightCmText" xml:space="preserve">
     <value>Height [cm]</value>
   </data>

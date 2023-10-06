@@ -92,7 +92,9 @@ namespace LaserPathEngraver.Core.Jobs
 							Dispose();
 						}
 					}
-					catch (TaskCanceledException)
+					catch (Exception ex) when (
+						ex is OperationCanceledException ||
+						ex is TaskCanceledException)
 					{
 						Status = JobStatus.Cancelled;
 						Dispose();
@@ -133,7 +135,7 @@ namespace LaserPathEngraver.Core.Jobs
 		}
 	}
 
-	public sealed class MoveAbsoluteJob: Job
+	public sealed class MoveAbsoluteJob : Job
 	{
 		private Point _position;
 
@@ -147,6 +149,37 @@ namespace LaserPathEngraver.Core.Jobs
 		protected override async Task ExecuteCoreAsync(Device device, CancellationToken cancellationToken)
 		{
 			await device.MoveAbsoluteAsync(_position, cancellationToken);
+		}
+	}
+
+	public sealed class FramingJob : Job
+	{
+		private Rectangle _frame;
+		private TimeSpan _stepDelay;
+
+		public FramingJob(Rectangle frame, TimeSpan stepDelay)
+		{
+			_frame = frame;
+			_stepDelay = stepDelay;
+		}
+
+		public override string Title => Resources.Localization.Texts.FramingJobTitle;
+
+		protected override async Task ExecuteCoreAsync(Device device, CancellationToken cancellationToken)
+		{
+			var queue = new Queue<Point>(4);
+			queue.Enqueue(new Point(_frame.Left, _frame.Top));
+			queue.Enqueue(new Point(_frame.Right, _frame.Top));
+			queue.Enqueue(new Point(_frame.Right, _frame.Bottom));
+			queue.Enqueue(new Point(_frame.Left, _frame.Bottom));
+			while (true)
+			{
+				cancellationToken.ThrowIfCancellationRequested();
+				var point = queue.Dequeue();
+				await device.MoveAbsoluteAsync(point, cancellationToken);
+				await Task.Delay(_stepDelay);
+				queue.Enqueue(point);
+			}
 		}
 	}
 }

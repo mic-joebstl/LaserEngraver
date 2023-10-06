@@ -165,6 +165,9 @@
   <data name="FixedEngravingPowerThresholdText" xml:space="preserve">
     <value>Schwellwert [%]</value>
   </data>
+  <data name="FramingCommandText" xml:space="preserve">
+    <value>Umrahmung</value>
+  </data>
   <data name="HeightCmText" xml:space="preserve">
     <value>Höhe [cm]</value>
   </data>
