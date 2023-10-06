@@ -97,12 +97,10 @@ namespace LaserPathEngraver.UI.Win
 			AddVisualToCanvas(_burnBitmapRectangle);
 
 			_burnArea = new BurnArea();
-			AddVisualToCanvas(_burnArea);
-
-			ImageWidthDot = 0;
-			ImageHeightDot = 0;
-
 			_burnArea.PropertyChanged += OnBurnAreaPropertyChanged;
+			_burnArea.Size = new Size(0, 0);
+			_burnArea.Position = new Point((double)_canvasWidthDot / 2, (double)_canvasHeightDot / 2);
+			AddVisualToCanvas(_burnArea);
 		}
 
 		#endregion

@@ -28,12 +28,14 @@ namespace LaserPathEngraver.UI.Win.Visuals
 		private List<BurnTarget> _targets;
 		private Point _position;
 		private Size _size;
+		private bool _requiresRenderUpdate;
 
 		public BurnArea()
 		{
 			_rectangle = new Rectangle();
 			_targets = new List<BurnTarget>();
 			_renderSync = new SemaphoreSlim(1, 1);
+			_requiresRenderUpdate = true;
 		}
 
 		public Point Position
@@ -57,6 +59,7 @@ namespace LaserPathEngraver.UI.Win.Visuals
 				if (_size != value)
 				{
 					_size = value;
+					_requiresRenderUpdate = true;
 					RaisePropertyChanged(nameof(Size));
 				}
 			}
@@ -66,9 +69,15 @@ namespace LaserPathEngraver.UI.Win.Visuals
 
 		public void RenderImage()
 		{
+			if (!_requiresRenderUpdate)
+				return;
+
 			_renderSync.Wait();
 			try
 			{
+				if (!_requiresRenderUpdate)
+					return;
+
 				_image = new BitmapImage();
 				_imageStream?.Dispose();
 				_image.BeginInit();
@@ -77,7 +86,6 @@ namespace LaserPathEngraver.UI.Win.Visuals
 				if (_scaledBitmap is null || _originalBitmap is null)
 				{
 					_targets.Clear();
-					Size = new Size(0, 0);
 				}
 
 				var width = (int)(Size.Width < 1 ? 1 : Size.Width);
@@ -120,6 +128,7 @@ namespace LaserPathEngraver.UI.Win.Visuals
 					pinnedArray.Free();
 				}
 				_rectangle.Fill = new ImageBrush(_image);
+				_requiresRenderUpdate = false;
 			}
 			finally
 			{
@@ -129,6 +138,7 @@ namespace LaserPathEngraver.UI.Win.Visuals
 
 		public void LoadBitmap(string filePath, Size maxSize)
 		{
+			_requiresRenderUpdate = true;
 			_originalBitmap = new System.Drawing.Bitmap(filePath);
 			var ratio = (double)_originalBitmap.Width / _originalBitmap.Height;
 			var height = _originalBitmap.Height > maxSize.Height ? maxSize.Height : _originalBitmap.Height;
@@ -169,9 +179,9 @@ namespace LaserPathEngraver.UI.Win.Visuals
 			_scaledBitmap = scaledBitmap;
 
 			_targets.Clear();
-			for (int x = 0; x < width; x++)
+			for (int x = 0; x < (int)width; x++)
 			{
-				for (int y = 0; y < height; y++)
+				for (int y = 0; y < (int)height; y++)
 				{
 					var pixel = scaledBitmap.GetPixel(x, y);
 					var value = (0xff - pixel.R + 0xff - pixel.G + 0xff - pixel.B) / 3d;
