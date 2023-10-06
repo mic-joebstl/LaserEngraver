@@ -4,6 +4,7 @@ using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Drawing;
 using System.Linq;
 using System.Net.NetworkInformation;
 using System.Text;
@@ -25,11 +26,15 @@ namespace LaserPathEngraver.Core.Devices
 
 		public event DeviceStatusChangedEventHandler? DeviceStatusChanged;
 
+		public event DevicePositionChangedEventHandler? DevicePositionChanged;
+
 		public event JobStatusChangedEventHandler? JobStatusChanged;
 
 		public event PropertyChangedEventHandler? PropertyChanged;
 
 		public DeviceStatus DeviceStatus => _device?.Status ?? DeviceStatus.Disconnected;
+
+		public Point? DevicePosition => _device?.Position;
 
 		public JobStatus JobStatus => _currentJob?.Status ?? JobStatus.None;
 
@@ -53,6 +58,7 @@ namespace LaserPathEngraver.Core.Devices
 						{
 							_device = new MockDevice();
 							_device.StatusChanged += OnDeviceStatusChanged;
+							_device.PositionChanged += OnDevicePositionChanged;
 						}
 						else
 						{
@@ -63,8 +69,14 @@ namespace LaserPathEngraver.Core.Devices
 			}
 
 			DeviceStatusChanged?.Invoke(_device, new DeviceStatusChangedEventArgs(DeviceStatus));
+			DevicePositionChanged?.Invoke(_device, new DevicePositionChangedEventArgs(DevicePosition));
 			PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(DeviceStatus)));
 			await _device.ConnectAsync(cancellationToken);
+		}
+
+		private void OnDevicePositionChanged(Device sender, DevicePositionChangedEventArgs args)
+		{
+			DevicePositionChanged?.Invoke(sender, args);
 		}
 
 		private void OnDeviceStatusChanged(Device sender, DeviceStatusChangedEventArgs args)
@@ -101,6 +113,7 @@ namespace LaserPathEngraver.Core.Devices
 						}
 						device.StatusChanged -= OnDeviceStatusChanged;
 					}
+					DevicePositionChanged?.Invoke(device, new DevicePositionChangedEventArgs(DevicePosition));
 					DeviceStatusChanged?.Invoke(device, new DeviceStatusChangedEventArgs(DeviceStatus));
 					PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(DeviceStatus)));
 				}

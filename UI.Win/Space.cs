@@ -1,4 +1,5 @@
 ﻿using LaserPathEngraver.Core.Configurations;
+using LaserPathEngraver.Core.Devices;
 using LaserPathEngraver.UI.Win.Visuals;
 using Microsoft.Extensions.Options;
 using System;
@@ -28,6 +29,7 @@ namespace LaserPathEngraver.UI.Win
 		private BurnRectangle _burnBoundsRectangle;
 		private BurnRectangle _burnBitmapRectangle;
 		private BurnArea _burnArea;
+		private BurnTarget _burnTarget;
 
 		private double _scale;
 		private double _offsetX;
@@ -50,7 +52,7 @@ namespace LaserPathEngraver.UI.Win
 
 		#region Initialization
 
-		public Space(IWritableOptions<DeviceConfiguration> deviceConfiguration, IWritableOptions<UserConfiguration> userConfiguration, IWritableOptions<BurnConfiguration> burnConfiguration)
+		public Space(IWritableOptions<DeviceConfiguration> deviceConfiguration, IWritableOptions<UserConfiguration> userConfiguration, IWritableOptions<BurnConfiguration> burnConfiguration, DeviceDispatcherService deviceDispatcher)
 		{
 			_userConfiguration = userConfiguration;
 			_deviceConfiguration = deviceConfiguration;
@@ -110,6 +112,25 @@ namespace LaserPathEngraver.UI.Win
 			_burnArea.FixedPowerThreshold = FixedPowerThreshold;
 			_burnArea.IsPowerVariable = IsPowerVarible;
 			AddVisualToCanvas(_burnArea);
+
+			_burnTarget = new BurnTarget();
+			_burnTarget.Size = new Size(8, 8);
+			_burnTarget.Shape.Opacity = 0;
+			_burnTarget.Shape.Fill = new SolidColorBrush(Color.FromRgb(236, 0, 22));
+			deviceDispatcher.DevicePositionChanged += (Device sender, DevicePositionChangedEventArgs args) =>
+			{
+				if (args.Position != null)
+				{
+					_burnTarget.Position = new Point(args.Position.Value.X, args.Position.Value.Y);
+					_burnTarget.Shape.Opacity = 0.7;
+				}
+				else
+				{
+					_burnTarget.Position = new Point(0, 0);
+					_burnTarget.Shape.Opacity = 0;
+				}
+			};
+			AddVisualToCanvas(_burnTarget);
 		}
 
 		#endregion
@@ -482,6 +503,14 @@ namespace LaserPathEngraver.UI.Win
 			yield return _burnBoundsRectangle;
 			yield return _burnBitmapRectangle;
 			yield return _burnArea;
+			yield return _burnTarget;
+		}
+
+		private IEnumerable<IVisual> GetAutoCenterVisuals()
+		{
+			yield return _burnBoundsRectangle;
+			yield return _burnBitmapRectangle;
+			yield return _burnArea;
 		}
 
 		private void UpdateVisuals(bool updatePositions = true, bool updateBitmap = true)
@@ -497,12 +526,25 @@ namespace LaserPathEngraver.UI.Win
 			if (updatePositions)
 			{
 				var shape = visual.Shape;
-				shape.Width = visual.Size.Width * _scale;
-				shape.Height = visual.Size.Height * _scale;
+				if (visual is BurnTarget)
+				{
+					//BurnTarget has a fixed size
+					shape.Width = visual.Size.Width;
+					shape.Height = visual.Size.Height;
 
-				var position = SpacePositionToScreenPosition(visual.Position);
-				Canvas.SetTop(shape, position.Y);
-				Canvas.SetLeft(shape, position.X);
+					var position = SpacePositionToScreenPosition(visual.Position);
+					Canvas.SetTop(shape, position.Y -(shape.Height / 2));
+					Canvas.SetLeft(shape, position.X - (shape.Width / 2));
+				}
+				else
+				{
+					shape.Width = visual.Size.Width * _scale + shape.StrokeThickness * 2;
+					shape.Height = visual.Size.Height * _scale + shape.StrokeThickness * 2;
+
+					var position = SpacePositionToScreenPosition(visual.Position);
+					Canvas.SetTop(shape, position.Y - shape.StrokeThickness);
+					Canvas.SetLeft(shape, position.X - shape.StrokeThickness);
+				}
 			}
 
 			if (updateBitmap)
@@ -554,7 +596,7 @@ namespace LaserPathEngraver.UI.Win
 				double offsetX = 0;
 				double offsetY = 0;
 
-				var visuals = GetVisuals().ToArray();
+				var visuals = GetAutoCenterVisuals().ToArray();
 				if (visuals.Length > 0)
 				{
 					foreach (var visual in visuals)
