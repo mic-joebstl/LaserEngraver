@@ -197,44 +197,61 @@ namespace LaserEngraver.UI.Win.Visuals
 						var defaultColor = theme is null ? Color.FromArgb(0, 0, 0, 0) : (Color?)null;
 
 						var writeableBitmap = _bitmapImage;
-						if (_requiresPartialRenderUpdate && writeableBitmap is not null)
+						var requiresPartialUpdate = _requiresPartialRenderUpdate && writeableBitmap is not null;
+						var areaWidth = 0;
+						var areaHeight = 0;
+						var areaTargets = default(List<BurnTarget>);
+						var areaOffset = default((int X, int Y));
+
+						if (requiresPartialUpdate)
 						{
-							foreach (var target in _targets.Where(t => !t.IsDrawn))
+							_requiresPartialRenderUpdate = false;
+							BurnTarget? topLeft = null;
+							BurnTarget? bottomRight = null;
+
+							foreach (var target in targets.Where(t => !t.IsDrawn))
 							{
-								var fillValue = target.Intensity;
-								var color = target.IsVisited ?
-									theme.GetBurnVisitedColor(fillValue)
-									: defaultColor ?? theme.GetBurnGradientColor(fillValue);
-								target.IsDrawn = true;
-
-								byte[] colorData =
+								if (topLeft is null || topLeft.X > target.X || topLeft.Y > target.Y)
 								{
-									color.B,
-									color.G,
-									color.R,
-									color.A
-								};
-
-								var rect = new Int32Rect(target.X, target.Y, 1, 1);
-
-								_windowDispatcher.Invoke(() =>
+									topLeft = target;
+								}
+								if (bottomRight is null || bottomRight.X < target.X || bottomRight.Y < target.Y)
 								{
-									writeableBitmap.WritePixels(rect, colorData, 4, 0);
-								});
+									bottomRight = target;
+								}
+							}
+
+							if (topLeft is not null && bottomRight is not null)
+							{
+								areaTargets = targets
+									.Where(t =>
+										t.X >= topLeft.X && t.X <= bottomRight.X &&
+										t.Y >= topLeft.Y && t.Y <= bottomRight.Y)
+									.ToList();
+								areaWidth = bottomRight.X - topLeft.X + 1;
+								areaHeight = bottomRight.Y - topLeft.Y + 1;
+								areaOffset = (topLeft.X, topLeft.Y);
 							}
 						}
 						else
 						{
+							areaTargets = targets;
+							areaWidth = width;
+							areaHeight = height;
+						}
+
+						if (areaWidth > 0 && areaHeight > 0)
+						{
 							var format = System.Drawing.Imaging.PixelFormat.Format32bppArgb;
 							int bitsPerPixel = ((int)format & 0xff00) >> 8;
 							int bytesPerPixel = (bitsPerPixel + 7) / 8;
-							int stride = 4 * ((width * bytesPerPixel + 3) / 4);
-							var imageBuffer = new byte[width * height * bytesPerPixel];
+							int stride = 4 * ((areaWidth * bytesPerPixel + 3) / 4);
+							var imageBuffer = new byte[areaWidth * areaHeight * bytesPerPixel];
 
-							Parallel.For(0, targets.Count, i =>
+							Parallel.For(0, areaTargets.Count, i =>
 							{
-								var target = targets[i];
-								var byteIndex = target.Y * width * bytesPerPixel + target.X * bytesPerPixel;
+								var target = areaTargets[i];
+								var byteIndex = (target.Y - areaOffset.Y) * areaWidth * bytesPerPixel + (target.X - areaOffset.X) * bytesPerPixel;
 								var fillValue = target.Intensity;
 								var color = target.IsVisited ?
 									theme.GetBurnVisitedColor(fillValue)
@@ -248,31 +265,42 @@ namespace LaserEngraver.UI.Win.Visuals
 								target.IsDrawn = true;
 							});
 
-							GCHandle pinnedArray = GCHandle.Alloc(imageBuffer, GCHandleType.Pinned);
-							try
+							if (requiresPartialUpdate)
 							{
-								IntPtr pointer = pinnedArray.AddrOfPinnedObject();
-								var bitmap = new System.Drawing.Bitmap(width, height, stride, format, pointer);
-								var ms = new MemoryStream();
-								bitmap.Save(ms, ImageFormat.Png);
-								ms.Position = 0;
-
-								_windowDispatcher.BeginInvoke(() =>
+								_windowDispatcher.Invoke(() =>
 								{
-									Interlocked.Exchange(ref _imageStream, ms)?.Dispose();
-
-									var tempImage = new BitmapImage();
-									tempImage.BeginInit();
-									tempImage.StreamSource = ms;
-									tempImage.EndInit();
-
-									_bitmapImage = new WriteableBitmap(tempImage);
-									_image.Source = _bitmapImage;
+									var rect = new Int32Rect(0, 0, areaWidth, areaHeight);
+									writeableBitmap.WritePixels(rect, imageBuffer, stride, areaOffset.X, areaOffset.Y);
 								});
 							}
-							finally
+							else
 							{
-								pinnedArray.Free();
+								GCHandle pinnedArray = GCHandle.Alloc(imageBuffer, GCHandleType.Pinned);
+								try
+								{
+									IntPtr pointer = pinnedArray.AddrOfPinnedObject();
+									var bitmap = new System.Drawing.Bitmap(width, height, stride, format, pointer);
+									var ms = new MemoryStream();
+									bitmap.Save(ms, ImageFormat.Png);
+									ms.Position = 0;
+
+									_windowDispatcher.BeginInvoke(() =>
+									{
+										Interlocked.Exchange(ref _imageStream, ms)?.Dispose();
+
+										var tempImage = new BitmapImage();
+										tempImage.BeginInit();
+										tempImage.StreamSource = ms;
+										tempImage.EndInit();
+
+										_bitmapImage = new WriteableBitmap(tempImage);
+										_image.Source = _bitmapImage;
+									});
+								}
+								finally
+								{
+									pinnedArray.Free();
+								}
 							}
 						}
 					}
