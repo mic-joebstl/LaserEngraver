@@ -51,91 +51,95 @@ namespace LaserEngraver.Core.Jobs
 			{
 				var points = relevantPoints
 					.OrderBy(x => x.Y)
-					.ThenBy(x => x.Y % 2 == 0 ? x.X : x.X * -1);
+					.ThenBy(x => x.X);
 
-				int? currentX = null;
-				int? currentY = null;
-				var pointGroup = new List<IEngravePoint>();
 				foreach (var point in points)
 				{
-					if (currentY != point.Y || currentX is null || point.Y % 2 == 0 ? currentX + 1 != point.X : currentX - 1 != point.X)
-					{
-						if (pointGroup.Count > 0)
-						{
-							foreach(var groupPoint in pointGroup.OrderBy(p => p.X))
-							{
-								yield return groupPoint;
-							}
-						}
-						pointGroup.Clear();
-					}
-
-					currentX = point.X;
-					currentY = point.Y;
-
-					pointGroup.Add(point);
-				}
-				if (pointGroup.Count > 0)
-				{
-					foreach (var groupPoint in pointGroup.OrderBy(p => p.X))
-					{
-						yield return groupPoint;
-					}
+					yield return point;
 				}
 			}
 			else
 			{
 				var unhandledPoints = new HashSet<IEngravePoint>(relevantPoints);
 
-				int clusterSize = 1;
-				int clusterSizeSqr = 1;
+				IEngravePoint? GetLeftmostNeighbor(IEngravePoint? context, IEnumerable<IEngravePoint>? points)
 				{
-					int? minX = null;
-					int? minY = null;
-					int? maxX = null;
-					int? maxY = null;
-					foreach (var point in unhandledPoints)
+					if (context is null || points is null)
 					{
-						if (minX is null || minX > point.X)
-							minX = point.X;
-						if (maxX is null || maxX < point.X)
-							maxX = point.X;
-						if (minY is null || minY > point.Y)
-							minY = point.Y;
-						if (maxY is null || maxY < point.Y)
-							maxY = point.Y;
+						return null;
 					}
 
-					int width = minX is not null && maxX is not null ? maxX.Value - minX.Value : 1;
-					int height = minY is not null && maxY is not null ? maxY.Value - minY.Value : 1;
-					int diameter = (int)Math.Sqrt(width * width + height * height);
+					var list = points.OrderBy(p => p.X).ToList();
+					var other = list.Find(p => p.X == context.X - 1);
+					if (other != null)
+					{
+						var io = list.IndexOf(other);
+						for (var i = io - 1; i >= 0; i--)
+						{
+							var current = list[i];
+							if (current.X != other.X - 1)
+							{
+								break;
+							}
+							other = current;
+						}
+						return other;
+					}
 
-					clusterSize = diameter / 20;
-					clusterSize = clusterSize == 0 ? 1 : clusterSize;
-					int log = Math.Clamp((int)Math.Log2(clusterSize), 1, 16) - 1;
-
-					clusterSize = 2 << log;
-					clusterSizeSqr = clusterSize * clusterSize;
+					return null;
 				}
 
 				bool TryGetNextPoint(IEngravePoint? currentPoint, [MaybeNullWhen(false)] out IEngravePoint nextPoint)
 				{
-					nextPoint = unhandledPoints?
-						.Where(other => other != currentPoint)
-						.OrderBy(other =>
-						{
-							var x = other.X - (currentPoint?.X ?? 0);
-							var y = other.Y - (currentPoint?.Y ?? 0);
-							var sqrDistance = x * x + y * y;
-							var trim = sqrDistance % clusterSizeSqr;
-							return sqrDistance - trim;
-						})
-						.ThenBy(other => other.Y)
-						.ThenBy(other => other.X > (currentPoint?.X ?? 0) ? 0 : 1)
-						.ThenBy(other => other.X - (currentPoint?.X ?? 0))
-						.FirstOrDefault();
+					////The following declarative is equal to the following imperative code, but much slower
+					//nextPoint = unhandledPoints?
+					//	.Where(other => other != currentPoint)
+					//	.OrderBy(other =>
+					//	{
+					//		var x = other.X - (currentPoint?.X ?? 0);
+					//		//var xSqr = x * x;
 
-					return nextPoint != null;
+					//		var y = other.Y - (currentPoint?.Y ?? 0);
+					//		//var ySqr = y * y;
+
+					//		var sqrDistance = x * x + y * y;
+					//		return sqrDistance < 2 ? 2 : sqrDistance;
+					//	})
+					//	.ThenBy(other => other.X > currentPoint?.X ? 0 : 1)
+					//	.ThenBy(other => other.Y == currentPoint?.Y ? 0 : other.Y > currentPoint?.Y ? 1 : 2)
+					//	.FirstOrDefault();
+
+					nextPoint = null;
+					var nextPointWeight = long.MaxValue;
+					foreach(var point in unhandledPoints) 
+					{
+						var weightXDistance = point.X > currentPoint?.X ? 0 : 1;
+						var weightYDistance = point.Y == currentPoint?.Y ? 0 : point.Y > currentPoint?.Y ? 1 : 2;
+						long weightDistance = 0;
+						{
+							var x = point.X - (currentPoint?.X ?? 0);
+							var y = point.Y - (currentPoint?.Y ?? 0);
+							var sqrDistance = x * x + y * y;
+							weightDistance =  sqrDistance < 2 ? 2 : sqrDistance;
+						}
+
+						long weight = (weightDistance << 2) + (weightXDistance << 1) + weightYDistance;
+						if (weight < nextPointWeight)
+						{
+							nextPointWeight = weight;
+							nextPoint = point;
+						}
+					}
+
+					if (nextPoint != null)
+					{
+						var p = nextPoint;
+						var sameLinePoints = unhandledPoints?.Where(other => other.Y == p.Y);
+						nextPoint = GetLeftmostNeighbor(p, sameLinePoints) ?? p;
+						return true;
+					}
+
+					return false;
 				}
 
 				while (TryGetNextPoint(_currentPoint, out var nextPoint))
@@ -160,7 +164,7 @@ namespace LaserEngraver.Core.Jobs
 				{
 					if (pointGroup.Count > 0)
 					{
-						yield return pointGroup.ToArray();
+						yield return pointGroup.OrderBy(p => p.X).ToArray();
 					}
 					pointGroup.Clear();
 				}
@@ -173,7 +177,7 @@ namespace LaserEngraver.Core.Jobs
 			}
 			if (pointGroup.Count > 0)
 			{
-				yield return pointGroup.ToArray();
+				yield return pointGroup.OrderBy(p => p.X).ToArray();
 			}
 		}
 
@@ -193,7 +197,6 @@ namespace LaserEngraver.Core.Jobs
 			foreach (var pointGroup in GetPointGroups())
 			{
 				var startingPoint = pointGroup[0];
-
 				var intensityFactor = startingPoint.Intensity / 255d;
 				var powerMilliwatt = (ushort)(_deviceConfiguration.MaximumPowerMilliwatts * intensityFactor);
 
