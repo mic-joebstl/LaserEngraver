@@ -206,18 +206,35 @@ namespace LaserEngraver.UI.Win.Visuals
 						if (requiresPartialUpdate)
 						{
 							_requiresPartialRenderUpdate = false;
-							BurnTarget? topLeft = null;
-							BurnTarget? bottomRight = null;
+							var topLeft = default((int X, int Y)?);
+							var bottomRight = default((int X, int Y)?);
 
 							foreach (var target in targets.Where(t => !t.IsDrawn))
 							{
-								if (topLeft is null || topLeft.X > target.X || topLeft.Y > target.Y)
+								if (topLeft is null)
 								{
-									topLeft = target;
+									topLeft = (target.X, target.Y);
 								}
-								if (bottomRight is null || bottomRight.X < target.X || bottomRight.Y < target.Y)
+								if (topLeft.Value.X > target.X)
 								{
-									bottomRight = target;
+									topLeft = (target.X, topLeft.Value.Y);
+								}
+								if (topLeft.Value.Y > target.Y)
+								{
+									topLeft = (topLeft.Value.X, target.Y);
+								}
+
+								if (bottomRight is null)
+								{
+									bottomRight = (target.X, target.Y);
+								}
+								if (bottomRight.Value.X < target.X)
+								{
+									bottomRight = (target.X, bottomRight.Value.Y);
+								}
+								if (bottomRight.Value.Y < target.Y)
+								{
+									bottomRight = (bottomRight.Value.X, target.Y);
 								}
 							}
 
@@ -225,12 +242,12 @@ namespace LaserEngraver.UI.Win.Visuals
 							{
 								areaTargets = targets
 									.Where(t =>
-										t.X >= topLeft.X && t.X <= bottomRight.X &&
-										t.Y >= topLeft.Y && t.Y <= bottomRight.Y)
+										t.X >= topLeft.Value.X && t.X <= bottomRight.Value.X &&
+										t.Y >= topLeft.Value.Y && t.Y <= bottomRight.Value.Y)
 									.ToList();
-								areaWidth = bottomRight.X - topLeft.X + 1;
-								areaHeight = bottomRight.Y - topLeft.Y + 1;
-								areaOffset = (topLeft.X, topLeft.Y);
+								areaWidth = bottomRight.Value.X - topLeft.Value.X + 1;
+								areaHeight = bottomRight.Value.Y - topLeft.Value.Y + 1;
+								areaOffset = (topLeft.Value.X, topLeft.Value.Y);
 							}
 						}
 						else
