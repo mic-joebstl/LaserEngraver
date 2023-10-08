@@ -100,9 +100,16 @@ namespace LaserEngraver.Core.Devices.Serial
 			{
 				tx.Open();
 
-				await WriteCommand(new SimpleEngraverCommand(EngraverCommandType.HomeCenter), cancellationToken);
-
-				Position = new Point((int)(_configuration.WidthDots / 2), (int)(_configuration.HeightDots / 2));
+				try
+				{
+					await WriteCommand(new SimpleEngraverCommand(EngraverCommandType.HomeCenter), cancellationToken);
+					Position = new Point((int)(_configuration.WidthDots / 2), (int)(_configuration.HeightDots / 2));
+				}
+				catch
+				{
+					Position = null;
+					throw;
+				}
 			}
 		}
 
@@ -120,13 +127,17 @@ namespace LaserEngraver.Core.Devices.Serial
 					if (x != vector.X || y != vector.Y)
 						throw new ArgumentOutOfRangeException(nameof(vector));
 
-					await WriteCommand(new MoveCommand(x, y), cancellationToken);
-
-					Position = new Point
+					var newPosition = new Point
 					{
 						X = position.Value.X + vector.X,
 						Y = position.Value.Y + vector.Y
 					};
+
+					using (cancellationToken.Register(() => Position = newPosition))
+					{
+						await WriteCommand(new MoveCommand(x, y), cancellationToken);
+						Position = newPosition;
+					}
 				}
 			}
 		}
@@ -139,9 +150,11 @@ namespace LaserEngraver.Core.Devices.Serial
 
 				if (Position != null && (Position.Value.X != position.X || Position.Value.Y != position.Y))
 				{
-					await WriteCommand(new MoveCommand((short)(position.X - Position.Value.X), (short)(position.Y - Position.Value.Y)), cancellationToken);
-
-					Position = position;
+					using (cancellationToken.Register(() => Position = position))
+					{
+						await WriteCommand(new MoveCommand((short)(position.X - Position.Value.X), (short)(position.Y - Position.Value.Y)), cancellationToken);
+						Position = position;
+					}
 				}
 			}
 		}
