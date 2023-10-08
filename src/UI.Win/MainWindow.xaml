@@ -90,33 +90,6 @@
 					            Margin="0,7.5,0,7.5">
 						<TextBox Width="70" Height="30" IsEnabled="{Binding IsEditable, Mode=OneWay}">
 							<TextBox.Text>
-								<Binding Path="Space.EngravingDuration"
-								         UpdateSourceTrigger="LostFocus"
-								         StringFormat="N0"
-								         Converter="{StaticResource ByteScaleConverter}">
-									<Binding.ValidationRules>
-										<rules:DoubleValidationRule Minimum="1" Maximum="100" />
-									</Binding.ValidationRules>
-								</Binding>
-							</TextBox.Text>
-						</TextBox>
-						<Label FontSize="16"
-						       Content="{x:Static localization:Texts.EngravingDurationText}"
-						       IsEnabled="{Binding IsEditable, Mode=OneWay}" />
-					</StackPanel>
-
-					<Slider Minimum="0"
-					        Maximum="100"
-					        Width="200"
-					        TickFrequency="1"
-					        Value="{Binding Path=Space.EngravingDuration, Converter={StaticResource ByteScaleConverter}}"
-					        HorizontalAlignment="Left"
-					        IsEnabled="{Binding IsEditable, Mode=OneWay}" />
-
-					<StackPanel Orientation="Horizontal"
-					            Margin="0,7.5,0,7.5">
-						<TextBox Width="70" Height="30" IsEnabled="{Binding IsEditable, Mode=OneWay}">
-							<TextBox.Text>
 								<Binding Path="Space.EngravingPower"
 								         UpdateSourceTrigger="LostFocus"
 								         StringFormat="N0"
@@ -128,18 +101,45 @@
 							</TextBox.Text>
 						</TextBox>
 						<Label FontSize="16"
-						       Content="{x:Static localization:Texts.MaximumEngravingPowerText}"
+						       Content="{x:Static localization:Texts.EngravingPowerText}"
+						       IsEnabled="{Binding IsEditable, Mode=OneWay}" />
+					</StackPanel>
+
+					<Slider Minimum="0"
+					        Maximum="100"
+					        Width="200"
+					        TickFrequency="1"
+					        Value="{Binding Path=Space.EngravingPower, Converter={StaticResource ByteScaleConverter}}"
+					        HorizontalAlignment="Left"
+					        IsEnabled="{Binding IsEditable, Mode=OneWay}" />
+					
+					<StackPanel Orientation="Horizontal"
+					            Margin="0,7.5,0,7.5">
+						<TextBox Width="70" Height="30" IsEnabled="{Binding IsEditable, Mode=OneWay}">
+							<TextBox.Text>
+								<Binding Path="Space.EngravingDuration"
+								         UpdateSourceTrigger="LostFocus"
+								         StringFormat="N0"
+								         Converter="{StaticResource ByteScaleConverter}">
+									<Binding.ValidationRules>
+										<rules:DoubleValidationRule Minimum="1" Maximum="100" />
+									</Binding.ValidationRules>
+								</Binding>
+							</TextBox.Text>
+						</TextBox>
+						<Label FontSize="16"
+						       Content="{x:Static localization:Texts.MaximumEngravingDurationText}"
 						       IsEnabled="{Binding IsEditable, Mode=OneWay}">
 							<Label.Style>
 								<Style TargetType="{x:Type Label}">
 									<Setter Property="Foreground" Value="{Binding RelativeSource={RelativeSource AncestorType={x:Type Window}}, Path=Foreground}" />
 									<Style.Triggers>
-										<DataTrigger Binding="{Binding Space.IsPowerVarible}" Value="True">
+										<DataTrigger Binding="{Binding Space.IsDurationVariable}" Value="True">
 											<DataTrigger.Setters>
 												<Setter Property="Visibility" Value="Visible" />
 											</DataTrigger.Setters>
 										</DataTrigger>
-										<DataTrigger Binding="{Binding Space.IsPowerVarible}" Value="False">
+										<DataTrigger Binding="{Binding Space.IsDurationVariable}" Value="False">
 											<DataTrigger.Setters>
 												<Setter Property="Visibility" Value="Collapsed" />
 											</DataTrigger.Setters>
@@ -203,18 +203,18 @@
 							</Label.Style>
 						</Label>
 						<Label FontSize="16"
-						       Content="{x:Static localization:Texts.EngravingPowerText}"
+						       Content="{x:Static localization:Texts.EngravingDurationText}"
 						       IsEnabled="{Binding IsEditable, Mode=OneWay}">
 							<Label.Style>
 								<Style TargetType="{x:Type Label}">
 									<Setter Property="Foreground" Value="{Binding RelativeSource={RelativeSource AncestorType={x:Type Window}}, Path=Foreground}" />
 									<Style.Triggers>
-										<DataTrigger Binding="{Binding Space.IsPowerVarible}" Value="True">
+										<DataTrigger Binding="{Binding Space.IsDurationVariable}" Value="True">
 											<DataTrigger.Setters>
 												<Setter Property="Visibility" Value="Collapsed" />
 											</DataTrigger.Setters>
 										</DataTrigger>
-										<DataTrigger Binding="{Binding Space.IsPowerVarible}" Value="False">
+										<DataTrigger Binding="{Binding Space.IsDurationVariable}" Value="False">
 											<DataTrigger.Setters>
 												<Setter Property="Visibility" Value="Visible" />
 											</DataTrigger.Setters>
@@ -283,7 +283,7 @@
 					        Maximum="100"
 					        Width="200"
 					        TickFrequency="1"
-					        Value="{Binding Path=Space.EngravingPower, Converter={StaticResource ByteScaleConverter}}"
+					        Value="{Binding Path=Space.EngravingDuration, Converter={StaticResource ByteScaleConverter}}"
 					        HorizontalAlignment="Left"
 					        IsEnabled="{Binding IsEditable, Mode=OneWay}" />
 
@@ -291,7 +291,7 @@
 						<StackPanel.Style>
 							<Style TargetType="{x:Type StackPanel}">
 								<Style.Triggers>
-									<DataTrigger Binding="{Binding Space.IsPowerVarible}" Value="False">
+									<DataTrigger Binding="{Binding Space.IsDurationVariable}" Value="False">
 										<DataTrigger.EnterActions>
 											<BeginStoryboard>
 												<Storyboard>
@@ -335,11 +335,11 @@
 											</BeginStoryboard>
 										</DataTrigger.ExitActions>
 									</DataTrigger>
-									<DataTrigger Binding="{Binding Space.IsPowerVarible, Mode=OneTime}" Value="False">
+									<DataTrigger Binding="{Binding Space.IsDurationVariable, Mode=OneTime}" Value="False">
 										<Setter Property="Height" Value="60" />
 										<Setter Property="Opacity" Value="1" />
 									</DataTrigger>
-									<DataTrigger Binding="{Binding Space.IsPowerVarible, Mode=OneTime}" Value="True">
+									<DataTrigger Binding="{Binding Space.IsDurationVariable, Mode=OneTime}" Value="True">
 										<Setter Property="Height" Value="0" />
 										<Setter Property="Opacity" Value="0" />
 									</DataTrigger>
@@ -350,7 +350,7 @@
 						            Margin="0,7.5,0,7.5">
 							<TextBox Width="70" Height="30" IsEnabled="{Binding IsEditable, Mode=OneWay}">
 								<TextBox.Text>
-									<Binding Path="Space.FixedPowerThreshold"
+									<Binding Path="Space.FixedDurationThreshold"
 									         UpdateSourceTrigger="LostFocus"
 									         StringFormat="N0"
 									         Converter="{StaticResource ByteScaleConverter}">
@@ -361,7 +361,7 @@
 								</TextBox.Text>
 							</TextBox>
 							<Label FontSize="16"
-							       Content="{x:Static localization:Texts.FixedEngravingPowerThresholdText}"
+							       Content="{x:Static localization:Texts.FixedEngravingDurationThresholdText}"
 							       IsEnabled="{Binding IsEditable, Mode=OneWay}" />
 						</StackPanel>
 
@@ -369,14 +369,14 @@
 						        Maximum="100"
 						        Width="200"
 						        TickFrequency="1"
-						        Value="{Binding Path=Space.FixedPowerThreshold, Converter={StaticResource ByteScaleConverter}}"
+						        Value="{Binding Path=Space.FixedDurationThreshold, Converter={StaticResource ByteScaleConverter}}"
 						        HorizontalAlignment="Left"
 						        IsEnabled="{Binding IsEditable, Mode=OneWay}" />
 					</StackPanel>
 
 					<CheckBox Margin="0,12.5,0,0"
-					          IsChecked="{Binding Space.IsPowerVarible}"
-					          Content="{x:Static localization:Texts.IsPowerVariableText}"
+					          IsChecked="{Binding Space.IsDurationVariable}"
+					          Content="{x:Static localization:Texts.IsDurationVariableText}"
 					          IsEnabled="{Binding IsEditable, Mode=OneWay}" />
 
 					<Label FontSize="16"

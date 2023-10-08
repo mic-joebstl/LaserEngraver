@@ -225,9 +225,9 @@ namespace LaserEngraver.UI.Win.Resources.Localization {
         /// <summary>
         ///   Looks up a localized string similar to Threshold [%].
         /// </summary>
-        public static string FixedEngravingPowerThresholdText {
+        public static string FixedEngravingDurationThresholdText {
             get {
-                return ResourceManager.GetString("FixedEngravingPowerThresholdText", resourceCulture);
+                return ResourceManager.GetString("FixedEngravingDurationThresholdText", resourceCulture);
             }
         }
         
@@ -296,11 +296,11 @@ namespace LaserEngraver.UI.Win.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Variable burn intensity.
+        ///   Looks up a localized string similar to Variable depth.
         /// </summary>
-        public static string IsPowerVariableText {
+        public static string IsDurationVariableText {
             get {
-                return ResourceManager.GetString("IsPowerVariableText", resourceCulture);
+                return ResourceManager.GetString("IsDurationVariableText", resourceCulture);
             }
         }
         
@@ -386,11 +386,11 @@ namespace LaserEngraver.UI.Win.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Max. Power [%].
+        ///   Looks up a localized string similar to Max. Depth [%].
         /// </summary>
-        public static string MaximumEngravingPowerText {
+        public static string MaximumEngravingDurationText {
             get {
-                return ResourceManager.GetString("MaximumEngravingPowerText", resourceCulture);
+                return ResourceManager.GetString("MaximumEngravingDurationText", resourceCulture);
             }
         }
         

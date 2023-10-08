@@ -197,6 +197,11 @@ namespace LaserEngraver.Core.Devices.Serial
 			}
 		}
 
+		public void SignalEngravingCompleted()
+		{
+			WriteCommand(new SimpleEngraverCommand(EngraverCommandType.Reset));
+		}
+
 		private async Task OnEngraveCancelled(CancellationToken cancellationToken)
 		{
 			WriteCommand(new SimpleEngraverCommand(EngraverCommandType.Stop));

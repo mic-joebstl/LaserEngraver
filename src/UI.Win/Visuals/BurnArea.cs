@@ -42,9 +42,9 @@ namespace LaserEngraver.UI.Win.Visuals
 		private DateTime _targetUpdateRequestUtcDate = DateTime.MinValue;
 		private TimeSpan _targetUpdateDebounceTime = TimeSpan.FromMilliseconds(320);
 		private bool _resizing = false;
-		private byte _engraverPower = 0xff;
-		private byte _fixedPowerThreshold = 0xff;
-		private bool _isPowerVariable = false;
+		private byte _engravingDuration = 0xff;
+		private byte _fixedDurationThreshold = 0xff;
+		private bool _isDurationVariable = false;
 		private Dispatcher _windowDispatcher;
 
 		public BurnArea()
@@ -92,44 +92,44 @@ namespace LaserEngraver.UI.Win.Visuals
 			}
 		}
 
-		public bool IsPowerVariable
+		public bool IsDurationVariable
 		{
-			get => _isPowerVariable;
+			get => _isDurationVariable;
 			set
 			{
-				if (_isPowerVariable != value)
+				if (_isDurationVariable != value)
 				{
-					_isPowerVariable = value;
+					_isDurationVariable = value;
 					RequestTargetUpdate();
-					RaisePropertyChanged(nameof(IsPowerVariable));
+					RaisePropertyChanged(nameof(IsDurationVariable));
 				}
 			}
 		}
 
-		public byte EngravingPower
+		public byte EngravingDuration
 		{
-			get => _engraverPower;
+			get => _engravingDuration;
 			set
 			{
-				if (_engraverPower != value)
+				if (_engravingDuration != value)
 				{
-					_engraverPower = value;
+					_engravingDuration = value;
 					RequestTargetUpdate();
-					RaisePropertyChanged(nameof(EngravingPower));
+					RaisePropertyChanged(nameof(EngravingDuration));
 				}
 			}
 		}
 
-		public byte FixedPowerThreshold
+		public byte FixedDurationThreshold
 		{
-			get => _fixedPowerThreshold;
+			get => _fixedDurationThreshold;
 			set
 			{
-				if (_fixedPowerThreshold != value)
+				if (_fixedDurationThreshold != value)
 				{
-					_fixedPowerThreshold = value;
+					_fixedDurationThreshold = value;
 					RequestTargetUpdate();
-					RaisePropertyChanged(nameof(FixedPowerThreshold));
+					RaisePropertyChanged(nameof(FixedDurationThreshold));
 				}
 			}
 		}
@@ -379,10 +379,10 @@ namespace LaserEngraver.UI.Win.Visuals
 			Interlocked.Exchange(ref _targets, new List<BurnTarget>(0));
 			var targets = new List<BurnTarget>(scaledBitmap.Width * scaledBitmap.Height);
 
-			var isPowerVariable = IsPowerVariable;
-			var maxPower = EngravingPower;
-			var minPower = isPowerVariable ? 0 : FixedPowerThreshold;
-			var intensityFactor = (double)maxPower / 0xff;
+			var isDurationVariable = IsDurationVariable;
+			var maxDuration = EngravingDuration;
+			var minDuration = isDurationVariable ? 0 : FixedDurationThreshold;
+			var intensityFactor = (double)maxDuration / 0xff;
 
 			for (int x = 0; x < scaledBitmap.Width; x++)
 			{
@@ -391,17 +391,17 @@ namespace LaserEngraver.UI.Win.Visuals
 					var pixel = scaledBitmap.GetPixel(x, y);
 					var value = (0xff - pixel.R + 0xff - pixel.G + 0xff - pixel.B) / 3d;
 					value *= pixel.A / 0xff;
-					if (value < minPower)
+					if (value < minDuration)
 					{
 						value = 0;
 					}
-					else if (isPowerVariable)
+					else if (isDurationVariable)
 					{
 						value *= intensityFactor;
 					}
 					else
 					{
-						value = maxPower;
+						value = maxDuration;
 					}
 
 					var target = new BurnTarget(this)

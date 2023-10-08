@@ -244,9 +244,6 @@ namespace LaserEngraver.Core.Jobs
 
 		protected override async Task ExecuteCoreAsync(Device device, CancellationToken cancellationToken)
 		{
-			_signalPause = false;
-			var duration = _burnConfiguration.Duration;
-
 #if DEBUG
 			var delayMilliseconds = 5d;
 			var sw = new Stopwatch();
@@ -254,42 +251,55 @@ namespace LaserEngraver.Core.Jobs
 			long i = 0;
 			var mockDevice = device as MockDevice;
 #endif
-
-			foreach (var pointGroup in GetPointGroups(cancellationToken))
+			try
 			{
-				var startingPoint = pointGroup[0];
-				var intensityFactor = startingPoint.Intensity / 255d;
-				var powerMilliwatt = (ushort)(_deviceConfiguration.MaximumPowerMilliwatts * intensityFactor);
+				_signalPause = false;
+				var powerFactor = _burnConfiguration.Power / 255d;
+				var power = (ushort)(_deviceConfiguration.MaximumPowerMilliwatts * powerFactor);
 
-				var imageStartingPoint = new Point { X = startingPoint.X, Y = startingPoint.Y };
-				imageStartingPoint.Offset(_pointTranslation);
-
-				await device.MoveAbsoluteAsync(imageStartingPoint, cancellationToken);
-				await device.Engrave(powerMilliwatt, duration, pointGroup.Length, cancellationToken);
-
-				foreach (var point in pointGroup)
+				foreach (var pointGroup in GetPointGroups(cancellationToken))
 				{
-					point.IsVisited = true;
-				}
+					var startingPoint = pointGroup[0];
+					var intensityFactor = startingPoint.Intensity / 255d;
+					var duration = (byte)(_burnConfiguration.Duration * intensityFactor);
 
-				if (_signalPause)
-				{
-					Status = JobStatus.Paused;
-					return;
-				}
+					var imageStartingPoint = new Point { X = startingPoint.X, Y = startingPoint.Y };
+					imageStartingPoint.Offset(_pointTranslation);
+
+					await device.MoveAbsoluteAsync(imageStartingPoint, cancellationToken);
+					await device.Engrave(power, duration, pointGroup.Length, cancellationToken);
+
+					foreach (var point in pointGroup)
+					{
+						point.IsVisited = true;
+					}
+
+					if (_signalPause)
+					{
+						Status = JobStatus.Paused;
+						return;
+					}
 
 #if DEBUG
-				if (mockDevice is not null)
-				{
-					var targetTime = i++ * delayMilliseconds;
-					var elapsedTime = sw.ElapsedMilliseconds;
-					var currentDelay = targetTime - elapsedTime;
-					if (currentDelay > 0)
+					if (mockDevice is not null)
 					{
-						await Task.Delay(TimeSpan.FromMilliseconds(currentDelay), cancellationToken);
+						var targetTime = i++ * delayMilliseconds;
+						var elapsedTime = sw.ElapsedMilliseconds;
+						var currentDelay = targetTime - elapsedTime;
+						if (currentDelay > 0)
+						{
+							await Task.Delay(TimeSpan.FromMilliseconds(currentDelay), cancellationToken);
+						}
 					}
-				}
 #endif
+				}
+			}
+			finally
+			{
+				if (device is Devices.Serial.SerialDevice serialDevice)
+				{
+					serialDevice.SignalEngravingCompleted();
+				}
 			}
 
 #if DEBUG

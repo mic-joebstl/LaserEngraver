@@ -125,9 +125,9 @@ namespace LaserEngraver.UI.Win
 			_burnArea.Size = new Size(0, 0);
 			_burnArea.Position = new Point((double)_canvasWidthDot / 2, (double)_canvasHeightDot / 2);
 			_burnArea.BoundingRect = CanvasBoundingRect;
-			_burnArea.EngravingPower = EngravingPower;
-			_burnArea.FixedPowerThreshold = FixedPowerThreshold;
-			_burnArea.IsPowerVariable = IsPowerVarible;
+			_burnArea.EngravingDuration = EngravingDuration;
+			_burnArea.FixedDurationThreshold = FixedDurationThreshold;
+			_burnArea.IsDurationVariable = IsDurationVariable;
 			AddVisualToCanvas(_burnArea);
 
 			_burnTarget = new BurnTarget();
@@ -470,7 +470,7 @@ namespace LaserEngraver.UI.Win
 			}
 		}
 
-		public bool IsPowerVarible
+		public bool IsDurationVariable
 		{
 			get
 			{
@@ -479,8 +479,8 @@ namespace LaserEngraver.UI.Win
 			set
 			{
 				_burnConfiguration.Update(config => config.IntensityMode = value ? BurnIntensityMode.Variable : BurnIntensityMode.Fixed);
-				_burnArea.IsPowerVariable = IsPowerVarible;
-				RaisePropertyChanged(nameof(IsPowerVarible));
+				_burnArea.IsDurationVariable = IsDurationVariable;
+				RaisePropertyChanged(nameof(IsDurationVariable));
 			}
 		}
 
@@ -493,7 +493,6 @@ namespace LaserEngraver.UI.Win
 			set
 			{
 				_burnConfiguration.Update(config => config.Power = value);
-				_burnArea.EngravingPower = EngravingPower;
 				RaisePropertyChanged(nameof(EngravingPower));
 			}
 		}
@@ -507,11 +506,12 @@ namespace LaserEngraver.UI.Win
 			set
 			{
 				_burnConfiguration.Update(config => config.Duration = value);
+				_burnArea.EngravingDuration = EngravingDuration;
 				RaisePropertyChanged(nameof(EngravingDuration));
 			}
 		}
 
-		public byte FixedPowerThreshold
+		public byte FixedDurationThreshold
 		{
 			get
 			{
@@ -520,8 +520,8 @@ namespace LaserEngraver.UI.Win
 			set
 			{
 				_burnConfiguration.Update(config => config.FixedIntensityThreshold = value);
-				_burnArea.FixedPowerThreshold = FixedPowerThreshold;
-				RaisePropertyChanged(nameof(FixedPowerThreshold));
+				_burnArea.FixedDurationThreshold = FixedDurationThreshold;
+				RaisePropertyChanged(nameof(FixedDurationThreshold));
 			}
 		}
 

@@ -171,7 +171,7 @@
   <data name="EngravingTitle" xml:space="preserve">
     <value>Gravur</value>
   </data>
-  <data name="FixedEngravingPowerThresholdText" xml:space="preserve">
+  <data name="FixedEngravingDurationThresholdText" xml:space="preserve">
     <value>Schwellwert [%]</value>
   </data>
   <data name="FramingCommandText" xml:space="preserve">
@@ -221,8 +221,8 @@ Genaue Dauer ist vom Gerät abhängig, daher hier in Prozent anzugeben.
   <data name="ImageTitle" xml:space="preserve">
     <value>Bild</value>
   </data>
-  <data name="IsPowerVariableText" xml:space="preserve">
-    <value>Variable Brennstärke</value>
+  <data name="IsDurationVariableText" xml:space="preserve">
+    <value>Variable Brenndauer</value>
   </data>
   <data name="JobElapsedDurationFormatText" xml:space="preserve">
     <value>{0:%h}h {0:%m}m {0:%s}s</value>
@@ -251,8 +251,8 @@ Genaue Dauer ist vom Gerät abhängig, daher hier in Prozent anzugeben.
   <data name="LightThemeText" xml:space="preserve">
     <value>Light</value>
   </data>
-  <data name="MaximumEngravingPowerText" xml:space="preserve">
-    <value>Max. Brennstärke [%]</value>
+  <data name="MaximumEngravingDurationText" xml:space="preserve">
+    <value>Max. Brenndauer [%]</value>
   </data>
   <data name="PauseButtonText" xml:space="preserve">
     <value>Pause</value>
