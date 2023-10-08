@@ -79,7 +79,6 @@ namespace LaserEngraver.Core.Devices
 		public abstract Task HomingAsync(CancellationToken cancellationToken);
 		public abstract Task MoveRelativeAsync(Point vector, CancellationToken cancellationToken);
 		public abstract Task MoveAbsoluteAsync(Point position, CancellationToken cancellationToken);
-		public abstract Task Engrave(ushort powerMilliwatt, byte duration, CancellationToken cancellationToken);
 		public abstract Task Engrave(ushort powerMilliwatt, byte duration, int length, CancellationToken cancellationToken);
 
 		protected IDeviceStatusIntermediateTransition StatusIntermediateTransition(DeviceStatus sourceStatus, DeviceStatus intermediateStatus)
@@ -109,6 +108,7 @@ namespace LaserEngraver.Core.Devices
 			private DeviceStatus _openStatus;
 			private DeviceStatus _targetStatus;
 			private bool _commited;
+			private bool _disposed;
 
 			public DeviceStatusTransition(Device owner, DeviceStatus sourceStatus, DeviceStatus openStatus, DeviceStatus targetStatus)
 			{
@@ -120,14 +120,19 @@ namespace LaserEngraver.Core.Devices
 
 			public void Dispose()
 			{
-				if (!_commited)
+				if (!_commited && !_disposed)
 				{
 					_owner.Status = _sourceStatus;
+					_disposed = true;
 				}
 			}
 
 			public void Open()
 			{
+				if (_disposed)
+				{
+					throw new ObjectDisposedException(nameof(DeviceStatusTransition));
+				}
 				lock (_owner.SyncRoot)
 				{
 					_owner.DemandState(_sourceStatus);
@@ -137,6 +142,10 @@ namespace LaserEngraver.Core.Devices
 
 			public void Commit()
 			{
+				if (_disposed)
+				{
+					throw new ObjectDisposedException(nameof(DeviceStatusTransition));
+				}
 				_owner.Status = _targetStatus;
 				_commited = true;
 			}

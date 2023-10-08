@@ -27,7 +27,6 @@ namespace LaserEngraver.Core.Devices.Serial
 
 	public enum EngraveDirection : byte
 	{
-		Default = RightToLeft,
 		RightToLeft = 0,
 		LeftToRight = 1,
 	}
@@ -122,6 +121,7 @@ namespace LaserEngraver.Core.Devices.Serial
 		public ushort PowerMilliwatt { get; set; }
 		public byte Duration { get; set; }
 		public byte[]? Data { get; set; }
+		public EngraveDirection Direction { get; set; }
 
 		protected override byte[] BuildArguments()
 		{
@@ -135,7 +135,7 @@ namespace LaserEngraver.Core.Devices.Serial
 				ms.WriteByte((byte)PowerMilliwatt);
 
 				ms.WriteByte(0);
-				ms.WriteByte((byte)EngraveDirection.Default);
+				ms.WriteByte((byte)Direction);
 				ms.Write(data, 0, data.Length);
 
 				return ms.ToArray();

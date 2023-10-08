@@ -1,14 +1,6 @@
 ﻿using LaserEngraver.Core.Configurations;
-using Microsoft.Extensions.Configuration;
-using System;
-using System.Collections.Generic;
 using System.Data;
-using System.Diagnostics;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using System.IO.Ports;
 
 namespace LaserEngraver.Core.Devices.Serial
@@ -17,8 +9,8 @@ namespace LaserEngraver.Core.Devices.Serial
 	{
 		private SerialPort? _serialPort;
 		private DeviceConfiguration _configuration;
-		private bool _requiresReset;
 		private SemaphoreSlim? _commandSync;
+		private EngraverCommand? _previousCommand;
 
 		public SerialDevice(DeviceConfiguration configuration)
 		{
@@ -27,20 +19,25 @@ namespace LaserEngraver.Core.Devices.Serial
 
 		private void OnDataReceived(object sender, SerialDataReceivedEventArgs e)
 		{
-			if (_commandSync.CurrentCount == 0)
+			try
 			{
-				_commandSync.Release();
-			}
-
-			var com = _serialPort;
-			if (com != null && com.IsOpen)
-			{
-				var response = new byte[1];
-				com.Read(response, 0, 1);
-
-				if (response[0] != (byte)EngraverResponse.Completed)
+				var com = _serialPort;
+				if (com != null && com.IsOpen)
 				{
-					throw new UnexpectedResponseException(response);
+					var response = new byte[1];
+					com.Read(response, 0, 1);
+
+					if (response[0] != (byte)EngraverResponse.Completed)
+					{
+						throw new UnexpectedResponseException(response);
+					}
+				}
+			}
+			finally
+			{
+				if (_commandSync?.CurrentCount == 0)
+				{
+					_commandSync.Release();
 				}
 			}
 		}
@@ -67,7 +64,7 @@ namespace LaserEngraver.Core.Devices.Serial
 				com.Open();
 
 				await WriteCommand(new SimpleEngraverCommand(EngraverCommandType.Connect), cancellationToken);
-				await WriteCommand(new SimpleEngraverCommand(EngraverCommandType.Discrete), cancellationToken);
+				await WriteCommand(new SimpleEngraverCommand(EngraverCommandType.NonDiscrete), cancellationToken);
 
 				tx.Commit();
 			}
@@ -82,7 +79,6 @@ namespace LaserEngraver.Core.Devices.Serial
 				try
 				{
 					await WriteCommand(new SimpleEngraverCommand(EngraverCommandType.Stop), cancellationToken);
-					await WriteCommand(new SimpleEngraverCommand(EngraverCommandType.Reset), cancellationToken);
 
 					_serialPort?.Close();
 					_serialPort?.Dispose();
@@ -104,7 +100,6 @@ namespace LaserEngraver.Core.Devices.Serial
 			{
 				tx.Open();
 
-				await WriteCommand(new SimpleEngraverCommand(EngraverCommandType.Reset), cancellationToken);
 				await WriteCommand(new SimpleEngraverCommand(EngraverCommandType.HomeCenter), cancellationToken);
 
 				Position = new Point((int)(_configuration.WidthDots / 2), (int)(_configuration.HeightDots / 2));
@@ -125,11 +120,6 @@ namespace LaserEngraver.Core.Devices.Serial
 					if (x != vector.X || y != vector.Y)
 						throw new ArgumentOutOfRangeException(nameof(vector));
 
-					if (_requiresReset)
-					{
-						await WriteCommand(new SimpleEngraverCommand(EngraverCommandType.Reset), cancellationToken);
-						_requiresReset = false;
-					}
 					await WriteCommand(new MoveCommand(x, y), cancellationToken);
 
 					Position = new Point
@@ -149,33 +139,13 @@ namespace LaserEngraver.Core.Devices.Serial
 
 				if (Position != null && (Position.Value.X != position.X || Position.Value.Y != position.Y))
 				{
-					if (_requiresReset)
-					{
-						await WriteCommand(new SimpleEngraverCommand(EngraverCommandType.Reset), cancellationToken);
-						_requiresReset = false;
-					}
-
 					await WriteCommand(new MoveCommand((short)(position.X - Position.Value.X), (short)(position.Y - Position.Value.Y)), cancellationToken);
 
 					Position = position;
 				}
 			}
 		}
-		public override async Task Engrave(ushort powerMilliwatt, byte duration, CancellationToken cancellationToken)
-		{
-			using (var tx = StatusIntermediateTransition(DeviceStatus.Ready, DeviceStatus.Executing))
-			{
-				tx.Open();
 
-				var command = new EngraveCommand(powerMilliwatt, duration)
-				{
-					Data = new byte[] { 128 }
-				};
-				await WriteCommand(new SimpleEngraverCommand(EngraverCommandType.Reset), cancellationToken);
-				await WriteCommand(command, cancellationToken);
-				_requiresReset = true;
-			}
-		}
 		public override async Task Engrave(ushort powerMilliwatt, byte duration, int length, CancellationToken cancellationToken)
 		{
 			if (length < 1)
@@ -184,6 +154,7 @@ namespace LaserEngraver.Core.Devices.Serial
 			}
 
 			using (var tx = StatusIntermediateTransition(DeviceStatus.Ready, DeviceStatus.Executing))
+			using (var cancellationAction = cancellationToken.Register(async () => { tx.Dispose(); await OnEngraveCancelled(CancellationToken.None); }))
 			{
 				tx.Open();
 
@@ -199,33 +170,47 @@ namespace LaserEngraver.Core.Devices.Serial
 					buffer[ib] = b;
 				}
 
-				await WriteCommand(new SimpleEngraverCommand(EngraverCommandType.Reset), cancellationToken);
 				await WriteCommand(new EngraveCommand(powerMilliwatt, duration)
 				{
-					Data = buffer
+					Data = buffer,
+					Direction = EngraveDirection.LeftToRight
 				}, cancellationToken);
-				_requiresReset = true;
+
+				var position = Position;
+				if (position != null)
+				{
+					Position = new Point(position.Value.X + length - 1, position.Value.Y + 1);
+				}
 			}
+		}
+
+		private async Task OnEngraveCancelled(CancellationToken cancellationToken)
+		{
+			WriteCommand(new SimpleEngraverCommand(EngraverCommandType.Stop));
+			//requires homing, because an interrupted engrave command leaves the position unknown
+			Position = null;
+			await HomingAsync(cancellationToken);
 		}
 
 		private async Task WriteCommand(EngraverCommand command, CancellationToken cancellationToken)
 		{
-			var com = _serialPort ?? throw new InvalidOperationException("Device not connected");
+			if (command.Type != EngraverCommandType.Reset && _previousCommand is EngraveCommand != command is EngraveCommand)
+			{
+				await WriteCommand(new SimpleEngraverCommand(EngraverCommandType.Reset), cancellationToken);
+			}
 
 			try
 			{
-				await _commandSync?.WaitAsync(cancellationToken);
-
-				var request = command.Build();
-				com.Write(request, 0, request.Length);
+				await _commandSync.WaitAsync(cancellationToken);
+				WriteCommand(command);
 
 				try
 				{
-					await _commandSync?.WaitAsync(cancellationToken);
+					await _commandSync.WaitAsync(cancellationToken);
 				}
 				finally
 				{
-					if (_commandSync?.CurrentCount == 0)
+					if (_commandSync.CurrentCount == 0)
 					{
 						_commandSync.Release();
 					}
@@ -233,12 +218,23 @@ namespace LaserEngraver.Core.Devices.Serial
 			}
 			catch (Exception)
 			{
-				if (_commandSync?.CurrentCount == 0)
+				if (_commandSync.CurrentCount == 0)
 				{
 					_commandSync.Release();
 				}
 				throw;
 			}
+			finally
+			{
+				_previousCommand = command;
+			}
+		}
+
+		private void WriteCommand(EngraverCommand command)
+		{
+			var com = _serialPort ?? throw new InvalidOperationException("Device not connected");
+			var request = command.Build();
+			com.Write(request, 0, request.Length);
 		}
 
 		private string GetPortName()
@@ -258,7 +254,7 @@ namespace LaserEngraver.Core.Devices.Serial
 
 	public enum EngraverResponse : byte
 	{
-		EngravingActive = 0x8,
+		Failed = 0x8,
 		Completed = 0x9
 	}
 
