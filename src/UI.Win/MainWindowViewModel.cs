@@ -539,7 +539,12 @@ namespace LaserEngraver.UI.Win
 										X = (int)burnArea.Position.X,
 										Y = (int)burnArea.Position.Y
 									};
-									var job = new EngraveJob(_deviceConfiguration.Value, _burnConfiguration.Value, burnAreaPosition, points);
+									var burnAreaSize = new System.Drawing.Size
+									{
+										Width = (int)burnArea.Size.Width,
+										Height = (int)burnArea.Size.Height
+									};
+									var job = new EngraveJob(_deviceConfiguration.Value, _burnConfiguration.Value, burnAreaSize, burnAreaPosition, points);
 									await _deviceDispatcher.ExecuteJob(job, CancellationToken.None);
 								}
 								catch (Exception ex)

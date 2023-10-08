@@ -11,7 +11,8 @@ namespace LaserEngraver.Core.Configurations
 		public DeviceType Type { get; set; }
 #if DEBUG
 		= DeviceType.Mock;
-		//= DeviceType.Serial;
+#else
+		= DeviceType.Serial;
 #endif
 		public short MaximumPowerMilliwatts { get; set; } = 1000;
 		public TimeSpan ConnectionTimeout { get; set; } = TimeSpan.FromSeconds(15);
