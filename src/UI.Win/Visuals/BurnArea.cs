@@ -5,6 +5,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
@@ -16,16 +17,18 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Media.Media3D;
-using System.Windows.Media.Media3D.Converters;
-using System.Windows.Shapes;
 using System.Windows.Threading;
 
 namespace LaserEngraver.UI.Win.Visuals
 {
 	public class BurnArea : IVisual, INotifyPropertyChanged
 	{
+		/// <summary>
+		/// Shortterm render parameter r/w locks via <c>Monitor.Enter</c> i.e. <c>lock(_renderSync)</c><br />
+		/// and longterm locking (synchronization of rendering itself) via <c>_renderSync.Wait()</c>
+		/// </summary>
 		private SemaphoreSlim _renderSync;
+
 		private Theme? _theme;
 		private Image _image;
 		private System.Drawing.Bitmap? _originalBitmap;
@@ -68,10 +71,13 @@ namespace LaserEngraver.UI.Win.Visuals
 
 				lock (_renderSync)
 				{
-					if (_resizing || _position == value)
+					if (_position == value)
 						return;
 
 					_position = value;
+
+					if (_resizing)
+						return;
 
 					ResizeToBoundingRect();
 					RaisePropertyChanged(nameof(Position));
@@ -89,12 +95,16 @@ namespace LaserEngraver.UI.Win.Visuals
 
 				lock (_renderSync)
 				{
-					if (_resizing || _size == value)
+					if (_size == value)
 						return;
 
 					_size = value;
+
 					_requiresRenderUpdate = true;
 					_requiresPartialRenderUpdate = false;
+
+					if (_resizing)
+						return;
 
 					ResizeToBoundingRect();
 					RaisePropertyChanged(nameof(Size));
@@ -175,7 +185,7 @@ namespace LaserEngraver.UI.Win.Visuals
 		private bool RequiresTargetUpdate
 		{
 			get => _requiresTargetUpdate && DateTime.UtcNow - _targetUpdateRequestUtcDate > _targetUpdateDebounceTime;
-			set 
+			set
 			{
 				lock (_renderSync)
 				{
@@ -187,13 +197,14 @@ namespace LaserEngraver.UI.Win.Visuals
 				}
 			}
 		}
-		
+
 		public void RenderImage()
 		{
 			var requiresRenderUpdate = false;
 			var requiresPartialRenderUpdate = false;
 			var requiresTargetUpdate = false;
 			var theme = default(Theme);
+			var targetUpdateRequestUtcDate = default(DateTime);
 
 			lock (_renderSync)
 			{
@@ -204,15 +215,17 @@ namespace LaserEngraver.UI.Win.Visuals
 				_requiresPartialRenderUpdate = false;
 
 				requiresTargetUpdate = RequiresTargetUpdate;
-				RequiresTargetUpdate = false;
+				targetUpdateRequestUtcDate = _targetUpdateRequestUtcDate;
+
 				theme = _theme;
 			}
 
 			if (!requiresRenderUpdate && !requiresPartialRenderUpdate && !requiresTargetUpdate)
 				return;
 
-			_renderSync.Wait();
+			var updatedTargets = false;
 
+			_renderSync.Wait();
 			try
 			{
 				var targets = _targets;
@@ -226,6 +239,7 @@ namespace LaserEngraver.UI.Win.Visuals
 					if (originalBitmap != null && requiresTargetUpdate || scaledBitmap == null || (width != scaledBitmap.Width || height != scaledBitmap.Height))
 					{
 						scaledBitmap = ScaleBitmap();
+						updatedTargets = true;
 						targets = _targets;
 					}
 					if (scaledBitmap != null)
@@ -366,6 +380,17 @@ namespace LaserEngraver.UI.Win.Visuals
 			{
 				_renderSync.Release();
 			}
+
+			if (updatedTargets)
+			{
+				lock (_renderSync)
+				{
+					if (_targetUpdateRequestUtcDate == targetUpdateRequestUtcDate)
+					{
+						RequiresTargetUpdate = false;
+					}
+				}
+			}
 		}
 
 		public void LoadBitmap(string filePath)
@@ -460,49 +485,46 @@ namespace LaserEngraver.UI.Win.Visuals
 
 		private void ResizeToBoundingRect()
 		{
-			if (_resizing)
-				return;
-
-			using (new Resizing(this))
+			if (Resizing.TryStartResizing(this, out var resizing))
 			{
-				if (_resizing)
-					return;
-
-				var boundingRectObj = BoundingRect;
-				if (boundingRectObj is null)
-					return;
-				var boundingRect = boundingRectObj.Value;
-
-				var position = Position;
-				var size = Size;
-				var ratio = size.Height != 0 ? size.Width / size.Height : 1;
-				ratio = ratio > 0 ? ratio : 1;
-
-				size.Height = size.Height > boundingRect.Height ? boundingRect.Height : size.Height;
-				size.Width = size.Height * ratio;
-				size.Width = size.Width > boundingRect.Width ? boundingRect.Width : size.Width;
-				size.Height = size.Width / ratio;
-
-				if (position.X + size.Width > boundingRect.Width)
+				using (resizing)
 				{
-					position.X = boundingRect.Width - size.Width;
-				}
-				if (position.X < boundingRect.X)
-				{
-					position.X = 0;
-				}
+					var boundingRectObj = BoundingRect;
+					if (boundingRectObj is null)
+						return;
+					var boundingRect = boundingRectObj.Value;
 
-				if (position.Y + size.Height > boundingRect.Height)
-				{
-					position.Y = boundingRect.Height - size.Height;
-				}
-				if (position.Y < boundingRect.Y)
-				{
-					position.Y = 0;
-				}
+					var position = Position;
+					var size = Size;
+					var ratio = size.Height != 0 ? size.Width / size.Height : 1;
+					ratio = ratio > 0 ? ratio : 1;
 
-				Position = position;
-				Size = size;
+					size.Height = size.Height > boundingRect.Height ? boundingRect.Height : size.Height;
+					size.Width = size.Height * ratio;
+					size.Width = size.Width > boundingRect.Width ? boundingRect.Width : size.Width;
+					size.Height = size.Width / ratio;
+
+					if (position.X + size.Width > boundingRect.Width)
+					{
+						position.X = boundingRect.Width - size.Width;
+					}
+					if (position.X < boundingRect.X)
+					{
+						position.X = 0;
+					}
+
+					if (position.Y + size.Height > boundingRect.Height)
+					{
+						position.Y = boundingRect.Height - size.Height;
+					}
+					if (position.Y < boundingRect.Y)
+					{
+						position.Y = 0;
+					}
+
+					Position = position;
+					Size = size;
+				}
 			}
 		}
 
@@ -521,7 +543,7 @@ namespace LaserEngraver.UI.Win.Visuals
 		{
 			if (_theme != theme)
 			{
-				lock(_renderSync)
+				lock (_renderSync)
 				{
 					_theme = theme;
 					_requiresRenderUpdate = true;
@@ -566,7 +588,7 @@ namespace LaserEngraver.UI.Win.Visuals
 			private BurnArea _owner;
 			private Size _originalSize;
 			private Point _originalPosition;
-			public Resizing(BurnArea owner)
+			private Resizing(BurnArea owner)
 			{
 				_owner = owner;
 				_owner._resizing = true;
@@ -575,8 +597,25 @@ namespace LaserEngraver.UI.Win.Visuals
 				_originalSize = owner.Size;
 			}
 
+			public static bool TryStartResizing(BurnArea owner, [MaybeNullWhen(false)] out Resizing resizing)
+			{
+				lock (owner._renderSync)
+				{
+					if (owner._resizing)
+					{
+						resizing = null;
+						return false;
+					}
+					resizing = new Resizing(owner);
+					return true;
+				}
+			}
+
 			public void Dispose()
 			{
+				_owner._resizing = false;
+				_owner._renderSync.Release();
+
 				if ((int)_owner.Size.Width != (int)_originalSize.Width || (int)_owner.Size.Height != (int)_originalSize.Height)
 				{
 					_owner.RaisePropertyChanged(nameof(_owner.Size));
@@ -585,9 +624,6 @@ namespace LaserEngraver.UI.Win.Visuals
 				{
 					_owner.RaisePropertyChanged(nameof(_owner.Position));
 				}
-
-				_owner._resizing = false;
-				_owner._renderSync.Release();
 			}
 		}
 	}
