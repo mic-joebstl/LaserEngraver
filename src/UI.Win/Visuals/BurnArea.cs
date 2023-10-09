@@ -63,11 +63,16 @@ namespace LaserEngraver.UI.Win.Visuals
 			get => _position;
 			set
 			{
-				if (_position != value)
+				if (_position == value)
+					return;
+
+				lock (_renderSync)
 				{
-					_position = value;
-					if (_resizing)
+					if (_resizing || _position == value)
 						return;
+
+					_position = value;
+
 					ResizeToBoundingRect();
 					RaisePropertyChanged(nameof(Position));
 				}
@@ -79,13 +84,18 @@ namespace LaserEngraver.UI.Win.Visuals
 			get => _size;
 			set
 			{
-				if (_size != value)
+				if (_size == value)
+					return;
+
+				lock (_renderSync)
 				{
+					if (_resizing || _size == value)
+						return;
+
 					_size = value;
 					_requiresRenderUpdate = true;
 					_requiresPartialRenderUpdate = false;
-					if (_resizing)
-						return;
+
 					ResizeToBoundingRect();
 					RaisePropertyChanged(nameof(Size));
 				}
@@ -100,7 +110,7 @@ namespace LaserEngraver.UI.Win.Visuals
 				if (_isDurationVariable != value)
 				{
 					_isDurationVariable = value;
-					RequestTargetUpdate();
+					RequiresTargetUpdate = true;
 					RaisePropertyChanged(nameof(IsDurationVariable));
 				}
 			}
@@ -114,7 +124,7 @@ namespace LaserEngraver.UI.Win.Visuals
 				if (_engravingDuration != value)
 				{
 					_engravingDuration = value;
-					RequestTargetUpdate();
+					RequiresTargetUpdate = true;
 					RaisePropertyChanged(nameof(EngravingDuration));
 				}
 			}
@@ -128,7 +138,7 @@ namespace LaserEngraver.UI.Win.Visuals
 				if (_fixedDurationThreshold != value)
 				{
 					_fixedDurationThreshold = value;
-					RequestTargetUpdate();
+					RequiresTargetUpdate = true;
 					RaisePropertyChanged(nameof(FixedDurationThreshold));
 				}
 			}
@@ -162,18 +172,49 @@ namespace LaserEngraver.UI.Win.Visuals
 			}
 		}
 
+		private bool RequiresTargetUpdate
+		{
+			get => _requiresTargetUpdate && DateTime.UtcNow - _targetUpdateRequestUtcDate > _targetUpdateDebounceTime;
+			set 
+			{
+				lock (_renderSync)
+				{
+					if (_requiresTargetUpdate = value)
+					{
+						_requiresPartialRenderUpdate = false;
+						_targetUpdateRequestUtcDate = DateTime.UtcNow;
+					}
+				}
+			}
+		}
+		
 		public void RenderImage()
 		{
-			if (!_requiresRenderUpdate && !_requiresPartialRenderUpdate && !RequiresTargetUpdate())
+			var requiresRenderUpdate = false;
+			var requiresPartialRenderUpdate = false;
+			var requiresTargetUpdate = false;
+			var theme = default(Theme);
+
+			lock (_renderSync)
+			{
+				requiresRenderUpdate = _requiresRenderUpdate;
+				_requiresRenderUpdate = false;
+
+				requiresPartialRenderUpdate = !requiresRenderUpdate && _requiresPartialRenderUpdate;
+				_requiresPartialRenderUpdate = false;
+
+				requiresTargetUpdate = RequiresTargetUpdate;
+				RequiresTargetUpdate = false;
+				theme = _theme;
+			}
+
+			if (!requiresRenderUpdate && !requiresPartialRenderUpdate && !requiresTargetUpdate)
 				return;
 
 			_renderSync.Wait();
 
 			try
 			{
-				if (!_requiresRenderUpdate && !_requiresPartialRenderUpdate && !RequiresTargetUpdate())
-					return;
-
 				var targets = _targets;
 				var originalBitmap = _originalBitmap;
 
@@ -182,7 +223,7 @@ namespace LaserEngraver.UI.Win.Visuals
 					var width = (int)(Size.Width < 1 ? 1 : Size.Width);
 					var height = (int)(Size.Height < 1 ? 1 : Size.Height);
 					var scaledBitmap = _scaledBitmap;
-					if (originalBitmap != null && RequiresTargetUpdate() || scaledBitmap == null || (width != scaledBitmap.Width || height != scaledBitmap.Height))
+					if (originalBitmap != null && requiresTargetUpdate || scaledBitmap == null || (width != scaledBitmap.Width || height != scaledBitmap.Height))
 					{
 						scaledBitmap = ScaleBitmap();
 						targets = _targets;
@@ -193,11 +234,9 @@ namespace LaserEngraver.UI.Win.Visuals
 						height = scaledBitmap.Height;
 						_size = new Size(width, height);
 
-						var theme = _theme;
 						var defaultColor = theme is null ? Color.FromArgb(0, 0, 0, 0) : (Color?)null;
-
 						var writeableBitmap = _bitmapImage;
-						var requiresPartialUpdate = _requiresPartialRenderUpdate && writeableBitmap is not null;
+						var requiresPartialUpdate = requiresPartialRenderUpdate && writeableBitmap is not null;
 						var areaWidth = 0;
 						var areaHeight = 0;
 						var areaTargets = default(List<BurnTarget>);
@@ -322,8 +361,6 @@ namespace LaserEngraver.UI.Win.Visuals
 						}
 					}
 				}
-
-				_requiresRenderUpdate = false;
 			}
 			finally
 			{
@@ -351,7 +388,7 @@ namespace LaserEngraver.UI.Win.Visuals
 				};
 			}
 
-			RequestTargetUpdate();
+			RequiresTargetUpdate = true;
 			RenderImage();
 		}
 
@@ -413,7 +450,6 @@ namespace LaserEngraver.UI.Win.Visuals
 					targets.Add(target);
 				}
 			}
-			_requiresTargetUpdate = false;
 			Interlocked.Exchange(ref _scaledBitmap, scaledBitmap);
 			Interlocked.Exchange(ref _targets, targets);
 
@@ -428,6 +464,9 @@ namespace LaserEngraver.UI.Win.Visuals
 
 			using (new Resizing(this))
 			{
+				if (_resizing)
+					return;
+
 				var boundingRectObj = BoundingRect;
 				if (boundingRectObj is null)
 					return;
@@ -466,18 +505,6 @@ namespace LaserEngraver.UI.Win.Visuals
 			}
 		}
 
-		private void RequestTargetUpdate()
-		{
-			_requiresTargetUpdate = true;
-			_requiresPartialRenderUpdate = false;
-			_targetUpdateRequestUtcDate = DateTime.UtcNow;
-		}
-
-		private bool RequiresTargetUpdate()
-		{
-			return _requiresTargetUpdate && DateTime.UtcNow - _targetUpdateRequestUtcDate > _targetUpdateDebounceTime;
-		}
-
 		#region INotifyPropertyChanged
 
 		public event PropertyChangedEventHandler? PropertyChanged;
@@ -493,9 +520,12 @@ namespace LaserEngraver.UI.Win.Visuals
 		{
 			if (_theme != theme)
 			{
-				_theme = theme;
-				_requiresRenderUpdate = true;
-				_requiresPartialRenderUpdate = false;
+				lock(_renderSync)
+				{
+					_theme = theme;
+					_requiresRenderUpdate = true;
+					_requiresPartialRenderUpdate = false;
+				}
 			}
 		}
 
