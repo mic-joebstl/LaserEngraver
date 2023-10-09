@@ -406,9 +406,10 @@ namespace LaserEngraver.UI.Win.Visuals
 			var scaledBitmap = new System.Drawing.Bitmap(width, height);
 			var graph = System.Drawing.Graphics.FromImage(scaledBitmap);
 
-			graph.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
-			graph.CompositingQuality = System.Drawing.Drawing2D.CompositingQuality.HighQuality;
-			graph.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+			graph.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.NearestNeighbor;
+			graph.CompositingQuality = System.Drawing.Drawing2D.CompositingQuality.HighSpeed;
+			graph.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.HighSpeed;
+			graph.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.None;
 
 			graph.FillRectangle(brush, new System.Drawing.RectangleF(0, 0, width, height));
 			graph.DrawImage(originalBitmap, 0, 0, width, height);
