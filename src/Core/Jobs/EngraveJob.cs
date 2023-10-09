@@ -74,25 +74,20 @@ namespace LaserEngraver.Core.Jobs
 
 		private bool TryGetNextPoint<T>(IEnumerable<EngravePointContext<T>> points, EngravePointContext? currentPoint, CancellationToken cancellationToken, [MaybeNullWhen(false)] out EngravePointContext<T> nextPoint)
 		{
-			////The following declarative is equal to the following imperative code, but much slower
-			//nextPoint = unhandledPoints?
-			//	.Where(other => other != currentPoint)
-			//	.OrderBy(other =>
-			//	{
-			//		var x = other.X - (currentPoint?.X ?? 0);
-			//		//var xSqr = x * x;
-
-			//		var y = other.Y - (currentPoint?.Y ?? 0);
-			//		//var ySqr = y * y;
-
-			//		var sqrDistance = x * x + y * y;
-			//		return sqrDistance < 2 ? 2 : sqrDistance;
-			//	})
-			//	.ThenBy(other => other.X > currentPoint?.X ? 0 : 1)
-			//	.ThenBy(other => other.Y == currentPoint?.Y ? 0 : other.Y > currentPoint?.Y ? 1 : 2)
-			//	.FirstOrDefault();
-
 			nextPoint = null;
+
+			if (currentPoint is null)
+			{
+				foreach (var point in points)
+				{
+					if (nextPoint is null || nextPoint.Position.Y > point.Position.Y || nextPoint.Position.X > point.Position.X && nextPoint.Position.Y == point.Position.Y)
+					{
+						nextPoint = point;
+					}
+				}
+				return nextPoint is not null;
+			}
+
 			var nextPointWeight = long.MaxValue;
 			foreach (var point in points)
 			{
@@ -100,9 +95,10 @@ namespace LaserEngraver.Core.Jobs
 				var weightXDistance = point.Position.X > currentPoint?.Position.X ? 0 : 1;
 				var weightYDistance = point.Position.Y == currentPoint?.Position.Y ? 0 : point.Position.Y > currentPoint?.Position.Y ? 1 : 2;
 				long weightDistance = 0;
+				if (currentPoint is not null)
 				{
-					var x = point.Position.X - (currentPoint?.Position.X ?? 0);
-					var y = point.Position.Y - (currentPoint?.Position.Y ?? 0);
+					var x = point.Position.X - currentPoint.Position.X;
+					var y = point.Position.Y - currentPoint.Position.Y;
 					var sqrDistance = x * x + y * y;
 					weightDistance = sqrDistance < 2 ? 2 : sqrDistance;
 				}
