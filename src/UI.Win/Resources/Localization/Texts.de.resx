@@ -192,20 +192,20 @@
 Dazu eine Bilddatei in das Fenster ziehen, &lt;i&gt;Verbinden&lt;/i&gt; drücken, Einstellungen vornehmen und &lt;i&gt;Starten&lt;/i&gt;.
 
 &lt;b&gt;Einstellungen&lt;/b&gt;
-&lt;br /&gt;&lt;i&gt;Brenndauer&lt;/i&gt; stellt die Dauer ein, wie lange der Gravierer an einer Position bleibt.
+&lt;br /&gt;&lt;i&gt;Brennstärke&lt;/i&gt; gibt die fixe Brennstärke der zu gravierenden Pixel vor.
+
+&lt;i&gt;Brenndauer&lt;/i&gt; stellt die Dauer ein, wie lange der Gravierer an einer Position bleibt.
 Genaue Dauer ist vom Gerät abhängig, daher hier in Prozent anzugeben.
 
-&lt;i&gt;Variable Brennstärke&lt;/i&gt;: Wenn aktiv, wird durch Helligkeit der Pixel (inkl. Alpha-Channel) die Brennstärke ermittelt.
+&lt;i&gt;Variable Brenndauer&lt;/i&gt;: Wenn aktiv, wird durch Helligkeit der Pixel (inkl. Alpha-Channel) die Brenndauer ermittelt.
 
-&lt;i&gt;Max. Brennstärke&lt;/i&gt; begrenzt die Brennstärke auf einen maximalen Wert, bei aktiver &lt;i&gt;Variable Brennstärke&lt;/i&gt;.
+&lt;i&gt;Max. Brenndauer&lt;/i&gt; begrenzt die Brenndauer auf einen maximalen Wert, bei aktiver &lt;i&gt;Variable Brenndauer&lt;/i&gt;.
 
-&lt;i&gt;Brennstärke&lt;/i&gt; gibt die fixe Brennstärke der zu gravierenden Pixel vor, wenn &lt;i&gt;Variable Brennstärke&lt;/i&gt; deaktiviert ist.
-
-&lt;i&gt;Schwellwert&lt;/i&gt; ist der Wert in Prozent, ab welcher Helligkeit ein Pixel graviert wird, wenn &lt;i&gt;Variable Brennstärke&lt;/i&gt; deaktiviert ist.
+&lt;i&gt;Schwellwert&lt;/i&gt; ist der Wert in Prozent, ab welcher Helligkeit ein Pixel graviert wird, wenn &lt;i&gt;Variable Brenndauer&lt;/i&gt; deaktiviert ist.
 
 &lt;i&gt;Modus Raster&lt;/i&gt; graviert die Pixel im Raster zeilenweise.
 
-&lt;i&gt;Modus Pfad&lt;/i&gt; beginnt die Gravur bei einem beliebigen Pixel und navigiert von dort direkt zum nächsten zu gravierenden Pixel.
+&lt;i&gt;Modus Raster optimiert&lt;/i&gt; versucht den besten Pfad unter Berücksichtigung besserer horizontaler Leistung zu finden.
 
 &lt;i&gt;Halo anzeigen&lt;/i&gt; ist eine rein optische Einstellung und hat auf die Gravur keinen Einfluss.
 &lt;br /&gt;

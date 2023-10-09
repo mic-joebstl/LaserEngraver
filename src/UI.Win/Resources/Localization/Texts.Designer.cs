@@ -270,15 +270,15 @@ namespace LaserEngraver.UI.Win.Resources.Localization {
         /// <summary>
         ///   Looks up a localized string similar to &lt;p&gt;
         ///&lt;b&gt;Engrave&lt;/b&gt;
-        ///To do this, drag an image file into the window, press &lt;i&gt;Connect&lt;/i&gt;, set your engraving preferences and &lt;i&gt;Start&lt;/i&gt;.
+        ///Drag an image file into the window, click &lt;i&gt;Connect&lt;/i&gt;, set your engraving preferences, and click &lt;i&gt;Start&lt;/i&gt;.
         ///
         ///&lt;b&gt;Settings&lt;/b&gt;
-        ///&lt;br /&gt;&lt;i&gt;Depth&lt;/i&gt; sets the duration for which the engraver stays at a position.
+        ///&lt;br /&gt;&lt;i&gt;Power&lt;/i&gt; specifies the fixed burn intensity for pixels to be engraved.
+        ///
+        ///&lt;i&gt;Depth&lt;/i&gt; sets the duration for which the engraver stays at a position.
         ///Exact duration depends on the device, so it is specified here in percent.
         ///
-        ///&lt;i&gt;Variable burn intensity&lt;/i&gt;: If active, the burn intensity is determined by the brightness of the pixel (including alpha channel).
-        ///
-        ///&lt;i&gt;Max. Power&lt;/i&gt; limits the burn intensity to a maximum [rest of string was truncated]&quot;;.
+        ///&lt;i&gt;Variable depth&lt;/i&gt;: If enabled, the burn duration/depth per pixel is determined by the brightness of the pixel (inclu [rest of string was truncated]&quot;;.
         /// </summary>
         public static string HelpText {
             get {

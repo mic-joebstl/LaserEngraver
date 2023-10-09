@@ -2,13 +2,20 @@
 This project serves as an alternative to the software that comes with K3/K5 laser engravers.  
 
 ## Motivation
-The original software only supports rasterized engraving, which limits its capabilities.  
-This project aims to enhance the engraving process by analyzing the input image and determining the shortest path for the laser to follow, thereby potentially speeding up the process.  
-However, due to the high latency of the engraver in acknowledging received commands and its quicker performance with single line engraving commands, this goal has not been fully realized yet.
+The original software the device comes with supports only rasterized engraving, which can unnecessarily prolong the engraving duration for simple shapes.  
+This project aims to optimize the engraving process by analyzing the input image and determining the most efficient path for the laser, potentially reducing the process time.  
+
+## Limitations
+The K3/K5 engraver is primarily designed for rasterized engraving, i.e., it only has instructions for horizontal engraving.  
+It also includes commands for specific location movement, homing, fan control, and other technical instructions.  
+Due to the high latency in acknowledging received commands, the engraver performs optimally when multiple horizontal pixels in succession are engraved with a single command.  
+Right-to-left engraving works well only when preceded by a left-to-right instruction.  
+The **Raster Optimized** mode considers these factors and seeks to find the best path that optimizes horizontal left-to-right engraving while minimizing unnecessary movements.  
 
 ## Installation
 To install, either clone the repository or download the source code and compile the application using Visual Studio.  
 Currently, only a Windows build profile is available as I don't use Linux with a GUI. Future releases will include prebuilt executables.
+
 ## How to use
 
 ### Engrave
@@ -16,16 +23,19 @@ Drag an image file into the window, click *Connect*, set your engraving preferen
 
 ![demo](./res/demo.png)
 
-The highlighted area represents what has already been engraved, while the dot indicates the current position of the laser.  
+The highlighted area represents the portion that has already been engraved, while the dot indicates the current position of the laser.  
 
 ### Settings
 - **Depth** determines how long the engraver stays at a position. The exact duration depends on the device and is specified here in percent.  
-- **Variable burn intensity**: If enabled, burn intensity is determined by pixel brightness (including alpha channel).
-- **Max. Power**: When **Variable burn intensity** is enabled, this option limits burn intensity to a maximum value.
-- **Power**: Specifies fixed burn intensity for pixels to be engraved when **Variable burn intensity** is disabled.
+- **Variable depth**: If enabled, this setting determines the burn duration/depth per pixel based on pixel brightness (including alpha channel).  
+Use this setting only when grayscale engraving is required as each pixel would likely require a separate instructions, increasing total engraving time due to high instruction acknowledgment latencies.
+- **Max. Depth**: When **Variable depth** is enabled, this option limits the burn duration/depth to a maximum value.
+- **Power**: Specifies fixed burn intensity for pixels to be engraved.
 - **Threshold**: Determines at what percent brightness a pixel is engraved when *Variable burn intensity* is disabled.
-- **Rasterized**: Engraves pixels in rows in a grid pattern.
-- **Raster optimized**: Begins engraving at any pixel and directly navigates to the next pixel to be engraved.
+- **Rasterized**: Engraves pixels in rows in a grid pattern.  
+This setting yields quickest results for images with minimal empty spaces in between.  
+- **Raster optimized**: Optimizes for better horizontal line performance by finding an efficient path.  
+Use this setting for simple shapes or images with large empty spaces.
 - **Show halo**: A visual setting that does not affect engraving.
 
 ### Keyboard Shortcuts
@@ -45,7 +55,8 @@ This section details settings that can only be set in `appsettings.json`.
     "DPI": 510.54,
     "WidthDots": 1608,
     "HeightDots": 1608,
-    "Type": 2
+    "Type": 2,
+    "PortName": "COM5"
   },
   "UserConfiguration": {
     "Culture": "en",
@@ -80,8 +91,10 @@ This section should not be modified, as it is preconfigured for K3/K5 laser engr
 Other models are not supported as of now.  
 
 - **DPI**: Dots per inch
-- **WidthDots**/**HeightDots**: Width and height of the canvas
+- **WidthDots**/**HeightDots**: Width and height of the canvas. This value should only be decreased, when the device is evidently trying to move out of bounds.  
 - **Type**: Set to 1 for demo-mode (default in debug-builds), which simulates a mockup device. Select 2 for USB devices (default in release-builds). Other devices are not supported.
+- **PortName**: Name of the serial port. Should only be modified/specified when asked by the application. Might happen, when more than one serial device is connnected.  
+- **BaudRate**: Baud rate of the connection
 
 ### UserConfiguration
 - **Culture**: The application is fully localized in both German (`de`) and English (`en`).

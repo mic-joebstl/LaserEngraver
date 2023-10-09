@@ -189,23 +189,23 @@
   <data name="HelpText" xml:space="preserve">
     <value>&lt;p&gt;
 &lt;b&gt;Engrave&lt;/b&gt;
-To do this, drag an image file into the window, press &lt;i&gt;Connect&lt;/i&gt;, set your engraving preferences and &lt;i&gt;Start&lt;/i&gt;.
+Drag an image file into the window, click &lt;i&gt;Connect&lt;/i&gt;, set your engraving preferences, and click &lt;i&gt;Start&lt;/i&gt;.
 
 &lt;b&gt;Settings&lt;/b&gt;
-&lt;br /&gt;&lt;i&gt;Depth&lt;/i&gt; sets the duration for which the engraver stays at a position.
+&lt;br /&gt;&lt;i&gt;Power&lt;/i&gt; specifies the fixed burn intensity for pixels to be engraved.
+
+&lt;i&gt;Depth&lt;/i&gt; sets the duration for which the engraver stays at a position.
 Exact duration depends on the device, so it is specified here in percent.
 
-&lt;i&gt;Variable burn intensity&lt;/i&gt;: If active, the burn intensity is determined by the brightness of the pixel (including alpha channel).
+&lt;i&gt;Variable depth&lt;/i&gt;: If enabled, the burn duration/depth per pixel is determined by the brightness of the pixel (including alpha channel).
 
-&lt;i&gt;Max. Power&lt;/i&gt; limits the burn intensity to a maximum value when &lt;i&gt;Variable burn intensity&lt;/i&gt; is active.
+&lt;i&gt;Max. Depth&lt;/i&gt; when &lt;i&gt;Variable depth&lt;/i&gt; is enabled, this option limits the burn duration/depth to a maximum value 
 
-&lt;i&gt;Power&lt;/i&gt; specifies the fixed burn intensity of the pixels to be engraved if &lt;i&gt;Variable burn intensity&lt;/i&gt; is disabled.
-
-&lt;i&gt;Threshold&lt;/i&gt; is the value in percent at which brightness a pixel is engraved if &lt;i&gt;Variable burn intensity&lt;/i&gt; is disabled.
+&lt;i&gt;Threshold&lt;/i&gt; is the value in percent at which brightness a pixel is engraved if &lt;i&gt;Variable depth&lt;/i&gt; is disabled.
 
 &lt;i&gt;Rasterized&lt;/i&gt; engraves the pixels in rows in a grid pattern.
 
-&lt;i&gt;Raster optimized&lt;/i&gt; starts engraving at any pixel and navigates directly to the next pixel to be engraved from there.
+&lt;i&gt;Raster optimized&lt;/i&gt; tries to find the best path optimizing for better horizontal line performance.
 
 &lt;i&gt;Show halo&lt;/i&gt; is a purely visual setting and has no effect on engraving.
 &lt;br /&gt;
