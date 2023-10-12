@@ -13,8 +13,12 @@ namespace LaserEngraver.UI.Win.Visuals
 	public class BurnTarget : IVisual
 	{
 		private System.Windows.Shapes.Ellipse _circle;
+		private Point _positionPrevious;
 		private Point _position;
 		private Size _size;
+
+		private TimeSpan _animationTime = TimeSpan.FromMilliseconds(250);
+		private DateTime _updateTime = DateTime.UtcNow;
 
 		public BurnTarget()
 		{
@@ -23,12 +27,30 @@ namespace LaserEngraver.UI.Win.Visuals
 
 		public Point Position
 		{
-			get => _position;
+			get
+			{
+				var now = DateTime.UtcNow;
+				var duration = _animationTime.TotalMilliseconds;
+				var t = (now - _updateTime).TotalMilliseconds;
+				if (t > duration)
+				{
+					return _position;
+				}
+				var tFactor = t / duration;
+				var tSmoothed = t * (tFactor < 0.5 ? 4 * tFactor * tFactor * tFactor : 1 - Math.Pow(-2 * tFactor + 2, 3) / 2);
+
+				var vector = _position - _positionPrevious;
+				var vectorT = vector / duration;
+
+				return _positionPrevious + vectorT * tSmoothed;
+			}
 			set
 			{
 				if (_position != value)
 				{
+					_positionPrevious = _position;
 					_position = value;
+					_updateTime = DateTime.UtcNow;
 				}
 			}
 		}
