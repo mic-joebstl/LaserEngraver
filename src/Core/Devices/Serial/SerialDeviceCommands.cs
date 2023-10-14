@@ -23,6 +23,7 @@ namespace LaserEngraver.Core.Devices.Serial
 		HomeCenter = 0x1A,
 		Discrete = 0x1B,
 		NonDiscrete = 0x1C,
+		SettingsUpdate = 0x28,
 	}
 
 	public enum EngraveDirection : byte
@@ -64,6 +65,73 @@ namespace LaserEngraver.Core.Devices.Serial
 		}
 
 		public override EngraverCommandType Type => _Type;
+	}
+
+	public interface IDeviceSettings
+	{
+		byte StandbyBrightness { get; set; }
+		ushort LineDelayMilliseconds { get; set; }
+		ushort MaximumPowerMilliwatts { get; set; }
+		byte SubdivisionCount { get; set; }
+		byte XAxisCommutationCompensation { get; set; }
+		byte YAxisCommutationCompensation { get; set; }
+		ushort StepCount { get; set; }
+		ushort SpeedUpperLimit { get; set; }
+		ushort SpeedLowerLimit { get; set; }
+		ushort PositioningSpeed { get; set; }
+	}
+
+	public class SettingsUpdateCommand : EngraverCommand, IDeviceSettings
+	{
+		public override EngraverCommandType Type => EngraverCommandType.SettingsUpdate;
+
+		public SettingsUpdateCommand(IDeviceSettings settings)
+		{
+			StandbyBrightness = settings.StandbyBrightness;
+			LineDelayMilliseconds = settings.LineDelayMilliseconds;
+			MaximumPowerMilliwatts = settings.MaximumPowerMilliwatts;
+			SubdivisionCount = settings.SubdivisionCount;
+			XAxisCommutationCompensation = settings.XAxisCommutationCompensation;
+			YAxisCommutationCompensation = settings.YAxisCommutationCompensation;
+			StepCount = settings.StepCount;
+			SpeedUpperLimit = settings.SpeedUpperLimit;
+			SpeedLowerLimit = settings.SpeedLowerLimit;
+			PositioningSpeed = settings.PositioningSpeed;
+		}
+
+		public byte StandbyBrightness { get; set; }
+		public ushort LineDelayMilliseconds { get; set; }
+		public ushort MaximumPowerMilliwatts { get; set; }
+		public byte SubdivisionCount { get; set; }
+		public byte XAxisCommutationCompensation { get; set; }
+		public byte YAxisCommutationCompensation { get; set; }
+		public ushort StepCount { get; set; }
+		public ushort SpeedUpperLimit { get; set; }
+		public ushort SpeedLowerLimit { get; set; }
+		public ushort PositioningSpeed { get; set; }
+
+		protected override byte[] BuildArguments()
+		{
+			return new byte[]
+			{
+				StandbyBrightness,
+				(byte)(LineDelayMilliseconds >> 8),
+				(byte)LineDelayMilliseconds,
+				(byte)(MaximumPowerMilliwatts >> 8),
+				(byte)MaximumPowerMilliwatts,
+				SubdivisionCount,
+				XAxisCommutationCompensation,
+				YAxisCommutationCompensation,
+				(byte)(StepCount >> 8),
+				(byte)StepCount,
+				(byte)(SpeedUpperLimit >> 8),
+				(byte)SpeedUpperLimit,
+				(byte)(SpeedLowerLimit >> 8),
+				(byte)SpeedLowerLimit,
+				(byte)(PositioningSpeed >> 8),
+				(byte)PositioningSpeed,
+			};
+		}
 	}
 
 	public class MoveCommand : EngraverCommand
