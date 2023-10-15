@@ -65,7 +65,7 @@ namespace LaserEngraver.Core.Devices.Serial
 
 				await WriteCommand(new SimpleEngraverCommand(EngraverCommandType.Connect), cancellationToken);
 				await WriteCommand(new SimpleEngraverCommand(EngraverCommandType.NonDiscrete), cancellationToken);
-				await WriteCommand(new SettingsUpdateCommand(_configuration), cancellationToken);
+				WriteCommand(new SettingsUpdateCommand(_configuration));
 
 				tx.Commit();
 			}
