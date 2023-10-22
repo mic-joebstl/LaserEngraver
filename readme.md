@@ -9,7 +9,6 @@ This project aims to optimize the engraving process by analyzing the input image
 The K3/K5 engraver is primarily designed for rasterized engraving, i.e., it only has instructions for horizontal engraving.  
 It also includes commands for specific location movement, homing, fan control, and other technical instructions.  
 Due to the high latency in acknowledging received commands, the engraver performs optimally when multiple horizontal pixels in succession are engraved with a single command.  
-Right-to-left engraving works well only when preceded by a left-to-right instruction.  
 The **Raster Optimized** mode considers these factors and seeks to find the best path that optimizes horizontal left-to-right engraving while minimizing unnecessary movements.  
 
 ## Installation
