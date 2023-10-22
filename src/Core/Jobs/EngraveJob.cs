@@ -249,6 +249,11 @@ namespace LaserEngraver.Core.Jobs
 #endif
 			try
 			{
+				if (device is Devices.Serial.SerialDevice serialDevice)
+				{
+					serialDevice.SignalEngravingStarted();
+				}
+
 				_signalPause = false;
 				var powerFactor = _burnConfiguration.Power / 255d;
 				var power = (ushort)(_deviceConfiguration.MaximumPowerMilliwatts * powerFactor);

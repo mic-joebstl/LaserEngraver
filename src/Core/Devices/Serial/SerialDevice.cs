@@ -11,6 +11,7 @@ namespace LaserEngraver.Core.Devices.Serial
 		private DeviceConfiguration _configuration;
 		private SemaphoreSlim? _commandSync;
 		private EngraverCommand? _previousCommand;
+		private bool _isEngraving;
 
 		public SerialDevice(DeviceConfiguration configuration)
 		{
@@ -64,7 +65,7 @@ namespace LaserEngraver.Core.Devices.Serial
 				com.Open();
 
 				await WriteCommand(new SimpleEngraverCommand(EngraverCommandType.Connect), cancellationToken);
-				await WriteCommand(new SimpleEngraverCommand(EngraverCommandType.NonDiscrete), cancellationToken);
+				await WriteCommand(new SimpleEngraverCommand(EngraverCommandType.Discrete), cancellationToken);
 				WriteCommand(new SettingsUpdateCommand(_configuration));
 
 				tx.Commit();
@@ -120,23 +121,36 @@ namespace LaserEngraver.Core.Devices.Serial
 			{
 				tx.Open();
 
-				var position = Position;
-				if (position != null)
+				var currentPosition = Position;
+				if (currentPosition is null || vector.X == 0 && vector.Y == 0)
 				{
-					var x = (short)vector.X;
-					var y = (short)vector.Y;
-					if (x != vector.X || y != vector.Y)
-						throw new ArgumentOutOfRangeException(nameof(vector));
+					return;
+				}
 
-					var newPosition = new Point
+				if (_isEngraving)
+				{
+					while (vector.X != 0 || vector.Y != 0)
 					{
-						X = position.Value.X + vector.X,
-						Y = position.Value.Y + vector.Y
-					};
+						var deltaX = vector.X > 0 ? 1 : vector.X < 0 ? -1 : 0;
+						var deltaY = vector.Y > 0 ? 1 : vector.Y < 0 ? -1 : 0;
+						var newPosition = new Point(currentPosition.Value.X + deltaX, currentPosition.Value.Y + deltaY);
 
+						using (cancellationToken.Register(() => Position = newPosition))
+						{
+							await WriteCommand(new MoveCommand((short)deltaX, (short)deltaY), cancellationToken);
+							Position = newPosition;
+						}
+
+						currentPosition = newPosition;
+						vector = new Point(vector.X - deltaX, vector.Y - deltaY);
+					}
+				}
+				else
+				{
+					var newPosition = new Point(currentPosition.Value.X + vector.X, currentPosition.Value.Y + vector.Y);
 					using (cancellationToken.Register(() => Position = newPosition))
 					{
-						await WriteCommand(new MoveCommand(x, y), cancellationToken);
+						await WriteCommand(new MoveCommand((short)vector.X, (short)vector.Y), cancellationToken);
 						Position = newPosition;
 					}
 				}
@@ -145,19 +159,14 @@ namespace LaserEngraver.Core.Devices.Serial
 
 		public override async Task MoveAbsoluteAsync(Point position, CancellationToken cancellationToken)
 		{
-			using (var tx = StatusIntermediateTransition(DeviceStatus.Ready, DeviceStatus.Executing))
+			var currentPosition = Position;
+			if (currentPosition is null)
 			{
-				tx.Open();
-
-				if (Position != null && (Position.Value.X != position.X || Position.Value.Y != position.Y))
-				{
-					using (cancellationToken.Register(() => Position = position))
-					{
-						await WriteCommand(new MoveCommand((short)(position.X - Position.Value.X), (short)(position.Y - Position.Value.Y)), cancellationToken);
-						Position = position;
-					}
-				}
+				return;
 			}
+
+			var vector = new Point(position.X - currentPosition.Value.X, position.Y - currentPosition.Value.Y);
+			await MoveRelativeAsync(vector, cancellationToken);
 		}
 
 		public override async Task Engrave(ushort powerMilliwatt, byte duration, int length, CancellationToken cancellationToken)
@@ -184,23 +193,47 @@ namespace LaserEngraver.Core.Devices.Serial
 					buffer[ib] = b;
 				}
 
-				await WriteCommand(new EngraveCommand(powerMilliwatt, duration)
-				{
-					Data = buffer,
-					Direction = EngraveDirection.LeftToRight
-				}, cancellationToken);
-
+				var direction = EngraveDirection.RightToLeft;
 				var position = Position;
 				if (position != null)
 				{
-					Position = new Point(position.Value.X + length - 1, position.Value.Y + 1);
+					if (direction == EngraveDirection.LeftToRight)
+					{
+						position = Position = new Point(position.Value.X + length - 1, position.Value.Y + 1);
+					}
+					else
+					{
+						Position = new Point(position.Value.X + length, position.Value.Y);
+					}
+				}
+
+				await WriteCommand(new EngraveCommand(powerMilliwatt, duration)
+				{
+					Data = buffer,
+					Direction = direction
+				}, cancellationToken);
+
+				//the engrave command is only executed after the next command is transmitted.
+				//send reset to engrave immediately for the delay to be accurate.
+				//TODO maybe only send reset if length > 1 for better performance?
+				await WriteCommand(new SimpleEngraverCommand(EngraverCommandType.Reset), cancellationToken);
+
+				if (position != null)
+				{
+					Position = position;
 				}
 			}
+		}
+
+		public void SignalEngravingStarted()
+		{
+			_isEngraving = true;
 		}
 
 		public void SignalEngravingCompleted()
 		{
 			WriteCommand(new SimpleEngraverCommand(EngraverCommandType.Reset));
+			_isEngraving = false;
 		}
 
 		private async Task OnEngraveCancelled(CancellationToken cancellationToken)
