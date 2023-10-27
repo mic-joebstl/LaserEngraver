@@ -49,11 +49,11 @@ namespace LaserEngraver.Core.Configurations
 
 	public class BurnConfiguration
 	{
-		public byte Power { get; set; } = 0xff;
-		public byte Duration { get; set; } = 0xff;
+		public byte Power { get; set; } = 0x7f;
+		public byte Duration { get; set; } = 0x7f;
 		public byte FixedIntensityThreshold { get; set; } = 0x7f;
 		public BurnPlottingMode PlottingMode { get; set; } = BurnPlottingMode.RasterOptimized;
-		public BurnIntensityMode IntensityMode { get; set; } = BurnIntensityMode.Variable;
+		public BurnIntensityMode IntensityMode { get; set; } = BurnIntensityMode.Fixed;
 	}
 
 	public enum BurnIntensityMode
