@@ -66,9 +66,26 @@ namespace LaserEngraver.Core.Devices.Serial
 
 				await WriteCommand(new SimpleEngraverCommand(EngraverCommandType.Connect), cancellationToken);
 				await WriteCommand(new SimpleEngraverCommand(EngraverCommandType.Discrete), cancellationToken);
-				WriteCommand(new SettingsUpdateCommand(_configuration));
 
 				tx.Commit();
+
+				try
+				{
+					using (var ctsTimeout = new CancellationTokenSource(_configuration.SettingsUpdateTimeout))
+					using (var ctsCombined = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, ctsTimeout.Token))
+					{
+						await WriteCommand(new SettingsUpdateCommand(_configuration), ctsCombined.Token);
+					}
+				}
+				catch (Exception ex)
+				{
+					if (_commandSync?.CurrentCount == 0)
+					{
+						_commandSync.Release();
+					}
+
+					throw new DeviceSettingsUpdateFailedException(ex);
+				}
 			}
 		}
 
@@ -314,6 +331,13 @@ namespace LaserEngraver.Core.Devices.Serial
 	{
 		public UnexpectedResponseException(byte[] buffer)
 			: base(String.Format(Resources.Localization.Texts.UnexpectedResponseExceptionFormat, String.Join("", buffer.Take(512).Select(b => b.ToString("X")))))
+		{ }
+	}
+
+	public class DeviceSettingsUpdateFailedException : Exception
+	{
+		public DeviceSettingsUpdateFailedException(Exception innerException)
+			: base(Resources.Localization.Texts.SerialDeviceSettingsTransmissionException, innerException)
 		{ }
 	}
 }

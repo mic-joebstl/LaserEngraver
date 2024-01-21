@@ -136,6 +136,9 @@
   <data name="NoDeviceFoundException" xml:space="preserve">
     <value>No device found</value>
   </data>
+  <data name="SerialDeviceSettingsTransmissionException" xml:space="preserve">
+    <value>Device settings transmission failed</value>
+  </data>
   <data name="UnexpectedDeviceDisconnectedExceptionMessage" xml:space="preserve">
     <value>Device disconnected unexpectedly</value>
   </data>

@@ -136,6 +136,9 @@
   <data name="NoDeviceFoundException" xml:space="preserve">
     <value>Kein Gerät gefunden</value>
   </data>
+  <data name="SerialDeviceSettingsTransmissionException" xml:space="preserve">
+    <value>Geräteeinstellungen konnten nicht übermittelt werden.</value>
+  </data>
   <data name="UnexpectedDeviceDisconnectedExceptionMessage" xml:space="preserve">
     <value>Gerät unerwartet getrennt</value>
   </data>

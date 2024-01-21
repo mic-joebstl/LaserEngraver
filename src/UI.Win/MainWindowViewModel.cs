@@ -15,6 +15,7 @@ using LaserEngraver.Core.Jobs;
 using System.Windows.Input;
 using LaserEngraver.UI.Win.Configuration;
 using System.Reactive.Linq;
+using LaserEngraver.Core.Devices.Serial;
 
 namespace LaserEngraver.UI.Win
 {
@@ -489,7 +490,15 @@ namespace LaserEngraver.UI.Win
 						ErrorMessage = null;
 						if (_deviceDispatcher.DeviceStatus == DeviceStatus.Disconnected)
 						{
-							await _deviceDispatcher.Connect(cancellationToken);
+							try
+							{
+								await _deviceDispatcher.Connect(cancellationToken);
+							}
+							catch (DeviceSettingsUpdateFailedException ex)
+							{
+								//settings update not essential - proceed anyways
+								ErrorMessage = ex.Message;
+							}
 							await _deviceDispatcher.ExecuteJob(new HomingJob(), cancellationToken);
 						}
 						else if (_deviceDispatcher.DeviceStatus == DeviceStatus.Ready)

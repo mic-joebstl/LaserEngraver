@@ -16,6 +16,7 @@ namespace LaserEngraver.Core.Configurations
 		= DeviceType.Serial;
 #endif
 		public TimeSpan ConnectionTimeout { get; set; } = TimeSpan.FromSeconds(15);
+		public TimeSpan SettingsUpdateTimeout { get; set; } = TimeSpan.FromMilliseconds(1);
 		public string? PortName { get; set; }
 		public int? BaudRate { get; set; } = 115200;
 

@@ -116,6 +116,15 @@ namespace LaserEngraver.Core.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Device settings transmission failed.
+        /// </summary>
+        internal static string SerialDeviceSettingsTransmissionException {
+            get {
+                return ResourceManager.GetString("SerialDeviceSettingsTransmissionException", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Device disconnected unexpectedly.
         /// </summary>
         internal static string UnexpectedDeviceDisconnectedExceptionMessage {
