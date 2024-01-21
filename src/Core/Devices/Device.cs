@@ -86,6 +86,11 @@ namespace LaserEngraver.Core.Devices
 			return new DeviceStatusTransition(this, sourceStatus, intermediateStatus, sourceStatus);
 		}
 
+		protected IDeviceStatusTransition StatusFailableTransition(DeviceStatus sourceStatus, DeviceStatus openStatus, DeviceStatus failedStatus)
+		{
+			return new DeviceStatusTransition(this, sourceStatus, openStatus, sourceStatus, failedStatus);
+		}
+
 		protected IDeviceStatusTransition StatusTransition(DeviceStatus sourceStatus, DeviceStatus openStatus, DeviceStatus targetStatus)
 		{
 			return new DeviceStatusTransition(this, sourceStatus, openStatus, targetStatus);
@@ -107,22 +112,24 @@ namespace LaserEngraver.Core.Devices
 			private DeviceStatus _sourceStatus;
 			private DeviceStatus _openStatus;
 			private DeviceStatus _targetStatus;
+			private DeviceStatus? _failedStatus;
 			private bool _commited;
 			private bool _disposed;
 
-			public DeviceStatusTransition(Device owner, DeviceStatus sourceStatus, DeviceStatus openStatus, DeviceStatus targetStatus)
+			public DeviceStatusTransition(Device owner, DeviceStatus sourceStatus, DeviceStatus openStatus, DeviceStatus targetStatus, DeviceStatus? failedstatus = null)
 			{
 				_owner = owner;
 				_sourceStatus = sourceStatus;
 				_openStatus = openStatus;
 				_targetStatus = targetStatus;
+				_failedStatus = failedstatus;
 			}
 
 			public void Dispose()
 			{
 				if (!_commited && !_disposed)
 				{
-					_owner.Status = _sourceStatus;
+					_owner.Status = _failedStatus ?? _sourceStatus;
 					_disposed = true;
 				}
 			}

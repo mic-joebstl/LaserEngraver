@@ -115,7 +115,7 @@ namespace LaserEngraver.Core.Devices.Serial
 
 		public override async Task HomingAsync(CancellationToken cancellationToken)
 		{
-			using (var tx = StatusIntermediateTransition(DeviceStatus.Ready, DeviceStatus.Executing))
+			using (var tx = StatusFailableTransition(DeviceStatus.Ready, DeviceStatus.Executing, DeviceStatus.Disconnected))
 			{
 				tx.Open();
 
@@ -123,6 +123,7 @@ namespace LaserEngraver.Core.Devices.Serial
 				{
 					await WriteCommand(new SimpleEngraverCommand(EngraverCommandType.HomeCenter), cancellationToken);
 					Position = new Point((int)(_configuration.WidthDots / 2), (int)(_configuration.HeightDots / 2));
+					tx.Commit();
 				}
 				catch
 				{
