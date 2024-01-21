@@ -241,11 +241,11 @@ namespace LaserEngraver.Core.Jobs
 		protected override async Task ExecuteCoreAsync(Device device, CancellationToken cancellationToken)
 		{
 #if DEBUG
-			var delayMilliseconds = 5d;
+			var mockDevice = device as MockDevice;
+			var delayMilliseconds = mockDevice?.TimeSpanPerPoint.TotalMilliseconds ?? 5d;
 			var sw = new Stopwatch();
 			sw.Start();
 			long i = 0;
-			var mockDevice = device as MockDevice;
 #endif
 			try
 			{

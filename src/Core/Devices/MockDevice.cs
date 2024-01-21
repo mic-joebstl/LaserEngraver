@@ -1,4 +1,5 @@
-﻿using System;
+﻿using LaserEngraver.Core.Devices.Serial;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
@@ -10,6 +11,8 @@ namespace LaserEngraver.Core.Devices
 {
 	public class MockDevice : Device
 	{
+		public TimeSpan TimeSpanPerPoint { get; set; } = TimeSpan.FromTicks(TimeSpan.FromSeconds(2).Ticks / 1600);
+
 		public override async Task ConnectAsync(CancellationToken cancellationToken)
 		{
 			using (var tx = StatusTransition(DeviceStatus.Disconnected, DeviceStatus.Connecting, DeviceStatus.Ready))
@@ -55,7 +58,8 @@ namespace LaserEngraver.Core.Devices
 				var position = Position;
 				if (position != null)
 				{
-					await Task.Delay(Math.Abs(vector.X) * TimeSpan.FromMilliseconds(1) + Math.Abs(vector.Y) * TimeSpan.FromMilliseconds(1), cancellationToken);
+					var length = Math.Sqrt(vector.X * vector.X + vector.Y * vector.Y);
+					await Task.Delay(TimeSpanPerPoint * length, cancellationToken);
 					Position = new Point
 					{
 						X = position.Value.X + vector.X,
@@ -71,7 +75,7 @@ namespace LaserEngraver.Core.Devices
 			{
 				tx.Open();
 
-				var delayMilliseconds = 2;
+				var delayMilliseconds = TimeSpanPerPoint.TotalMilliseconds;
 				var sw = new Stopwatch();
 				sw.Start();
 				long i = 0;
@@ -118,7 +122,21 @@ namespace LaserEngraver.Core.Devices
 			using (var tx = StatusIntermediateTransition(DeviceStatus.Ready, DeviceStatus.Executing))
 			{
 				tx.Open();
-				await Task.Delay(TimeSpan.FromMilliseconds(length));
+				await Task.Delay(TimeSpanPerPoint * length);
+				var direction = EngraveDirection.RightToLeft;
+				var position = Position;
+				if (position != null)
+				{
+					if (direction == EngraveDirection.LeftToRight)
+					{
+						Position = new Point(position.Value.X + length - 1, position.Value.Y + 1);
+					}
+					else
+					{
+						Position = new Point(position.Value.X + length, position.Value.Y);
+					}
+				}
+				await Task.Delay(TimeSpan.Zero);
 			}
 		}
 	}
